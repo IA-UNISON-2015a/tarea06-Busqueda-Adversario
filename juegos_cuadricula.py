@@ -376,11 +376,11 @@ class JugadorNegamax(JugadorInterfazTK):
         if acabado is not None:
             return jugador * acabado
         if profundidad == 0:
-            return jugador * self.utilidad(juego, estado)
+            return jugador * self.utilidad(juego, estado, jugador)
 
         for jugada in self.ordena(juego,
                                   estado,
-                                  juego.jugadas_legales(estado, jugador)):
+                                  juego.jugadas_legales(estado, jugador), jugador):
             alpha = max(alpha, -self.negamax(juego,
                                              estado=juego.hacer_jugada(estado,
                                                                        jugada,
