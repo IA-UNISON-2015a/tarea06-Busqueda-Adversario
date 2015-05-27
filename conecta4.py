@@ -16,7 +16,6 @@ from random import shuffle
 
 __author__ = 'juliowaissman'
 
-
 class Conecta4(juegos_cuadricula.Juego2ZT):
     """
     Juego del conecta 4 utilizando la definición de juego utilizada
@@ -56,8 +55,9 @@ class Conecta4(juegos_cuadricula.Juego2ZT):
                  donde ai es la posición donde se le puede agregar una ficha
 
         """
+
         def indice0(tupla):
-            "Como index pero regresa None, si no hay lugares vacios"
+            """Como index pero regresa None, si no hay lugares vacios"""
             try:
                 return tupla.index(0)
             except ValueError:
@@ -70,12 +70,13 @@ class Conecta4(juegos_cuadricula.Juego2ZT):
 
         return [(None, pos) for pos in vacios(estado) if pos is not None]
 
-    def estado_terminal(self, estado):
+    def estado_terminal(self, estado, jugador):
         """
         Revisa si el estado es terminal, si no hay espacios para
         agregar una nueva ficha o si algun jugador completo 4 puntos
 
         """
+
         def p(renglon, columna):
             return 7 * renglon + columna
 
@@ -97,10 +98,10 @@ class Conecta4(juegos_cuadricula.Juego2ZT):
         for r in range(6):
             for c in range(7):
                 if ((c < 4 and horiz(estado, p(r, c))) or
-                    (r < 3 and
-                     ((vertical(estado, p(r, c))) or
-                      (c < 4 and diag_izq(estado, p(r, c))) or
-                      (c > 2 and diag_der(estado, p(r, c)))))):
+                        (r < 3 and
+                             ((vertical(estado, p(r, c))) or
+                                  (c < 4 and diag_izq(estado, p(r, c))) or
+                                  (c > 2 and diag_der(estado, p(r, c)))))):
                     return estado[p(r, c)]
         return None if 0 in estado else 0
 
@@ -124,7 +125,6 @@ class Conecta4(juegos_cuadricula.Juego2ZT):
         e[jugada[1]] = jugador
         return tuple(e)
 
-
 class JugadorConecta4(juegos_cuadricula.JugadorNegamax):
     """
     Un jugador Negamax ajustado a el juego conecta 4, solamente hay
@@ -132,6 +132,7 @@ class JugadorConecta4(juegos_cuadricula.JugadorNegamax):
     estamos preocupados por el tiempo de búsqueda: ordena y utilidad.
 
     """
+
     def __init__(self, tiempo_espera=10):
         """
         Inicializa el jugador limitado en tiempo y no en profundidad
@@ -149,8 +150,8 @@ class JugadorConecta4(juegos_cuadricula.JugadorNegamax):
 
         """
         # ----------------------------------------------------------------------
-        #                             (20 puntos)
-        #                        INSERTE SU CÓDIGO AQUÍ
+        # (20 puntos)
+        # INSERTE SU CÓDIGO AQUÍ
         # ----------------------------------------------------------------------
         # Bueno para empezar que significa una jugadora prometedora? cuando estuve jugando lo mejor que
         # podia tener es el siguiente caso supongamos que mis fichas se representan con X las del adversario
@@ -190,11 +191,6 @@ class JugadorConecta4(juegos_cuadricula.JugadorNegamax):
 
         return jugadas
 
-        """
-        shuffle(jugadas)
-        return jugadas
-
-        """
     def utilidad(self, juego, estado, jugador):
         """
         El corazón del algoritmo, determina fuertemente
@@ -204,8 +200,8 @@ class JugadorConecta4(juegos_cuadricula.JugadorNegamax):
 
         """
         # ----------------------------------------------------------------------
-        #                             (20 puntos)
-        #                        INSERTE SU CÓDIGO AQUÍ
+        # (20 puntos)
+        # INSERTE SU CÓDIGO AQUÍ
         # ----------------------------------------------------------------------
         # En realidad es el corazon del algoritmo la verdad le di muchas vueltas a como
         # responder esto y todo lo que se me ocurria tenia que distinguir las fichas ya 
@@ -242,7 +238,7 @@ class JugadorConecta4(juegos_cuadricula.JugadorNegamax):
         # la maquina se apendeja mucho y es mejor la que usted propuso. Pero al final de cuentas es una forma de
         # obtener la utilidad ..
 
-        def OI(columna, renglon):
+        def obtener_indice(columna, renglon):
             return columna + renglon * 7
 
         evaluacion_juego = [3, 4, 5, 7, 5, 4, 3,
@@ -257,21 +253,13 @@ class JugadorConecta4(juegos_cuadricula.JugadorNegamax):
 
         for x in range(6):
             for y in range(7):
-                temp = OI(y,x)
+                temp = obtener_indice(y, x)
                 if estado[temp] == jugador:
                     suma += evaluacion_juego[temp]
                 if estado[temp] == -1 * jugador:
                     suma -= evaluacion_juego[temp]
 
         return utilidad + suma
-
-        """
-        val = juego.estado_terminal(estado)
-        if val is None:
-            return 0
-        return val
-
-        """
 
     def decide_jugada(self, juego, estado, jugador, tablero):
         self.dmax = 0
@@ -293,7 +281,7 @@ class JugadorConecta4(juegos_cuadricula.JugadorNegamax):
 
     def es_meta(self, estado, jugador):
 
-        def OI(columna, renglon):
+        def obtener_indice(columna, renglon):
             return columna + renglon * 7
 
         cont = 0
@@ -301,35 +289,34 @@ class JugadorConecta4(juegos_cuadricula.JugadorNegamax):
         # horizontal
         for y in range(6):
             for x in range(7 - 3):
-                if estado[OI(x, y)] == jugador and estado[OI(x + 1, y)] == jugador and estado[
-                    OI(x + 2, y)] == jugador and estado[OI(x + 3, y)] == jugador:
+                if estado[obtener_indice(x, y)] == jugador and estado[obtener_indice(x + 1, y)] == jugador and estado[
+                    obtener_indice(x + 2, y)] == jugador and estado[obtener_indice(x + 3, y)] == jugador:
                     cont += 1
 
         # vertical
         for x in range(7):
             for y in range(6 - 3):
-                if estado[OI(x, y)] == jugador and estado[OI(x, y + 1)] == jugador and estado[
-                    OI(x, y + 2)] == jugador and estado[OI(x, y + 3)] == jugador:
+                if estado[obtener_indice(x, y)] == jugador and estado[obtener_indice(x, y + 1)] == jugador and estado[
+                    obtener_indice(x, y + 2)] == jugador and estado[obtener_indice(x, y + 3)] == jugador:
                     cont += 1
 
         # / diagonal
         for x in range(7 - 3):
             for y in range(3, 6):
-                if estado[OI(x, y)] == jugador and estado[OI(x + 1, y - 1)] == jugador and estado[
-                    OI(x + 2, y - 2)] == jugador and estado[OI(x + 3, y - 3)] == jugador:
+                if estado[obtener_indice(x, y)] == jugador and estado[obtener_indice(x + 1, y - 1)] == jugador and estado[
+                    obtener_indice(x + 2, y - 2)] == jugador and estado[obtener_indice(x + 3, y - 3)] == jugador:
                     cont += 1
 
         # \ diagonal
         for x in range(7 - 3):
             for y in range(6 - 3):
-                if estado[OI(x, y)] == jugador and estado[OI(x + 1, y + 1)] == jugador and estado[
-                    OI(x + 2, y + 2)] == jugador and estado[OI(x + 3, y + 3)] == jugador:
+                if estado[obtener_indice(x, y)] == jugador and estado[obtener_indice(x + 1, y + 1)] == jugador and estado[
+                    obtener_indice(x + 2, y + 2)] == jugador and estado[obtener_indice(x + 3, y + 3)] == jugador:
                     cont += 1
 
         return cont
 
 if __name__ == '__main__':
-
     # Ejemplo donde empieza el jugador humano
     juego = juegos_cuadricula.InterfaseTK(Conecta4(),
                                           juegos_cuadricula.JugadorHumano(),
