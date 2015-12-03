@@ -152,8 +152,12 @@ class JugadorConecta4(juegos_cuadricula.JugadorNegamax):
         #                             (20 puntos)
         #                        INSERTE SU CÓDIGO AQUÍ
         # ----------------------------------------------------------------------
-        shuffle(jugadas)
-        return jugadas
+        
+        shuffle(jugadas) #se crean las jugadas
+        jugadas.sort() #ordena los numeros de menor a mayor
+        jugadas.reverse() #invierte el orden
+                    
+        return jugadas #regresa las jugadas de mayor a menor
 
     def utilidad(self, juego, estado):
         """
