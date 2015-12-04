@@ -14,7 +14,7 @@ import juegos_cuadricula
 import time
 from random import shuffle
 
-__author__ = 'juliowaissman'
+__author__ = 'Luis Fernando Suarez Astiazaran'
 
 
 class Conecta4(juegos_cuadricula.Juego2ZT):
@@ -240,9 +240,48 @@ class JugadorConecta4(juegos_cuadricula.JugadorNegamax):
         #                             (20 puntos)
         #                        INSERTE SU CÓDIGO AQUÍ
         # ----------------------------------------------------------------------
-        val = juego.estado_terminal(estado)
-        if val is None:
-            return 0
+        e=estado
+        
+        col=anterior%7
+        ren=anterior/7
+        ren*=7
+
+        gmax=1
+        umax=1
+        g=1
+        
+        for i in range(4):
+            if e[col+(i*7)] == e[col+((i+1)*7)] == 1:
+                g+=1
+            else: g=1
+
+        gmax=g
+
+        g=1
+        for i in range(5):
+            if e[ren+i] == e[ren+(i+1)] == 1:
+                g+=1
+            else: g=1
+
+        if g>gmax : gmax=g
+        elif g==gmax : umax+=1
+
+        w1=4.0/gmax
+        w2=2.0/umax
+
+        if w1> 2:
+            val=0
+        else:
+            val=w1+w2
+
+        #w1=4.0*gmax
+        #w2=2.0*umax
+        
+        #val=gmax+umax
+                
+        #val = juego.estado_terminal(estado)
+        #if val is None:
+        #    return 0
         return val
 
     def decide_jugada(self, juego, estado, jugador, tablero):
