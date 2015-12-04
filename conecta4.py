@@ -152,7 +152,80 @@ class JugadorConecta4(juegos_cuadricula.JugadorNegamax):
         #                             (20 puntos)
         #                        INSERTE SU CÓDIGO AQUÍ
         # ----------------------------------------------------------------------
-        shuffle(jugadas)
+        e=estado
+        key=0
+        for i in range(42):
+            if(e[i] == 1):
+                key=i
+                break
+        #print"mi key=",key
+        #print"anterior =",anterior
+        r=randint(1,2)
+        
+        if r==1 : key=key
+        else : key=anterior
+
+        #print"mi f_key=",key
+        #raw_input("press key..")
+        posibles=[]
+        for elemento in jugadas : 
+             #Si esta en la misma columna y es la diferencia de renglones es uno se le da valor de uno a esa jugada, sino 2
+             if elemento[1]%7 == key%7:
+                 
+                 if abs(elemento[1]/7 - key/7) == 1 : val=1
+                 else : val=2
+                 
+             #Si esta en el mismo renglon y es la diferencia de columnas es uno se le da valor de uno a esa jugada, sino 2
+             elif elemento[1]/7 == key/7 :
+
+                 if abs(elemento[1]%7 - key%7) == 1 : val=1
+                 else : val=2
+             
+             #Si esta en la misma diagonal izquierda y si solo esta a un movimiento se le da valor de uno a esa jugada, si se encuentra en la diagonal a mas de un movimiento es 2
+             elif abs(key-elemento[1])%6 == 0 :
+                 
+                 if abs(key-elemento[1])/6 == 1 : val=1
+                 else : val=2
+                 
+             #Si esta en la misma diagonal derecha y si solo esta a un movimiento se le da valor de uno a esa jugada, si se encuentra en la diagonal a mas de un movimiento es 2                
+             elif abs(key-elemento[1])%8 == 0 :
+
+                 if abs(key-elemento[1])/8 == 1 : val=1
+                 else : val=2
+             
+             #Si esta en otro renglon solo se resta la distancia entre los renglones mas uno
+             elif abs(elemento[1]/7 - key/7) > 0 : val=abs(elemento[1]/7 - key/7)+2
+             
+             #Si esta en otra columna solo se resta la distancia entre las columnas mas uno
+             elif abs(elemento[1]%7 - key%7) > 0 : val=abs(elemento[1]%7 - key%7)+2
+             
+             casilla=[elemento[0],elemento[1],val]
+             posibles.append(tuple (casilla))
+             #print "casilla :",casilla
+  
+             
+
+        #print "posibles :",posibles            
+
+        #raw_input("press any key..")
+
+        #for ab in posibles:
+            #print ab[0],",",ab[1],",",ab[2]
+        
+        posibles=sorted(posibles, key=itemgetter(2))
+        
+        #print "*posibles :",posibles
+
+        #raw_input("press any key..")
+
+        jugadas=[]
+        for elemento in posibles :
+            casilla=[elemento[0],elemento[1]]
+            jugadas.append(tuple(casilla))
+
+        #print "jugadas_ordenadas :",jugadas 
+        #raw_input("press enter to continue *****...")                                
+        #shuffle(jugadas)
         return jugadas
 
     def utilidad(self, juego, estado):
