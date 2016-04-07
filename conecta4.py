@@ -152,8 +152,12 @@ class JugadorConecta4(juegos_cuadricula.JugadorNegamax):
         #                             (20 puntos)
         #                        INSERTE SU CÓDIGO AQUÍ
         # ----------------------------------------------------------------------
-        shuffle(jugadas)
-        return jugadas
+        
+        shuffle(jugadas) #se crean las jugadas
+        jugadas.sort() #ordena los numeros de menor a mayor
+        jugadas.reverse() #invierte el orden
+                    
+        return jugadas #regresa las jugadas de mayor a menor
 
     def utilidad(self, juego, estado):
         """
@@ -168,6 +172,27 @@ class JugadorConecta4(juegos_cuadricula.JugadorNegamax):
         #                        INSERTE SU CÓDIGO AQUÍ
         # ----------------------------------------------------------------------
         val = juego.estado_terminal(estado)
+   
+        matriz = []
+        m=[]
+        for i in range(6):
+            matriz.append([])
+            m.append([])
+            for j in range(7):
+                matriz[i].append(None)
+                m[i].append(None)
+        n = 0
+        #Se guarda todo el estado en una matrix
+        for i in range(6):
+            for j in range(7):
+                matriz[i][j]=estado[n]
+                n = n +1
+        val = 0
+        for i in range(6):
+            for j in range(7):
+                if matriz[i][j]==-1:
+                    val +=(1/(6*7)) # Cada -1, representa 1/42 parte del total. 
+
         if val is None:
             return 0
         return val

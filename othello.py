@@ -3,9 +3,7 @@
 """
 othello.py
 ------------
-
 El juego de Otello implementado por ustes mismos, con jugador inteligente
-
 """
 
 __author__ = 'nombre del alumno'
