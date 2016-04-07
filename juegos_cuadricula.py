@@ -78,7 +78,7 @@ class Juego2ZT:
         """
         pass
 
-    def estado_terminal(self, estado):
+    def estado_terminal(self, estado, jugador):
         """
         Devuelve 1 si el estado es final y gana el jugador 1,
                 -1 si el estado es final y gana el jugador -1,
@@ -194,7 +194,8 @@ class InterfaseTK:
                                              jugador)
             self.actualiza_tablero(estado,
                                    estado_anterior)
-            resultado = self.juego.estado_terminal(estado)
+            resultado = self.juego.estado_terminal(estado, jugador)
+            #print resultado
             if resultado is not None:
                 showinfo("Fin de juego",
                          ['EMPATE', 'GANAN AZULES', 'GANAN ROJAS'][resultado])
@@ -351,7 +352,7 @@ class JugadorNegamax(JugadorInterfazTK):
         """
         return max(self.ordena(juego,
                                estado,
-                               juego.jugadas_legales(estado, jugador)),
+                               juego.jugadas_legales(estado, jugador), jugador),
                    key=lambda jugada: -self.negamax(juego,
                                                     estado=juego.hacer_jugada(estado,
                                                                               jugada,
@@ -372,15 +373,20 @@ class JugadorNegamax(JugadorInterfazTK):
         es el mejor valor esperado posible.
 
         """
-        acabado = juego.estado_terminal(estado)
+        acabado = juego.estado_terminal(estado, jugador)
         if acabado is not None:
             return jugador * acabado
         if profundidad == 0:
-            return jugador * self.utilidad(juego, estado)
+
+            if self.utilidad(juego, estado, jugador) is not None:
+                return jugador * self.utilidad(juego, estado, jugador)
+            else:
+                return jugador * 0
+
 
         for jugada in self.ordena(juego,
                                   estado,
-                                  juego.jugadas_legales(estado, jugador)):
+                                  juego.jugadas_legales(estado, jugador), jugador):
             alpha = max(alpha, -self.negamax(juego,
                                              estado=juego.hacer_jugada(estado,
                                                                        jugada,
@@ -393,7 +399,7 @@ class JugadorNegamax(JugadorInterfazTK):
                 return beta
         return alpha
 
-    def ordena(self, juego, estado, jugadas):
+    def ordena(self, juego, estado, jugadas, jugador):
         """
         Ordena las jugadas en función de las más prometedoras a las
         menos prometedoras. Por default regresa las jugadas en el mismo
@@ -402,7 +408,7 @@ class JugadorNegamax(JugadorInterfazTK):
         """
         return jugadas
 
-    def utilidad(self, juego, estado):
+    def utilidad(self, juego, estado, jugador):
         """
         El corazón del algoritmo, determina fuertemente
         la calidad de la búsqueda.
@@ -410,4 +416,4 @@ class JugadorNegamax(JugadorInterfazTK):
         Por default devuelve el valor de juego.estado_terminal(estado)
 
         """
-        return juego.estado_terminal(estado)
+        return juego.estado_terminal(estado, jugador)

@@ -38,16 +38,22 @@ reforzar con la tarea.
    que se emplee de forma práctica. Dentro de la clase `JugadorConecta4` se tiene el método `ordena`, el cual solamente
    reacomoda las jugadas legales al azar. Desarrolla tu propio mñetodo con el fin de lograr mejores búsquedas a mayor
    profundidad (20 puntos).
+
+   Listo.
    
 3. En el mismo archivo `juegos_cuadricula.py` y el mismo método `JugadorConecta4` se tiene el método `utilidad` en 
    el cual por el momento la utilidad se calcula asignando un valor de 1 (-1 respectivamente) si un estado es terminal
    y gana el jugador 1 (-1 respectivamente), mientras que en cualquier otro caso responde un 0 (total ignorancia). 
    Desarrolla tu porpio método de utilidad. Para esto posiblemente tendras que desarrollar varias funciones de 
    características, y devolver como utilidad una combinacion lineal de estas, tal como vimos en clases (20 puntos).
+
+   Listo.
    
 4. El archivo `othello.py` es un archivo completamente en blanco. Desarrolla todo lo necesario para un juego de 
    [Othello](http://en.wikipedia.org/wiki/Reversi). Todas las decisiones son tuyas. No importa que juegue lento,
    pero que el ordenamiento y las funciones de utilidad hagan que jugar contra el motor de IA sea muy dificil de
-   ganar (60 puntos). 
+   ganar (60 puntos).
+
+   Aun no termino :/
    
    
