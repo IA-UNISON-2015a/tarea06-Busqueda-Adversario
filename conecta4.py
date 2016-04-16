@@ -152,8 +152,11 @@ class JugadorConecta4(juegos_cuadricula.JugadorNegamax):
         #                             (20 puntos)
         #                        INSERTE SU CÓDIGO AQUÍ
         # ----------------------------------------------------------------------
-        shuffle(jugadas)
+        jugadas.sort(key=lambda j: self.threat(juego, juego.hacer_jugada(estado,j,self.jugador)))
         return jugadas
+        
+        
+        
 
     def utilidad(self, juego, estado):
         """
@@ -167,13 +170,122 @@ class JugadorConecta4(juegos_cuadricula.JugadorNegamax):
         #                             (20 puntos)
         #                        INSERTE SU CÓDIGO AQUÍ
         # ----------------------------------------------------------------------
-        val = juego.estado_terminal(estado)
-        if val is None:
+        t = self.threat(juego, estado)
+        return 1 if t >= 500 else -1 if t<=-500 else 0
+        
+    def threat(self, juego, estado):
+        """
+        Devuelve el nivel de amenaza que tiene un estado
+        """
+        t = [0,0,0,0,0,0,0,0,0] # [0,1,2,3,4,-4,-3,-2,-1]
+        for r in range(5,-1,-1):
+            for c in range(7):
+                t[self.up(estado, r*7+c)] += 1 
+                t[self.right(estado, r*7+c)] += 1 
+                t[self.upright(estado, r*7+c)] += 1 
+                t[self.upleft(estado, r*7+c)] += 1
+        if t[-self.jugador*4] > 0:
+            return 1000
+        if t[self.jugador*4] > 0:
+            return -1000
+        if t[-self.jugador*3] > 0:
+            return -500
+        if t[self.jugador*3] > 0:
+            return 500
+        return sum([-self.jugador*t[i]*i for i in (-2,-1,1,2,3)])
+    
+    @staticmethod
+    def up(estado, x):
+        """
+        Devuelve lo bueno que es la posicion x en el estado 'estado' en base
+        a el numero de fichas (y de que jugador) que hay desde x hasta 3 
+        fichas mas arriba. Devuelve 0 si no hay 3 filas mas arriba o si
+        hay fichas mixtas en la trayectoria
+        """
+        if x/7 < 3:
+            return 0 
+        j = estado[x]
+        total = j
+        for i in range(1,4):
+            u = estado[x-i*7]
+            if j == 0 or u != -j:
+                total += u
+                j = u
+            else:
+                return 0
+        return total
+    
+    @staticmethod
+    def right(estado, x):
+        """
+        Devuelve lo bueno que es la posicion x en el estado 'estado' en base
+        a el numero de fichas (y de que jugador) que hay desde x hasta 3 
+        fichas mas a la derecha. Devuelve 0 si no hay 3 columnas mas a la 
+        izquierda o si hay fichas mixtas en la trayectoria
+        """
+        if x%7 > 3:
             return 0
-        return val
+        j = estado[x]
+        total = j
+        for i in range(1,4):
+            r = estado[x+i]
+            if j == 0 or r != -j:
+                total += r
+                j = r
+            else:
+                return 0
+        return total
+        
+    @staticmethod
+    def upright(estado, x):
+        """
+        Devuelve lo bueno que es la posicion x en el estado 'estado' en base
+        a el numero de fichas (y de que jugador) que hay desde x hasta 3 
+        fichas mas en la diagonal superior derecha. Devuelve 0 si no hay 3 
+        filas mas arriba o 3 columnas mas a la derecha; o si hay fichas 
+        mixtas en la trayectoria
+        """
+        if x/7 < 3 or x%7 > 3:
+            return 0
+        j = estado[x]
+        total = j
+        for i in range(1,4):
+            ur = estado[x-i*6]
+            if j == 0 or ur != -j:
+                total += ur
+                j = ur
+            else:
+                return 0
+        return total
+        
+    @staticmethod
+    def upleft(estado, x):
+        """
+        Devuelve lo bueno que es la posicion x en el estado 'estado' en base
+        a el numero de fichas (y de que jugador) que hay desde x hasta 3 
+        fichas mas en la diagonal superior izquierda. Devuelve 0 si no hay 3 
+        filas mas arriba o 3 columnas mas a la izquierda; o si hay fichas 
+        mixtas en la trayectoria
+        """
+        if x/7 < 3 or x%7 < 3:
+            return 0
+        j = estado[x]
+        total = j
+        for i in range(1,4):
+            ul = estado[x-i*8]
+            if j == 0 or ul != -j:
+                total += ul
+                j = ul
+            else:
+                return 0
+        return total
+            
+                    
+            
 
     def decide_jugada(self, juego, estado, jugador, tablero):
         self.dmax = 0
+        self.jugador = jugador
         t_ini = time.time()
         while time.time() - t_ini < self.tiempo and self.dmax < self.maxima_d:
             jugada = max(self.ordena(juego,
@@ -194,6 +306,7 @@ if __name__ == '__main__':
     # Ejemplo donde empieza el jugador humano
     juego = juegos_cuadricula.InterfaseTK(Conecta4(),
                                           juegos_cuadricula.JugadorHumano(),
+                                          #JugadorConecta4(4),
                                           JugadorConecta4(4),
                                           1)
     juego.arranca()
