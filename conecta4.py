@@ -140,7 +140,7 @@ class JugadorConecta4(juegos_cuadricula.JugadorNegamax):
         self.tiempo = tiempo_espera
         self.maxima_d = 20
 
-    def ordena(self, juego, estado, jugadas):
+    def ordena(self, juego, estado, jugadas, jugador):
         """
         Ordena las jugadas en función de las más prometedoras a las menos
         prometedoras.
@@ -152,7 +152,7 @@ class JugadorConecta4(juegos_cuadricula.JugadorNegamax):
         #                             (20 puntos)
         #                        INSERTE SU CÓDIGO AQUÍ
         # ----------------------------------------------------------------------
-        jugadas.sort(key=lambda j: self.threat(juego, juego.hacer_jugada(estado,j,self.jugador)))
+        jugadas.sort(key=lambda j: self.threat(juego, juego.hacer_jugada(estado,j,jugador), jugador))
         return jugadas
         
         
@@ -170,10 +170,10 @@ class JugadorConecta4(juegos_cuadricula.JugadorNegamax):
         #                             (20 puntos)
         #                        INSERTE SU CÓDIGO AQUÍ
         # ----------------------------------------------------------------------
-        t = self.threat(juego, estado)
+        t = self.threat(juego, estado, self.jugador)
         return 1 if t >= 500 else -1 if t<=-500 else 0
         
-    def threat(self, juego, estado):
+    def threat(self, juego, estado, jugador):
         """
         Devuelve el nivel de amenaza que tiene un estado
         """
@@ -184,15 +184,15 @@ class JugadorConecta4(juegos_cuadricula.JugadorNegamax):
                 t[self.right(estado, r*7+c)] += 1 
                 t[self.upright(estado, r*7+c)] += 1 
                 t[self.upleft(estado, r*7+c)] += 1
-        if t[-self.jugador*4] > 0:
+        if t[-jugador*4] > 0:
             return 1000
-        if t[self.jugador*4] > 0:
+        if t[jugador*4] > 0:
             return -1000
-        if t[-self.jugador*3] > 0:
+        if t[-jugador*3] > 0:
             return -500
-        if t[self.jugador*3] > 0:
+        if t[jugador*3] > 0:
             return 500
-        return sum([-self.jugador*t[i]*i for i in (-2,-1,1,2,3)])
+        return sum([-jugador*t[i]*i for i in (-2,-1,1,2,3)])
     
     @staticmethod
     def up(estado, x):
@@ -290,8 +290,9 @@ class JugadorConecta4(juegos_cuadricula.JugadorNegamax):
         while time.time() - t_ini < self.tiempo and self.dmax < self.maxima_d:
             jugada = max(self.ordena(juego,
                                      estado,
-                                     juego.jugadas_legales(estado, jugador)),
-                         key=lambda jugada: -self.negamax(juego,
+                                     juego.jugadas_legales(estado, jugador),
+                                     jugador),
+                         key=lambda jugada: self.negamax(juego,
                                                           estado=juego.hacer_jugada(estado, jugada, jugador),
                                                           jugador=-jugador,
                                                           alpha=-1e10,
@@ -305,8 +306,8 @@ if __name__ == '__main__':
 
     # Ejemplo donde empieza el jugador humano
     juego = juegos_cuadricula.InterfaseTK(Conecta4(),
-                                          juegos_cuadricula.JugadorHumano(),
-                                          #JugadorConecta4(4),
+                                          #juegos_cuadricula.JugadorHumano(),
+                                          JugadorConecta4(4),
                                           JugadorConecta4(4),
                                           1)
     juego.arranca()

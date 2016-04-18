@@ -37,7 +37,6 @@ class Othello(juegos_cuadricula.Juego2ZT):
             return None
         
         s = sum(estado)
-        print "terminal", s
         
         return 1 if s > 0 else -1 if s < 0 else 0
         
@@ -88,10 +87,10 @@ class JugadorOthello(juegos_cuadricula.JugadorNegamax):
         return jugadas
         
     def utilidad(self, juego, estado): 
-        s = self.chilometro(estado, self.jugador)
+        s = self.chilometro(estado, self.jugador)/len([x for x in estado if x != 0])
         # s esta en (-140, 140), si s en (-140, -50), muy probable gane jugador -1,
         # y similar para jugador 1. Y si s en (-50, 50) esta reñido
-        return (1 if s > 50 else -1 if s < -50 else 0)
+        return (1 if s > 0 else -1 if s < 0 else 0)
                 
     @staticmethod
     def chilometro(estado, jugador):
