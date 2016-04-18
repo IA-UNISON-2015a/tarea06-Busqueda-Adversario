@@ -374,13 +374,14 @@ class JugadorNegamax(JugadorInterfazTK):
         """
         acabado = juego.estado_terminal(estado)
         if acabado is not None:
-            return jugador * acabado
+            return self.jugador * acabado
         if profundidad == 0:
-            return jugador * self.utilidad(juego, estado)
+            return self.utilidad(juego, estado)
 
         for jugada in self.ordena(juego,
                                   estado,
-                                  juego.jugadas_legales(estado, jugador)):
+                                  juego.jugadas_legales(estado, jugador),
+                                  jugador):
             alpha = max(alpha, -self.negamax(juego,
                                              estado=juego.hacer_jugada(estado,
                                                                        jugada,
@@ -390,10 +391,10 @@ class JugadorNegamax(JugadorInterfazTK):
                                              beta=-alpha,
                                              profundidad=profundidad - 1))
             if alpha >= beta:
-                return alpha
+                return beta
         return alpha
 
-    def ordena(self, juego, estado, jugadas):
+    def ordena(self, juego, estado, jugadas, jugador):
         """
         Ordena las jugadas en función de las más prometedoras a las
         menos prometedoras. Por default regresa las jugadas en el mismo
