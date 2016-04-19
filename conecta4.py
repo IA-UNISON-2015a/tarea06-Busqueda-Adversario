@@ -109,18 +109,18 @@ class Conecta4(juegos_cuadricula.Juego2ZT):
 
     def hacer_jugada(self, estado, jugada, jugador):
         """
-        Devuelve estado_nuevo que es el estado una vez que se
-        realizó la juagada por el jugador.
+            Devuelve estado_nuevo que es el estado una vez que se
+            realizó la juagada por el jugador.
 
-        Hay que recordar que los juegos de tablero los estamos
-        estandarizando para jugadas las cuales son (pini, pfinal)
-        donde pini esla posicion inicial y pfinal es la posicion
-        final de una ficha.
+            Hay que recordar que los juegos de tablero los estamos
+            estandarizando para jugadas las cuales son (pini, pfinal)
+            donde pini esla posicion inicial y pfinal es la posicion
+            final de una ficha.
 
-        Si el juego solamente implica poner fichas entonces pini
-        no se toma en cuenta pero si tiene que ir para
-        guardar homogeneidad entre los diferentes juegos y
-        los diferentes métodos que desarrollaremos.
+            Si el juego solamente implica poner fichas entonces pini
+            no se toma en cuenta pero si tiene que ir para
+            guardar homogeneidad entre los diferentes juegos y
+            los diferentes métodos que desarrollaremos.
 
         """
         e = list(estado)
