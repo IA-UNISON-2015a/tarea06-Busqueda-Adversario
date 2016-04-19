@@ -82,27 +82,28 @@ class JugadorOthello(juegos_cuadricula.JugadorNegamax):
         self.maxima_d = 20
     
     def ordena(self, juego, estado, jugadas, jugador): 
-        jugadas.sort(key=lambda j: -self.chilometro(
-                juego.hacer_jugada(estado, j, jugador), jugador))
+        jugadas.sort(key=lambda j: -self.chilometro(juego, estado, j, jugador))
         return jugadas
         
-    def utilidad(self, juego, estado): 
-        s = self.chilometro(estado, self.jugador)/len([x for x in estado if x != 0])
-        # s esta en (-140, 140), si s en (-140, -50), muy probable gane jugador -1,
-        # y similar para jugador 1. Y si s en (-50, 50) esta reñido
-        return (1 if s > 0 else -1 if s < 0 else 0)
+    def utilidad(self, juego, estado):
+        s = (estado[0]+estado[7]+estado[56]+estado[63])
+        return (self.jugador if s > 0 else -self.jugador if s < 0 else 0)
                 
     @staticmethod
-    def chilometro(estado, jugador):
-        s = (estado[0] + estado[7] + estado[63] + estado[56])*3
-        s += sum([estado[i] for i in range(8)+range(56,64)+range(0,64,8)+range(7,64,8)])*2
-        s += sum(estado)
-        return s*jugador
+    def chilometro(juego, estado, jugada, jugador):
+        s = juego.hacer_jugada(estado, jugada, jugador)
+        r = sum([s[i]-estado[i] for i in [0,7,56,63]])
+        if r != 0 :
+            return r*jugador
+        return 0
+        
+            
                 
     def decide_jugada(self, juego, estado, jugador, tablero):
         self.dmax = 0
         self.jugador = jugador
         t_ini = time.time()
+        
         while time.time() - t_ini < self.tiempo and self.dmax < self.maxima_d:
             jugada = max(self.ordena(juego,
                                      estado,
@@ -120,7 +121,8 @@ class JugadorOthello(juegos_cuadricula.JugadorNegamax):
     
 if __name__ == '__main__':
     juego = juegos_cuadricula.InterfaseTK(Othello(),
-                                        JugadorOthello(4),
+                                        #JugadorOthello(4),
+					                    juegos_cuadricula.JugadorHumano(),
                                         JugadorOthello(4),
                                         1)
                                         

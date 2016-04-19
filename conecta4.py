@@ -171,7 +171,7 @@ class JugadorConecta4(juegos_cuadricula.JugadorNegamax):
         #                        INSERTE SU CÓDIGO AQUÍ
         # ----------------------------------------------------------------------
         t = self.threat(juego, estado, self.jugador)
-        return 1 if t >= 500 else -1 if t<=-500 else 0
+        return -1 if t >= 500 else 1 if t<=-500 else 0
         
     def threat(self, juego, estado, jugador):
         """
@@ -306,8 +306,8 @@ if __name__ == '__main__':
 
     # Ejemplo donde empieza el jugador humano
     juego = juegos_cuadricula.InterfaseTK(Conecta4(),
-                                          #juegos_cuadricula.JugadorHumano(),
-                                          JugadorConecta4(4),
+                                          juegos_cuadricula.JugadorHumano(),
+                                          #JugadorConecta4(4),
                                           JugadorConecta4(4),
                                           1)
     juego.arranca()
