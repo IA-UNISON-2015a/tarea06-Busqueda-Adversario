@@ -70,6 +70,9 @@ class Conecta4(juegos_cuadricula.Juego2ZT):
 
         return [(None, pos) for pos in vacios(estado) if pos is not None]
 
+
+    
+
     def estado_terminal(self, estado):
         """
         Revisa si el estado es terminal, si no hay espacios para
@@ -101,23 +104,23 @@ class Conecta4(juegos_cuadricula.Juego2ZT):
                      ((vertical(estado, p(r, c))) or
                       (c < 4 and diag_izq(estado, p(r, c))) or
                       (c > 2 and diag_der(estado, p(r, c)))))):
-                    return estado[p(r, c)]
+                    return estado[p(r, c)]*100
         return None if 0 in estado else 0
 
     def hacer_jugada(self, estado, jugada, jugador):
         """
-        Devuelve estado_nuevo que es el estado una vez que se
-        realizó la juagada por el jugador.
+            Devuelve estado_nuevo que es el estado una vez que se
+            realizó la juagada por el jugador.
 
-        Hay que recordar que los juegos de tablero los estamos
-        estandarizando para jugadas las cuales son (pini, pfinal)
-        donde pini esla posicion inicial y pfinal es la posicion
-        final de una ficha.
+            Hay que recordar que los juegos de tablero los estamos
+            estandarizando para jugadas las cuales son (pini, pfinal)
+            donde pini esla posicion inicial y pfinal es la posicion
+            final de una ficha.
 
-        Si el juego solamente implica poner fichas entonces pini
-        no se toma en cuenta pero si tiene que ir para
-        guardar homogeneidad entre los diferentes juegos y
-        los diferentes métodos que desarrollaremos.
+            Si el juego solamente implica poner fichas entonces pini
+            no se toma en cuenta pero si tiene que ir para
+            guardar homogeneidad entre los diferentes juegos y
+            los diferentes métodos que desarrollaremos.
 
         """
         e = list(estado)
@@ -152,24 +155,45 @@ class JugadorConecta4(juegos_cuadricula.JugadorNegamax):
         #                             (20 puntos)
         #                        INSERTE SU CÓDIGO AQUÍ
         # ----------------------------------------------------------------------
-        shuffle(jugadas)
+        def en_medio(jugada):
+            return abs(jugada[1]%7 -3)
+
+        sorted(jugadas,key=en_medio)
         return jugadas
 
     def utilidad(self, juego, estado):
+
+        def checa_columnas(estado,tipo):
+            #tipo 0 = numero de fichas en el tope de las columnas pertenecientes al color
+            #tipo 1 = 7 - numero de renglones ocupados
+            utilidad = 7 if tipo == 1 else 0
+            for i in range(7):
+                for j in range(6):
+                    if estado[7*j+i] != 0:
+                        utilidad+= -1 if tipo == 1 else estado[7*j+i]
+                        break
+            return utilidad
+        def en_medio(estado):
+            return sum(estado[3+7*i] for i in xrange(6))
+
+
         """
         El corazón del algoritmo, determina fuertemente
         la calidad de la búsqueda.
 
         Por default devuelve el valor de juego.estado_terminal(estado)
-
         """
+        
         # ----------------------------------------------------------------------
         #                             (20 puntos)
         #                        INSERTE SU CÓDIGO AQUÍ
         # ----------------------------------------------------------------------
         val = juego.estado_terminal(estado)
         if val is None:
-            return 0
+            a1 = 1.0
+            a2 = 2.0
+            a3 = 3.0
+            return a1*checa_columnas(estado,0) + a2*checa_columnas(estado,1) + a3*en_medio(estado)
         return val
 
     def decide_jugada(self, juego, estado, jugador, tablero):
