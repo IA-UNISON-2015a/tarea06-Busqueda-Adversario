@@ -126,22 +126,23 @@ class Othello(juegos_cuadricula.Juego2ZT):
         for i in iteradores:
             jaux = jugada[1] + i
             try:
-        	   while e[jaux] == -jugador:
-        	       if e[jaux+i] == -jugador:
-        		       jaux+=i
-        		       continue
-        	       else:
+                while e[jaux] == -jugador:
+                    if e[jaux+i] == -jugador:
+                        jaux+=i
+                        continue
+                    else:
                         if e[jaux+i] == 0:
-            			     for j in xrange(abs(   (jugada[1]-(jaux) ) //i)):
-            				    finale[jugada[1]+j*i] = jugador
+                            for j in xrange(abs(   (jugada[1]-(jaux) ) //i)):
+                                finale[jugada[1]+j*i] = jugador
                                 maxiter-=1
                                 if maxiter<1 :
                                     break
-            				    print "ficha puesta"
-            			else:
-            		      break
-        	except:
-        	   pass
+                    	    print "ficha puesta"
+                        else:
+                            break
+                	   
+            except:
+                pass
         return tuple(finale)
 
 class JugadorOthello(juegos_cuadricula.JugadorNegamax):
