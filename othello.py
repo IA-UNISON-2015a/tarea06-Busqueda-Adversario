@@ -120,7 +120,7 @@ class Othello(juegos_cuadricula.Juego2ZT):
         a las fichas del jugador actual.
         """
         e = list(estado)
-        maxiter = 10000
+        
         finale = copy.copy(e)
         iteradores = {1,-1,8,-8,7,9,-7,-9}
         for i in iteradores:
@@ -131,13 +131,10 @@ class Othello(juegos_cuadricula.Juego2ZT):
                         jaux+=i
                         continue
                     else:
-                        if e[jaux+i] == 0:
-                            for j in xrange(abs(   (jugada[1]-(jaux) ) //i)):
+                        if e[jaux+i] == jugador:
+                            for j in xrange(abs( (jugada[1]-(jaux+i) ) //i)):
                                 finale[jugada[1]+j*i] = jugador
-                                maxiter-=1
-                                if maxiter<1 :
-                                    break
-                    	    print "ficha puesta"
+                    	        print "ficha puesta"
                         else:
                             break
                 	   
