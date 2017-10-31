@@ -97,22 +97,120 @@ class ConectaCuatro(JuegoSumaCeros2T):
                 self.jugador *= -1
                 return None
 
+def puedeGanarRenglon(x,reng,jugador):
+    for i in range(7*reng,7*reng+4):
+        cuantos = 0
+        for j in range(4):
+            if x[i + j] == jugador or x[i + j] == 0:
+                cuantos += 1
+            else:
+                break
+        if cuantos >= 4:
+            return True
+    return False
+
+def puedeGanarColumna(x,col,jugador):
+    for i in range(col,col + 21,7):
+        cuantos = 0
+        for j in range(0,28,7):
+            if x[i + j] == jugador or x[i + j] == 0:
+                cuantos += 1
+            else:
+                break
+        if cuantos >= 4:
+            return True
+    return False
+
+def puedeGanarDiagonal1(x,diag,jugador):
+    if diag == 3:
+        cuantos = 0
+        for i in (3,11,19,27):
+            if x[i] == jugador or x[i] == 0:
+                cuantos += 1
+            else:
+                break
+        return cuantos >= 4
+    
+    for i in range(diag,18,8):
+        cuantos = 0
+        for j in range(0,32,8):
+            if x[i + j] == jugador or x[i + j] == 0:
+                cuantos += 1
+            else:
+                break
+        if cuantos >= 4:
+            return True
+    return False
+
+def puedeGanarDiagonal2(x,diag,jugador):
+    if diag == 3:
+        cuantos = 0
+        for i in (3,9,15,21):
+            if x[i] == jugador or x[i] == 0:
+                cuantos += 1
+            else:
+                break
+        return cuantos >= 4
+    
+    for i in range(diag,21,6):
+        if i != 16:
+            cuantos = 0 
+            for j in range(0,24,6):
+                if x[i + j] == jugador or x[i + j] == 0:
+                    cuantos += 1
+                else:
+                    break
+            if cuantos >= 4:
+                return True
+    return False
+
+def cuentaVentaja(x,jugador):
+    """
+    Esta función recibe un estado x y un jugador(1 0 -1), 
+    lo que hace es contar la cantidad de renglones,
+    columnas y diagonales en los cuales aún puede ganar 
+    y los cuenta.
+
+    @param x: una lista de estado del tablero.
+
+    @param jugador: un número 1 o -1 que indica el jugador.
+
+    @return numero de renglones, columnas y diagonales en las 
+            que aún puede ganar el jugador "jugador"
+    """
+    cuantos = 0
+    for i in range(6):
+        if puedeGanarRenglon(x,i,jugador):
+            cuantos += 1
+    
+    for i in range(7):
+        if puedeGanarColumna(x,i,jugador):
+            cuantos += 1
+
+    for i in (0,1,2,3,7,14):
+        if puedeGanarDiagonal1(x,i,jugador):
+            cuantos += 1
+    
+    for i in (3,4,5,6,13,20):
+        if puedeGanarDiagonal2(x,i,jugador):
+            cuantos += 1
+    return cuantos
 
 def utilidad_c4(x):
     """
-    Calcula la utilidad de una posición del juego conecta 4
-    para el jugador max (las fichas rojas, o el que empieza)
+    cantidad de renglones en los que puede ganar el jugador max
+    menos la cantidad de renglones en los que puede ganar el jugador
+    min.
 
     @param x: Una lista con el estado del tablero
 
-    @return: Un número entre -1 y 1 con la ganancia esperada
-
-    Para probar solo busque el número de conecciones de las
-    bolitas de mas arriba con su alrededor
+    @return: Un número entre -25 y 25 con la ganancia esperada
     """
-    cum = 0
+    return cuentaVentaja(x,1) - cuentaVentaja(x,-1)
+    
+    """cum = 0
     for i in range(7):
-        for j in (35, 28, 21, 14, 7, 0):
+        for j in (35, 28, 21, 14, 7, 0):    
             if x[i] != 0:
                 if 0 < i < 6:
                     biases = (-6, -7, -8, -1, 1, 6, 8)
@@ -124,8 +222,9 @@ def utilidad_c4(x):
                           if i + bias >= 0 and x[i] == x[i + bias])
                 cum += con / len(biases)
                 break
+    print(cum/42)
+    return cum / 42"""
 
-    return cum / 42
 
 
 def ordena_jugadas(juego):
