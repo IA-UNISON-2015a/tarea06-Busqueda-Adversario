@@ -13,6 +13,7 @@ __author__ = 'José Roberto Salazar Espinoza'
 from busquedas_adversarios import JuegoSumaCeros2T
 from busquedas_adversarios import minimax_t
 from busquedas_adversarios import minimax
+import os
 
 class Otello(JuegoSumaCeros2T):
     def __init__(self):
@@ -236,12 +237,23 @@ def utilidad(x):
 class JuegoOtello:
     def __init__(self,tmax=10):
         self.tmax = tmax
-        
+    
+    def jugar(self):
+        juego = Otello()
+
+        print(juego.terminal())
+
+        while(juego.terminal() == None):
+            os.system('cls' if os.name == 'nt' else 'clear')
+            print("Turno de las blancas" if juego.jugador == 1 else "Turno de las negras")
+            juego.dibuja_tablero()
+            jugadas = juego.jugadas_legales()
+            print("Jugadas: ")
+            for i in range(len(jugadas)):
+                print(i,":",jugadas[i][0],"  ",sep = '',end='')
+            opc = input("\nOpción: ")
+            juego.hacer_jugada(jugadas[int(opc)])
+
 if __name__ == '__main__':
-    otello = Otello()
-    jugadas = otello.jugadas_legales()
-    print(otello.jugadas_legales())
-    otello.dibuja_tablero()
-    otello.hacer_jugada(jugadas[1])
-    print(otello.jugadas_legales())
-    otello.dibuja_tablero()
+    juego = JuegoOtello()
+    juego.jugar()
