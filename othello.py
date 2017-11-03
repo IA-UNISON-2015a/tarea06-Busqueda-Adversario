@@ -16,89 +16,102 @@ from busquedas_adversarios import minimax
 
 class Otello(JuegoSumaCeros2T):
     def __init__(self):
+        """
+        Se inicializa el tablero como una matriz de 8x8
+        donde llena de 0,1 y -1, donde 0 es un lugar vacío,
+        1 es una pieza blanca y -1 es una pieza negra.
+        Para realizar este reversi me basé en el que está en el 
+        siguiente link: https://inventwithpython.com/chapter15.html
+        """
         super().__init__((
-            0,0,0,0,0,0,0,0,
-            0,0,0,0,0,0,0,0,
-            0,0,0,0,0,0,0,0,
-            0,0,0,1,-1,0,0,0,
-            0,0,0,1,-1,0,0,0,
-            0,0,0,0,0,0,0,0,
-            0,0,0,0,0,0,0,0,
-            0,0,0,0,0,0,0,0  
+            [ 0, 0, 0, 0, 0, 0, 0, 0],
+            [ 0, 0, 0, 0, 0, 0, 0, 0],
+            [ 0, 0, 0, 0, 0, 0, 0, 0],
+            [ 0, 0, 0, 1,-1, 0, 0, 0],
+            [ 0, 0, 0,-1, 1, 0, 0, 0],
+            [ 0, 0, 0, 0, 0, 0, 0, 0],
+            [ 0, 0, 0, 0, 0, 0, 0, 0],
+            [ 0, 0, 0, 0, 0, 0, 0, 0]
         ))
-    
-    def revisar_arriba(self,pos):
-        reng,col = (pos//8,pos%8)
 
-        if reng < 2 or self.x[pos - 8] != -self.jugador:
-            return False
+    def dibuja_tablero(self):
+        """ 
+        Método para dibujar el tablero, lo dibuja en el siguiente formato:
 
-        for i in range(reng-2,0,-1):
-            if self.x[ i*8 + col ] == self.jugador:
-                return True
-
-        return False
-
-    def revisar_abajo(self,pos):
-        reng,col = (pos//8,pos%8)
-
-        if reng > 5 or self.x[pos + 8] != -self.jugador:
-            return False
-
-        for i in range(reng+2,8):
-            if self.x[ i*8 + col ] == self.jugador:
-                return True
-
-        return False
-
-    def revisar_derecha(self,pos):
-        reng,col = (pos//8,pos%8)
-
-        if col > 5 or self.x[pos + 1] != -self.jugador:
-            return False
-
-        for i in range(col+2,8):
-            if self.x[ reng*8 + i ] == self.jugador:
-                return True
-
-        return False
-
-    def revisar_izquierda(self,pos):
-        reng,col = (pos//8,pos%8)
-
-        if col < 2 or self.x[pos - 1] != -self.jugador:
-            return False
-
-        for i in range(col-2,0,-1):
-            if self.x[ reng*8 + i ] == self.jugador:
-                return True
-
-        return False
-
-    def puede_ir_pieza(self,pos):
-        return (self.revisar_arriba(pos) or self.revisar_abajo(pos) 
-                or self.revisar_izquierda(pos) or self.revisar_derecha(pos))
-
-    def imprime_tablero(self):
-        tablero = '_________________\n'
-        for i in range(8):
-            renglon = '|'
-            for j in range(8):
-                if self.x[i*8 + j] == -1:
-                    renglon += '○|'
-                elif self.x[i*8 + j] == 1:
-                    renglon += '•|'
-                else:
-                    renglon += ' |'
-            tablero += renglon + '\n'
-        tablero += '─────────────────'
+           1   2   3   4   5   6   7   8  
+         ┌───┬───┬───┬───┬───┬───┬───┬───┐
+        1│   │   │   │   │   │   │   │   │
+         ├───┼───┼───┼───┼───┼───┼───┼───┤
+        2│   │   │   │   │   │   │   │   │
+         ├───┼───┼───┼───┼───┼───┼───┼───┤
+        3│   │   │   │   │   │   │   │   │
+         ├───┼───┼───┼───┼───┼───┼───┼───┤
+        4│   │   │   │ O │ X │   │   │   │
+         ├───┼───┼───┼───┼───┼───┼───┼───┤
+        5│   │   │   │ X │ O │   │   │   │
+         ├───┼───┼───┼───┼───┼───┼───┼───┤
+        6│   │   │   │   │   │   │   │   │
+         ├───┼───┼───┼───┼───┼───┼───┼───┤
+        7│   │   │   │   │   │   │   │   │
+         ├───┼───┼───┼───┼───┼───┼───┼───┤
+        8│   │   │   │   │   │   │   │   │
+         └───┴───┴───┴───┴───┴───┴───┴───┘
+        """
+        tablero = "   0   1   2   3   4   5   6   7\n"
+        tablero += " ┌───┬───┬───┬───┬───┬───┬───┬───┐\n"
+        for reng in range(8):
+            tablero += str(reng)
+            for col in range(8):
+                tablero += "│"
+                tablero += " O " if self.x[reng][col] == 1 else " X " if self.x[reng][col] == -1 else "   "
+            tablero += "│\n"
+            tablero += " ├───┼───┼───┼───┼───┼───┼───┼───┤\n" if reng < 7 else " └───┴───┴───┴───┴───┴───┴───┴───┘"
+        
         print(tablero)
 
+    def esta_fuera_tablero(self,reng,col):
+        #este método revisa si dados un renglón y un columna son coordenadas válidas para el tablero
+        return (reng < 0 or reng >7 or col < 0 or col > 7) 
+
+    def es_valido(self,reng,col):
+        #primero se revisa si ya hay una pieza en la posición o si está fuera del tablero
+        if self.x[reng][col] != 0 or self.esta_fuera_tablero(reng,col):
+            return False
+        
+        #se revisan las ocho direcciones en las cuales se pueden voltear piezas
+        for rStep,cStep in [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]:
+
+            #se revisa si la primera pieza en la dirección está en el tablero o si es diferente del otro jugador
+            if self.esta_fuera_tablero(reng + rStep, col + cStep) or self.x[reng + rStep][col + cStep] != -self.jugador:
+                continue
+            
+            #variables para moverte en la dirección
+            rengTemp = reng + 2*rStep
+            colTemp = col + 2*cStep
+
+            #Ciclo para ver si se van a voltear piezas en la dirección
+            while not self.esta_fuera_tablero(rengTemp, colTemp):
+                if self.x[rengTemp][colTemp] == 0:
+                    break
+                if self.x[rengTemp][colTemp] == self.jugador:
+                    return True  
+
+                rengTemp += rStep
+                colTemp += cStep
+
+        return False
+
+    def jugadas_legales(self):
+        legales = []
+        for reng in range(8):
+            for col in range(8):
+                if self.es_valido(reng,col):
+                    legales.append((reng,col))
+                    self.x[reng][col] = 2
+
+        return legales
 if __name__ == '__main__':
     otello = Otello()
-    mov = []
-    for i in range(8*8):
-        if otello.puede_ir_pieza(i):
-            mov.append(i)
-    print(mov)
-    otello.imprime_tablero()
+    otello.dibuja_tablero()
+    print(otello.jugadas_legales())
+    otello.dibuja_tablero()

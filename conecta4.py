@@ -53,7 +53,7 @@ class ConectaCuatro(JuegoSumaCeros2T):
                 if ((x[i] == x[i + 7] == x[i + 14]) or
                     (x[i + 7] == x[i + 14] == x[i + 28]) or
                     (x[i + 14] == x[i + 28] == x[i + 35])):
-                    return x[i + 14]
+                    return x[i + 14]*25
             # Diagonales
             for j in (0, 7, 14):
                 for i in (0, 1, 2, 3):
@@ -62,20 +62,20 @@ class ConectaCuatro(JuegoSumaCeros2T):
                         x[i + j + 24] == x[i + j + 16] and
                         x[i + j + 16] == x[i + j + 8] and
                         x[i + j + 8] == x[i + j]):
-                        return x[i + j]
+                        return x[i + j]*25
                     # Hacia abajo
                     if (x[i + j + 21] != 0 and
                         x[i + j + 21] == x[i + j + 15] and
                         x[i + j + 15] == x[i + j + 9] and
                         x[i + j + 9] == x[i + j + 3]):
-                        return x[i + j + 3]
+                        return x[i + j + 3]*25
         # Ahora checamos renglones
         for i in range(0, 41, 7):
             if x[i + 3] == 0:
                 break
             for j in range(4):
                 if (x[i + j] == x[i + j + 1] == x[i + j + 2] == x[i + j + 3]):
-                    return x[i + 3]
+                    return x[i + 3]*25
         # Ahora checamos si no se lleno el tabero
         if 0 not in x:
             return 0
@@ -179,20 +179,20 @@ def cuentaVentaja(x,jugador):
             que aún puede ganar el jugador "jugador"
     """
     cuantos = 0
-    for i in range(6):
+    for i in range(6): #conteo de los renglones en los que aún puede ganar
         if puedeGanarRenglon(x,i,jugador):
             cuantos += 1
     
-    for i in range(7):
+    for i in range(7): #conteo de las columnas en las que aún puede ganar
         if puedeGanarColumna(x,i,jugador):
             cuantos += 1
 
     for i in (0,1,2,3,7,14):
-        if puedeGanarDiagonal1(x,i,jugador):
+        if puedeGanarDiagonal1(x,i,jugador): #conteo de las diagonales/ en las que aún puede ganar
             cuantos += 1
     
     for i in (3,4,5,6,13,20):
-        if puedeGanarDiagonal2(x,i,jugador):
+        if puedeGanarDiagonal2(x,i,jugador): #conteo de las diagonales\ en las que aún puede ganar
             cuantos += 1
     return cuantos
 
@@ -207,25 +207,6 @@ def utilidad_c4(x):
     @return: Un número entre -25 y 25 con la ganancia esperada
     """
     return cuentaVentaja(x,1) - cuentaVentaja(x,-1)
-    
-    """cum = 0
-    for i in range(7):
-        for j in (35, 28, 21, 14, 7, 0):    
-            if x[i] != 0:
-                if 0 < i < 6:
-                    biases = (-6, -7, -8, -1, 1, 6, 8)
-                elif i == 0:
-                    biases = (-7, -8, 1, 8)
-                else:
-                    biases = (-6, -7, -1, 6)
-                con = sum(x[i] for bias in biases
-                          if i + bias >= 0 and x[i] == x[i + bias])
-                cum += con / len(biases)
-                break
-    print(cum/42)
-    return cum / 42"""
-
-
 
 def ordena_jugadas(juego):
     """
@@ -234,7 +215,6 @@ def ordena_jugadas(juego):
 
     Para que funcione le puse simplemente las jugadas aleatorias
     pero es un criterio bastante inaceptable
-
     """
     jugadas = list(juego.jugadas_legales())
     shuffle(jugadas)

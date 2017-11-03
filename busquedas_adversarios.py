@@ -77,7 +77,6 @@ def minimax(juego, dmax=100, utilidad=None, ordena_jugadas=None, transp=None):
     método de minimax a una profundidad máxima de dmax, con una función de
     utilidad (para el jugador 1) definida por utilidad y un método
     de ordenación de jugadas específico
-
     """
     if ordena_jugadas is None:
         def ordena_jugadas(juego):
