@@ -13,6 +13,7 @@ __author__ = 'José Roberto Salazar Espinoza'
 from busquedas_adversarios import JuegoSumaCeros2T
 from busquedas_adversarios import minimax_t
 from busquedas_adversarios import minimax
+from random import shuffle
 import os
 
 class Otello(JuegoSumaCeros2T):
@@ -45,29 +46,29 @@ class Otello(JuegoSumaCeros2T):
         )
         """
         super().__init__((
-            [ 0, 0, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 1,-1, 0, 0, 0],
-            [ 0, 0, 0,-1, 1, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 0, 0, 0]
+             0, 0, 0, 0, 0, 0, 0, 0,
+             0, 0, 0, 0, 0, 0, 0, 0,
+             0, 0, 0, 0, 0, 0, 0, 0,
+             0, 0, 0, 1,-1, 0, 0, 0,
+             0, 0, 0,-1, 1, 0, 0, 0,
+             0, 0, 0, 0, 0, 0, 0, 0,
+             0, 0, 0, 0, 0, 0, 0, 0,
+             0, 0, 0, 0, 0, 0, 0, 0
         ))
 
     def terminal(self):
-        negras,blancas = 0,0
+        negras = self.x.count(-1)
+        blancas = self.x.count(1)
+
+        if negras == 0 or blancas == 0:
+            return 1 if blancas > negras else -1
 
         #se revisa si hay casillas vacias.
-        for i in range(8):
-            #se cuenta cuantas negras y cuantas blancas hay.
-            negras += self.x[i].count(-1)
-            blancas += self.x[i].count(1)
-            if 0 in self.x[i]:
-                return None
+        if 0 in self.x:
+            return None
 
-        #1 si ganan las blancas -1 si ganan las negras.
-        return 1 if blancas > negras else -1
+        #1 si ganan las blancas -1 si ganan las negras 0 en empate.
+        return 1 if blancas > negras else -1 if negras > blancas else 0
 
     def dibuja_tablero(self):
         """ 
@@ -98,7 +99,7 @@ class Otello(JuegoSumaCeros2T):
             tablero += str(reng)
             for col in range(8):
                 tablero += "│"
-                tablero += " O " if self.x[reng][col] == 1 else " X " if self.x[reng][col] == -1 else "   "
+                tablero += " O " if self.x[ 8*reng + col ] == 1 else " X " if self.x[8*reng + col] == -1 else "   "
             tablero += "│\n"
             tablero += " ├───┼───┼───┼───┼───┼───┼───┼───┤\n" if reng < 7 else " └───┴───┴───┴───┴───┴───┴───┴───┘"
         
@@ -126,14 +127,14 @@ class Otello(JuegoSumaCeros2T):
         direcciones = []
 
         #primero se revisa si ya hay una pieza en la posición o si está fuera del tablero
-        if self.x[reng][col] != 0 or self.esta_fuera_tablero(reng,col):
+        if self.x[8*reng + col] != 0 or self.esta_fuera_tablero(reng,col):
             return direcciones
         
         #se revisan las ocho direcciones en las cuales se pueden voltear piezas
         for rStep,cStep in [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]:
 
             #se revisa si la primera pieza en la dirección está en el tablero o si es diferente del otro jugador
-            if self.esta_fuera_tablero(reng + rStep, col + cStep) or self.x[reng + rStep][col + cStep] != -self.jugador:
+            if self.esta_fuera_tablero(reng + rStep, col + cStep) or self.x[8*(reng + rStep) + (col + cStep)] != -self.jugador:
                 continue
             
             #variables para moverte en la dirección
@@ -142,9 +143,9 @@ class Otello(JuegoSumaCeros2T):
 
             #Ciclo para ver si se van a voltear piezas en la dirección
             while not self.esta_fuera_tablero(rengTemp, colTemp):
-                if self.x[rengTemp][colTemp] == 0:
+                if self.x[8*rengTemp + colTemp] == 0:
                     break
-                if self.x[rengTemp][colTemp] == self.jugador:
+                if self.x[8*rengTemp + colTemp] == self.jugador:
                     direcciones.append((rStep,cStep)) #se agrega la dirección
                     break
 
@@ -184,17 +185,17 @@ class Otello(JuegoSumaCeros2T):
         casillas = [(reng,col)]
         
         #se pone la pieza en la posición
-        self.x[reng][col] = self.jugador
+        self.x[8*reng + col] = self.jugador
 
 
         for rStep,cStep in direcciones:
             rengTemp = reng + rStep
             colTemp = col + cStep
 
-            while self.x[rengTemp][colTemp] != self.jugador:
+            while self.x[8*rengTemp + colTemp] != self.jugador:
                 #aquí se guardan las casillas al momento de modificarse.
                 casillas.append( (rengTemp,colTemp) )
-                self.x[rengTemp][colTemp] = self.jugador
+                self.x[8*rengTemp + colTemp] = self.jugador
                 rengTemp += rStep
                 colTemp += cStep
         
@@ -211,11 +212,11 @@ class Otello(JuegoSumaCeros2T):
         reng,col = casillas[0]
 
         #se quita la pieza.
-        self.x[reng][col] = 0
+        self.x[8*reng + col] = 0
 
         #se regresan todas las demas casillas a su estado original.
         for i,j in casillas[1:]:
-            self.x[i][j] = -self.x[i][j]
+            self.x[8*i + j] = -self.x[8*i + j]
 
         self.jugador *= -1
 
@@ -225,34 +226,65 @@ def utilidad(x):
     se restan y luego se dividen entre la suma, una forma medio macana pero
     es el primer intento.
     """
-    blancas,negras = 0,0
 
-    for i in range(8):
-        for j in range(8):
-            blancas += self.x[i].count(1)
-            negras += self.x[i].count(-1)
+    blancas,negras = x.count(1),x.count(-1)
 
     return (blancas - negras)/(blancas + negras)
 
+def ordena_jugadas(juego):
+    jugadas = list(juego.jugadas_legales())
+    #shuffle(jugadas)
+    return jugadas
+
 class JuegoOtello:
     def __init__(self,tmax=10):
+        self.tr_ta = {}
         self.tmax = tmax
     
     def jugar(self):
         juego = Otello()
 
-        print(juego.terminal())
-
         while(juego.terminal() == None):
             os.system('cls' if os.name == 'nt' else 'clear')
-            print("Turno de las blancas" if juego.jugador == 1 else "Turno de las negras")
             juego.dibuja_tablero()
+
             jugadas = juego.jugadas_legales()
-            print("Jugadas: ")
-            for i in range(len(jugadas)):
-                print(i,":",jugadas[i][0],"  ",sep = '',end='')
-            opc = input("\nOpción: ")
-            juego.hacer_jugada(jugadas[int(opc)])
+            if len(jugadas) > 0:
+                print("Jugadas: ")
+                for i in range(len(jugadas)):
+                    print(i,":",jugadas[i][0],"  ",sep = '',end='')
+
+                opc = input("\nOpción: ")
+
+                while int(opc) >= len(jugadas) or int(opc) < 0:
+                    print("Opción incorrecta...")
+                    opc = input("Opción: ")
+
+                juego.hacer_jugada(jugadas[int(opc)])
+                os.system('cls' if os.name == 'nt' else 'clear')
+                juego.dibuja_tablero()
+            else:
+                juego.jugador = -juego.jugador
+            
+            print("Esperando el movimiento de la máquina...")
+
+            jugadas = juego.jugadas_legales()
+
+            if len(jugadas) > 0:
+                jugada = minimax(juego, dmax=6, utilidad=utilidad,
+                                ordena_jugadas=ordena_jugadas,
+                                transp=self.tr_ta)
+
+                juego.hacer_jugada(jugada)
+            else:
+                juego.jugador = -juego.jugador
+
+        os.system('cls' if os.name == 'nt' else 'clear')
+        juego.dibuja_tablero()
+
+        mensaje = "Ganaron las blancas :3" if juego.terminal() == 1 else "Ganaron las negras :c" if juego.terminal() == -1 else "Empate D:"
+
+        print(mensaje)
 
 if __name__ == '__main__':
     juego = JuegoOtello()
