@@ -4,7 +4,7 @@
 othello.py
 ------------
 
-El juego de Otello implementado por ustes mismos, con jugador inteligente
+El juego de othello implementado por ustes mismos, con jugador inteligente
 
 """
 
@@ -16,7 +16,7 @@ from busquedas_adversarios import minimax
 from random import shuffle
 import os
 
-class Otello(JuegoSumaCeros2T):
+class Othello(JuegoSumaCeros2T):
     def __init__(self):
         """
         Se inicializa el tablero como una matriz de 8x8
@@ -54,7 +54,7 @@ class Otello(JuegoSumaCeros2T):
              0, 0, 0, 0, 0, 0, 0, 0,
              0, 0, 0, 0, 0, 0, 0, 0,
              0, 0, 0, 0, 0, 0, 0, 0
-        ))
+        ),-1)
 
     def terminal(self):
         negras = self.x.count(-1)
@@ -233,16 +233,30 @@ def utilidad(x):
 
 def ordena_jugadas(juego):
     jugadas = list(juego.jugadas_legales())
-    #shuffle(jugadas)
+    shuffle(jugadas)
     return jugadas
 
-class JuegoOtello:
-    def __init__(self,tmax=10):
-        self.tr_ta = {}
-        self.tmax = tmax
+class JuegoOthello:
+    def __init__(self):
+        pass
     
     def jugar(self):
-        juego = Otello()
+        juego = Othello()
+        os.system('cls' if os.name == 'nt' else 'clear')
+        print("Juego de othello contra una máquina con el algoritmo minimax.\n")
+        res = ""
+
+        while res != "s" and res != "n":
+            res = input("¿Quieres ser primeras(s/n)?")
+
+        if res == "n":
+            juego.dibuja_tablero()
+            print("Esperando el movimiento de la máquina...")
+            jugada = minimax(juego, dmax=6, utilidad=utilidad,
+                                ordena_jugadas=ordena_jugadas,
+                                transp={})
+
+            juego.hacer_jugada(jugada)
 
         while(juego.terminal() == None):
             os.system('cls' if os.name == 'nt' else 'clear')
@@ -273,7 +287,7 @@ class JuegoOtello:
             if len(jugadas) > 0:
                 jugada = minimax(juego, dmax=6, utilidad=utilidad,
                                 ordena_jugadas=ordena_jugadas,
-                                transp=self.tr_ta)
+                                transp={})
 
                 juego.hacer_jugada(jugada)
             else:
@@ -282,10 +296,10 @@ class JuegoOtello:
         os.system('cls' if os.name == 'nt' else 'clear')
         juego.dibuja_tablero()
 
-        mensaje = "Ganaron las blancas :3" if juego.terminal() == 1 else "Ganaron las negras :c" if juego.terminal() == -1 else "Empate D:"
+        mensaje = "Ganaron las blancas" if juego.terminal() == 1 else "Ganaron las negras" if juego.terminal() == -1 else "Empate D:"
 
         print(mensaje)
 
 if __name__ == '__main__':
-    juego = JuegoOtello()
+    juego = JuegoOthello()
     juego.jugar()
