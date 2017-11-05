@@ -79,8 +79,13 @@ class Othello(JuegoSumaCeros2T):
                 tablero += "│"
                 tablero += " O " if self.x[ 8*reng + col ] == 1 else " X " if self.x[8*reng + col] == -1 else "   "
             tablero += "│\n"
-            tablero += " ├───┼───┼───┼───┼───┼───┼───┼───┤\n" if reng < 7 else " └───┴───┴───┴───┴───┴───┴───┴───┘"
+            tablero += " ├───┼───┼───┼───┼───┼───┼───┼───┤\n" if reng < 7 else " └───┴───┴───┴───┴───┴───┴───┴───┘\n"
         
+        blancas,negras = self.x.count(1),self.x.count(-1)
+
+        tablero += "O: " + str(blancas) + "\n"
+        tablero += "X: " + str(negras) + "\n"
+
         print(tablero)
 
     def esta_fuera_tablero(self,reng,col):
@@ -159,8 +164,7 @@ class Othello(JuegoSumaCeros2T):
         reng,col = jugada[0]
         direcciones = jugada[1]
 
-        #es una lista con las casillas que se modifican para poder deshacer la jugada.
-        casillas = [(reng,col)]
+        x = self.x[:]
         
         #se pone la pieza en la posición
         self.x[8*reng + col] = self.jugador
@@ -171,30 +175,22 @@ class Othello(JuegoSumaCeros2T):
             colTemp = col + cStep
 
             while self.x[8*rengTemp + colTemp] != self.jugador:
-                #aquí se guardan las casillas al momento de modificarse.
-                casillas.append( (rengTemp,colTemp) )
                 self.x[8*rengTemp + colTemp] = self.jugador
                 rengTemp += rStep
                 colTemp += cStep
         
-        #se agregan las casillas en el historial y se cambia de jugador.
-        self.historial.append(casillas)
+        #se guarda todo el estado en el historial
+        self.historial.append(x)
         self.jugador *= -1
 
     def deshacer_jugada(self):
         """
-        Método para des hacer la última jugada que se realizó.
+        Método para deshacer la última jugada que se realizó.
         """
-        #se obtienen las casillas que se modificaron.
-        casillas = self.historial.pop()
-        reng,col = casillas[0]
 
-        #se quita la pieza.
-        self.x[8*reng + col] = 0
-
-        #se regresan todas las demas casillas a su estado original.
-        for i,j in casillas[1:]:
-            self.x[8*i + j] = -self.x[8*i + j]
+        x = self.historial.pop()
+        
+        self.x = x
 
         self.jugador *= -1
 
@@ -215,11 +211,11 @@ def movilidad(x):
     movilidad_negras = len(juego.jugadas_legales())
     juego.jugador = 1
     movilidad_blancas = len(juego.jugadas_legales())
+    movilidad = 0 if movilidad_blancas + movilidad_negras == 0 else (movilidad_blancas - movilidad_negras)/(movilidad_blancas + movilidad_negras)
+    return movilidad
 
-    return (movilidad_blancas - movilidad_negras)/(movilidad_blancas + movilidad_negras)
-
-def esquinas(X):
-    esquinas_blancas,esquinas_negras = 0
+def esquinas(x):
+    esquinas_blancas,esquinas_negras = 0,0
     for i in (0,7,56,63):
         if x[i] == 1:
             esquinas_blancas += 1
@@ -231,7 +227,7 @@ def esquinas(X):
     return esquinas
 
 def utilidad(x):
-    return 0.4*esquinas(x) + 0.4*movilidad(x) + 0.2*numero_piezas(x)
+    return 0.333*esquinas(x) + 0.333*movilidad(x) + 0.333*numero_piezas(x)
 
 def ordena_jugadas(juego):
     jugadas = list(juego.jugadas_legales())
@@ -258,7 +254,7 @@ class JuegoOthello:
             os.system('cls' if os.name == 'nt' else 'clear')
             juego.dibuja_tablero()
             print("Esperando el movimiento de la máquina...")
-            jugada = minimax(juego, dmax=6, utilidad=utilidad_2,
+            jugada = minimax(juego, dmax=4, utilidad=utilidad,
                                 ordena_jugadas=ordena_jugadas,
                                 transp={})
 
@@ -291,7 +287,7 @@ class JuegoOthello:
             jugadas = juego.jugadas_legales()
 
             if len(jugadas) > 0:
-                jugada = minimax(juego, dmax=5, utilidad=utilidad,
+                jugada = minimax(juego, dmax=4, utilidad=utilidad,
                                 ordena_jugadas=ordena_jugadas,
                                 transp={})
 
