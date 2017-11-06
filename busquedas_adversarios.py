@@ -47,7 +47,7 @@ class JuegoSumaCeros2T:
     3. hacer_jugada(jugada): Realiza la jugada, modifica el estado.
 
     """
-    def __init__(self, x0, jugador=1):
+    def __init__(self, x0, jugador=-1):
         """
         Inicializa el estado inicial del juego y el jugador
         que comienza (típicamente el primero)
