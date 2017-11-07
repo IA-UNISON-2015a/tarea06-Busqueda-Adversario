@@ -363,7 +363,7 @@ class OthelloGUI():
                 self.posibles = []
                 self.anuncio['text'] = "Ahora juega Python"
                 self.anuncio.update()
-                jugada = minimax(juego, dmax=6, utilidad=utilidad_othello,
+                jugada = minimax(juego, dmax=3, utilidad=utilidad_othello,
                                  ordena_jugadas=ordena_jugadas,
                                  transp=self.tr_ta)
                 juego.hacer_jugada(jugada)
