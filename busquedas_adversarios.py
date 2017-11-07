@@ -107,6 +107,7 @@ def min_val(juego, jugada, d, utilidad, ordena_jugadas,
         juego.deshacer_jugada()
         return primero * u
 
+
     if transp is not None and tuple(juego.x) in transp:
         val_tt, d_tt, tipo_tt = transp[tuple(juego.x)]
         if d_tt >= d and tipo_tt is 'beta':
