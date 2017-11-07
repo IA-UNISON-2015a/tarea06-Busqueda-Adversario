@@ -264,7 +264,7 @@ def utilidad_othello(tablero):
 def ordena_jugadas(juego):
     
     #ordena las jugadas de acuedo al numero de fichas rojas despues del movimento
-    jugadas = juego.jugadas_legales()
+    jugadas = list(juego.jugadas_legales())
     jugadas_ordenadas = []
     for jugada in jugadas:
         juego.hacer_jugada(jugada)
