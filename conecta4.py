@@ -137,7 +137,7 @@ def ordena_jugadas(juego):
     pero es un criterio bastante inaceptable
 
     """
-    jugadas = juego.jugadas_legales()
+    jugadas = list(juego.jugadas_legales())
     jugadas_ordenadas = []
     for jugada in jugadas:
         juego.hacer_jugada(jugada)
