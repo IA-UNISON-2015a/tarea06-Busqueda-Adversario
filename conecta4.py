@@ -107,39 +107,51 @@ def utilidad_c4(x):
 
     @return: Un número entre -1 y 1 con la ganancia esperada
 
-    Para probar solo busque el número de conexiones de las
-    bolitas de mas arriba con su alrededor
-    """
-    cum = 0
-    for i in range(7):
-        for j in (35, 28, 21, 14, 7, 0):
-            if x[i] != 0:
-                if 0 < i < 6:         
-                    biases = (-6, -7, -8, -1, 1, 6, 8)
-                elif i == 0:
-                    #esquina inferior izquierda
-                    biases = (-7, -8, 1, 8)
-                else:
-                    #esquina inferior derecha
-                    biases = (-6, -7, -1, 6)
-                con = sum(x[i] for bias in biases
-                          if i + bias >= 0 and x[i] == x[i + bias])
-                cum += con / len(biases)
+    para columna 3 se checan estas conexiones (-)
+    |-|-|-|
+    | |o|-|
 
-                break
-    return cum / 42
+    para columna 0 a 2 se checan estas conexiones (-)
+    | |-|-|
+    | |o|-|
+
+    para columna 4 a 6 se checan estas conexiones (-)
+    |-|-| |
+    | |o| |
+
+    no se necesita checar la conexion a la izquierda debido a que siempre 
+    se estan checando las de las derecha desde que se empieza a recorrer el tablero.
+    """
+    #nos movemos a traves de las columnas
+    cum=0
+    for i in range(7):
+        #nos movemos a traves de los renglones
+        for j in (0,7,14,21,28,35):
+            #para el caso en estar en la columna 3 se tiene que es posible tener conexiones en diagonales, derecha y hacia arriba
+            if i==3:        
+                aux = (1, 6, 7, 8)
+            elif 0<=i<=2:
+                aux=(1,7,8)
+            elif 4<=i<=6:
+                aux = (6,7)    
+            con = sum(x[j+i] for bias in aux if x[i+j] == x[(i+j) + bias])
+            cum += con / len(aux)
+            break 
+    return cum/42
 
 def ordena_jugadas(juego):
     """
-    Ordena las jugadas de acuerdo al jugador actual, en función
-    de las más prometedoras.
-
-    Para que funcione le puse simplemente las jugadas aleatorias
-    pero es un criterio bastante inaceptable
-
+    Se utiliza la utilidad para elegir el siguiente movimiento.
+    Te da todas las jugadas posibles.
     """
+    #mi lista de jugadas contiente las columnas en las que puedo colocar una siguiente ficha
     jugadas = list(juego.jugadas_legales())
-    shuffle(jugadas)
+    #cada jugada se le aplicara al tablero actual
+    #esto se mete a una lista
+    #se obtiene la utilidad de cada tablero y se guarda en una lista
+    #se ordenan de mayor a menor las jugadas con mayor utilidad y se devuelven en la funcion
+
+    #se necesita sacar la utilidad de de todas las jugadas legales en el juego y ordenarlas dentro del mis
     return jugadas
 
 
