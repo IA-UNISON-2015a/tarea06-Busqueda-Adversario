@@ -14,6 +14,7 @@ from busquedas_adversarios import JuegoSumaCeros2T
 from busquedas_adversarios import minimax_t
 from busquedas_adversarios import minimax
 from random import shuffle
+from operator import itemgetter
 import tkinter as tk
 
 __author__ = 'juliowaissman'
@@ -76,7 +77,7 @@ class ConectaCuatro(JuegoSumaCeros2T):
             for j in range(4):
                 if (x[i + j] == x[i + j + 1] == x[i + j + 2] == x[i + j + 3]):
                     return x[i + 3]
-        # Ahora checamos si no se lleno el tabero
+        # Ahora checamos si no se lleno el tablero
         if 0 not in x:
             return 0
         return None
@@ -123,37 +124,49 @@ def utilidad_c4(x):
     se estan checando las de las derecha desde que se empieza a recorrer el tablero.
     """
     #nos movemos a traves de las columnas
-    cum=0
+    cm=0
     for i in range(7):
         #nos movemos a traves de los renglones
         for j in (0,7,14,21,28,35):
-            #para el caso en estar en la columna 3 se tiene que es posible tener conexiones en diagonales, derecha y hacia arriba
-            if i==3:        
-                aux = (1, 6, 7, 8)
-            elif 0<=i<=2:
-                aux=(1,7,8)
-            elif 4<=i<=6:
-                aux = (6,7)    
-            con = sum(x[j+i] for bias in aux if x[i+j] == x[(i+j) + bias])
-            cum += con / len(aux)
-            break 
-    return cum/42
+            if x[i] != 0:
+                #para el caso en estar en la columna 3 se tiene que es posible tener conexiones en diagonales, derecha y hacia arriba
+                if i==3:        
+                    aux = (1, 6, 7, 8)
+                elif 0<=i<=2:
+                    aux=(1,7,8)
+                elif 4<=i<=6:
+                    aux = (6,7)    
+                cn = sum(x[(j+i)] for bias in aux if x[(i+j)] == x[(i+j) + bias])
+                cm += cn / len(aux)
+                break 
+    return cm/42
 
 def ordena_jugadas(juego):
     """
     Se utiliza la utilidad para elegir el siguiente movimiento.
     Te da todas las jugadas posibles.
     """
+    jds = {}
+    l=[]
+    aux=[]
     #mi lista de jugadas contiente las columnas en las que puedo colocar una siguiente ficha
     jugadas = list(juego.jugadas_legales())
-    #cada jugada se le aplicara al tablero actual
-    #esto se mete a una lista
-    #se obtiene la utilidad de cada tablero y se guarda en una lista
-    #se ordenan de mayor a menor las jugadas con mayor utilidad y se devuelven en la funcion
 
-    #se necesita sacar la utilidad de de todas las jugadas legales en el juego y ordenarlas dentro del mis
-    return jugadas
+    #cada jugada se le aplica al tablero actual y se mete esta informacion a una lista
+    for i in jugadas:
+        juego.hacer_jugada(i)
+        #se obtiene la utilidad de cada tablero y se guarda un diccionario lista
+        jds[i]=utilidad_c4(juego.x)
+    #se ordenan de mayor a menor las jugadas con mayor utilidad
+    l=list(jds.items())
 
+    l.sort(key=lambda x: x[1],reverse=True)
+    
+    for i in l:
+        aux.append(i[0])
+    #print("AUX",aux)
+    #se devuelve la jugada con mayor utilidad
+    return aux
 
 class Conecta4GUI:
     def __init__(self, tmax=10, escala=1):
@@ -241,10 +254,11 @@ class Conecta4GUI:
 
             self.anuncio.master.wait_variable('sel_j')
             jugada = self.sel_j.get()
-            juego.hacer_jugada(jugada)
+            juego.hacer_jugada(jugada) 
             self.actualiza_tablero(jugada, color)
 
-            ganancia = juego.terminal()
+            ganancia = juego.terminal() 
+
             if ganancia is not None:
                 break
 
@@ -253,14 +267,15 @@ class Conecta4GUI:
             for i in range(7):
                 self.botones[i]['state'] = tk.DISABLED
                 self.botones[i].update()
-
-            jugada = minimax(juego, dmax=6, utilidad=utilidad_c4,
+            #CHECAR LA UTILIDAD
+            jugada = minimax(juego, dmax=6, utilidad=utilidad_c4, 
                              ordena_jugadas=ordena_jugadas,
                              transp=self.tr_ta)
             juego.hacer_jugada(jugada)
             self.actualiza_tablero(jugada, color_p)
 
-            ganancia = juego.terminal()
+            ganancia = juego.terminal() #TERMINAL ME ESTA DANDO SIEMPRE GANANCIA 1 CHECAR ESTO
+            print("GANANCIA",ganancia)
             if ganancia is not None:
                 break
 
@@ -268,7 +283,7 @@ class Conecta4GUI:
             self.botones[i]['state'] = tk.DISABLED
 
         str_fin = ("Ganaron las rojas" if ganancia > 0 else
-                   "Ganaron las negars" if ganancia < 0 else
+                   "Ganaron las negras" if ganancia < 0 else
                    "Un asqueroso empate")
         self.anuncio['text'] = str_fin
 
