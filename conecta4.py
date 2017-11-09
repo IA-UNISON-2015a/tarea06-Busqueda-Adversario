@@ -27,12 +27,12 @@ class ConectaCuatro(JuegoSumaCeros2T):
         renglones y el estado inicial del juego. Cuyas posiciones
         estan dadas como:
 
-                        35  36  37  38  39  40  41
-                        28  29  30  31  32  33  34
-                        21  22  23  24  25  26  27
-                        14  15  16  17  18  19  20
-                         7   8   9  10  11  12  13
-                         0   1   2   3   4   5   6
+            35  36  37  38  39  40  41
+            28  29  30  31  32  33  34
+            21  22  23  24  25  26  27
+            14  15  16  17  18  19  20
+            7   8   9  10  11  12  13
+            0   1   2   3   4   5   6
         """
         super().__init__(tuple([0 for _ in range(6 * 7)]))
 
@@ -103,9 +103,7 @@ def utilidad_c4(x):
     """
     Calcula la utilidad de una posición del juego conecta 4
     para el jugador max (las fichas rojas, o el que empieza)
-
     @param x: Una lista con el estado del tablero
-
     @return: Un número entre -1 y 1 con la ganancia esperada
 
     para columna 3 se checan estas conexiones (-)
@@ -123,8 +121,7 @@ def utilidad_c4(x):
     no se necesita checar la conexion a la izquierda debido a que siempre 
     se estan checando las de las derecha desde que se empieza a recorrer el tablero.
     """
-    #nos movemos a traves de las columnas
-    cm=0
+    cm=0 #nos movemos a traves de las columnas
     for i in range(7):
         #nos movemos a traves de los renglones
         for j in (0,7,14,21,28,35):
@@ -139,6 +136,7 @@ def utilidad_c4(x):
                 cn = sum(x[(j+i)] for bias in aux if x[(i+j)] == x[(i+j) + bias])
                 cm += cn / len(aux)
                 break 
+
     return cm/42
 
 def ordena_jugadas(juego):
@@ -161,12 +159,18 @@ def ordena_jugadas(juego):
     l=list(jds.items())
 
     l.sort(key=lambda x: x[1],reverse=True)
+    #print("L",l)
     
     for i in l:
         aux.append(i[0])
-    #print("AUX",aux)
+    print("AUX",aux)
     #se devuelve la jugada con mayor utilidad
+
     return aux
+    #jugadas = list(juego.jugadas_legales())
+    #print(jugadas)
+    #shuffle(jugadas)
+    #return jugadas
 
 class Conecta4GUI:
     def __init__(self, tmax=10, escala=1):
