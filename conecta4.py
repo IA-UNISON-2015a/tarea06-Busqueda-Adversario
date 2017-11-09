@@ -145,8 +145,7 @@ def ordena_jugadas(juego):
     Te da todas las jugadas posibles.
     """
     jds = {}
-    l=[]
-    aux=[]
+    l,aux=[],[]
     #mi lista de jugadas contiente las columnas en las que puedo colocar una siguiente ficha
     jugadas = list(juego.jugadas_legales())
 
@@ -157,7 +156,6 @@ def ordena_jugadas(juego):
         jds[i]=utilidad_c4(juego.x)
     #se ordenan de mayor a menor las jugadas con mayor utilidad
     l=list(jds.items())
-
     l.sort(key=lambda x: x[1],reverse=True)
     #print("L",l)
     
@@ -167,10 +165,12 @@ def ordena_jugadas(juego):
     #se devuelve la jugada con mayor utilidad
 
     return aux
-    #jugadas = list(juego.jugadas_legales())
+    
+    """
+    jugadas = list(juego.jugadas_legales())
     #print(jugadas)
-    #shuffle(jugadas)
-    #return jugadas
+    shuffle(jugadas)
+    return jugadas"""
 
 class Conecta4GUI:
     def __init__(self, tmax=10, escala=1):

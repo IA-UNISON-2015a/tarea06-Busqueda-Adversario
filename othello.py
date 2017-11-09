@@ -20,7 +20,7 @@ __author__ = 'Patricia Quiroz'
 	renglones y el estado inicial del juego. Cuyas posiciones
 	estan dadas como:
 
-    56  57  58  59  60  61  62  63
+    56  57  58  59  60  61  62  63		
     48  49  50  51  52  53  54  55
     40  41  42  43  44  45  46  47
     32  33  34  35  36  37  38  39
@@ -28,11 +28,30 @@ __author__ = 'Patricia Quiroz'
     16  17  18  19  20  21  22  23
     8   9   10  11  12  13  14  15
     0   1   2   3   4   5   6   7
+
 """
 class Othello(JuegoSumaCeros2T):
   
-    def __init__(self, jugador=1):
-        super().__init__(tuple([0 for _ in range(8 * 8)]))
+    def __init__(self):
+    	x=[]
+		for i in range(8*8):
+			if i==35 or i==28 :
+  				x.append(1)
+			elif i== 36 or i==27:
+  				x.append(-1)
+			else:
+  				x.append(0)
+  		"""
+ 		0	0	0	 0	 0	 0	 0	 0
+		0	0	0	 0	 0	 0	 0	 0
+		0	0	0	 0	 0	 0	 0	 0
+		0	0	0	 1	-1	 0	 0	 0
+		0	0	0	-1	 1	 0	 0	 0
+		0	0	0	 0	 0	 0	 0	 0
+		0	0	0	 0	 0	 0	 0	 0
+		0	0	0	 0	 0	 0	 0	 0
+  		"""
+        super().__init__(tuple(x),-1)
 
     def jugadas_legales(self):
     	return None
@@ -41,18 +60,38 @@ class Othello(JuegoSumaCeros2T):
         del propio color en una casilla vacía. Entre la ficha recién colocada y otra
 		del mismo color (previamente en el tablero) debe haber fichas del color contrario en la misma
 		línea (ya sea en dirección diagonal, horizontal o vertical).
+
+		@return: una lista de jugadas que se pueden realizar
         """
 
     def terminal(self):
         """
 		La partida acaba cuando nadie puede mover (normalmente cuando el tablero está lleno o casi
 		lleno) y gana quien en ese momento tenga más fichas sobre el tablero.
+		****Existe un caso especial donde se le terminan las fichas a un jugador.****
+
+		@return: quien gano
         """
-        return None
+        f_negras = self.x.count(-1) #se obtiene el numero de fichas negras en el tablero
+        f_blancas = self.x.count(1) #se obtiene el numero de fichas blancas en el tablero
+        if 0 not in x:
+            return 0
+
+        if f_blancas>f_negras:
+        	ganador=1
+        elif f_negras > f_blancas:
+        	ganador=-1
+        else: #EMPATE
+        	ganador=0
+
+        return ganador
 
     def hacer_jugada(self, jugada):
     	#MODIFICAR, FALTAN DETALLES DE OTHELLO
-    	"""Voltear las fichas del color contrario que quedan entre la ficha recién colocada y cualquier
+    	"""
+    	Metodo para hacer una jugada, recibe una jugada previamente validada por jugadas_legales.
+
+    	Voltear las fichas del color contrario que quedan entre la ficha recién colocada y cualquier
 		otra del mismo color ya colocada. De esta forma, cambian de color.
        	"""
 
@@ -61,10 +100,15 @@ class Othello(JuegoSumaCeros2T):
    			#una o mas fichas de mi oponente, entonces, pongo una de mis fichas
 
    			#¿como checar si existen una serie fichas del oponente?
+   			#primero checamos si existe ficha de oponente de manera horizontal
     		if self.x[i + jugada] == 0: #Si existe espacio donde poner la ficha
-    			self.x[i + jugada] = self.jugador
+    			if self.x[i+jugada -1] == 1 and self.x[jugada]:
+    			"""
+    		   for i in range(0, 41, 7):
+            	if self.x[i + jugada] == 0:
+                self.x[i + jugada] = self.jugador
                 self.historial.append(jugada) #Se guarda la jugada en el historial
-                self.jugador *= -1 #Cambio mis ficha
+                self.jugador *= -1#Cambio mis ficha"""
                 return None
 
     def deshacer_jugada(self):
