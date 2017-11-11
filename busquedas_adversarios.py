@@ -57,6 +57,7 @@ class JuegoSumaCeros2T:
         self.x = list(x0)
         self.historial = []
         self.jugador = jugador
+        self.n_movimientos = 0
 
     def jugadas_legales(self):
         raise NotImplementedError("Hay que desarrollar este método, pues")
@@ -108,7 +109,7 @@ def min_val(juego, jugada, d, utilidad, ordena_jugadas,
         return primero * u
 
     if transp is not None and tuple(juego.x) in transp:
-        val_tt, d_tt, tipo_tt = transp[tuple(juego.x)]
+        d_tt, val_tt, tipo_tt = transp[tuple(juego.x)]
         if d_tt >= d and tipo_tt is 'beta':
             beta = min(alfa, val_tt)
 
@@ -140,7 +141,7 @@ def max_val(juego, jugada, d, utilidad, ordena_jugadas,
         return primero * u
 
     if transp is not None and tuple(juego.x) in transp:
-        val_tt, d_tt, tipo_tt = transp[tuple(juego.x)]
+        d_tt, val_tt, tipo_tt = transp[tuple(juego.x)]
         if d_tt >= d and tipo_tt is 'alfa':
             alfa = max(alfa, val_tt)
 
