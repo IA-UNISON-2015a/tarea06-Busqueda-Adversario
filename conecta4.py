@@ -141,36 +141,12 @@ def utilidad_c4(x):
 
 def ordena_jugadas(juego):
     """
-    Se utiliza la utilidad para elegir el siguiente movimiento.
-    Te da todas las jugadas posibles.
-    """
-    jds = {}
-    l,aux=[],[]
-    #mi lista de jugadas contiente las columnas en las que puedo colocar una siguiente ficha
-    jugadas = list(juego.jugadas_legales())
-
-    #cada jugada se le aplica al tablero actual y se mete esta informacion a una lista
-    for i in jugadas:
-        juego.hacer_jugada(i)
-        #se obtiene la utilidad de cada tablero y se guarda un diccionario lista
-        jds[i]=utilidad_c4(juego.x)
-    #se ordenan de mayor a menor las jugadas con mayor utilidad
-    l=list(jds.items())
-    l.sort(key=lambda x: x[1],reverse=True)
-    #print("L",l)
-    
-    for i in l:
-        aux.append(i[0])
-    print("AUX",aux)
-    #se devuelve la jugada con mayor utilidad
-
-    return aux
-    
+    Ordena las jugadas de acuerdo al jugador actual, en función
+    de las más prometedoras.
     """
     jugadas = list(juego.jugadas_legales())
-    #print(jugadas)
     shuffle(jugadas)
-    return jugadas"""
+    return jugadas
 
 class Conecta4GUI:
     def __init__(self, tmax=10, escala=1):

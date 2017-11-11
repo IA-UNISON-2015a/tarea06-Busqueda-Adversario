@@ -53,6 +53,31 @@ class Othello(JuegoSumaCeros2T):
   		"""
         super().__init__(tuple(x),-1)
 
+    def validar_posicion(posicion):
+    	"""
+    	NOTA: TODAVIA LE FALTA PERO AHI VA LA IDEA
+    	
+        Método para validar si es posible usar la posicion para poner una ficha y asi realizar una jugada.
+        @return: una lista con las direcciones en las cuales puede realizar un movimiento.
+        """
+        mov=[]
+        #Revisar si la casilla no esta ocupada
+        #Revisar posibles direcciones al colocar la ficha 
+        aux=[1,6,7,8,-1,-6,-7,-8] #8 formas de moverte respecto a la posicion
+        #Se empieza a mover por las direcciones
+        for i in aux:
+        	#nos movemos en la direccion tomando en cuenta nuesta posicion actual(indice)
+        	aux2+=posicion+aux
+        	while(still_in_tablero(self.x[aux2])): #mientras no se salga del tablero
+        		aux2+=posicion+aux #Nos seguimos moviendo en la direccion
+		    	#se va checando si en la direccion en que se camina existen fichas contrarias
+		    	if self.x[aux2]!= 1 or self.x[aux2] == self.jugador: 
+		    		break #no existen al menos una ficha contraria que voltear
+		    	#si llega a un espacio
+		    	if self.x[aux2] == 0:
+		    		mov.append(i) #se agrega la direccion a la lista
+       	return mov
+
     def jugadas_legales(self):
     	return None
     	"""
@@ -62,7 +87,13 @@ class Othello(JuegoSumaCeros2T):
 		línea (ya sea en dirección diagonal, horizontal o vertical).
 
 		@return: una lista de jugadas que se pueden realizar
-        """
+		"""
+        jugadas_legales = []
+        for i in range(64):
+           direcciones = self.validar_posicion(i)
+           jugadas_legales.append( ((reng,col), direcciones) ) 
+        return jugadas_legales
+
 
     def terminal(self):
         """
@@ -95,21 +126,17 @@ class Othello(JuegoSumaCeros2T):
 		otra del mismo color ya colocada. De esta forma, cambian de color.
        	"""
 
-    	for i in range(64): #Me muevo a traves del tablero 
-   			#Si existe una ficha de color y de manera tanto vertical, diagonal y horizontal existe
-   			#una o mas fichas de mi oponente, entonces, pongo una de mis fichas
-
-   			#¿como checar si existen una serie fichas del oponente?
-   			#primero checamos si existe ficha de oponente de manera horizontal
-    		if self.x[i + jugada] == 0: #Si existe espacio donde poner la ficha
-    			if self.x[i+jugada -1] == 1 and self.x[jugada]:
-    			"""
-    		   for i in range(0, 41, 7):
-            	if self.x[i + jugada] == 0:
-                self.x[i + jugada] = self.jugador
-                self.historial.append(jugada) #Se guarda la jugada en el historial
-                self.jugador *= -1#Cambio mis ficha"""
-                return None
+    	#Me muevo a traves del tablero 
+   		#Si existe una ficha de color y de manera tanto vertical, diagonal y horizontal existe
+   		#una o mas fichas de mi oponente, entonces, pongo una de mis fichas
+   		#¿como checar si existen una serie fichas del oponente?
+   		#primero checamos si existe ficha de oponente de manera horizontal
+	   for i in range(0, 41, 7):
+    	if self.x[i + jugada] == 0:
+        self.x[i + jugada] = self.jugador
+        self.historial.append(jugada) #Se guarda la jugada en el historial
+        self.jugador *= -1#Cambio mis ficha"""
+        return None
 
     def deshacer_jugada(self):
     	#MODIFICAR, FALTAN DETALLES DE OTHELLO
@@ -121,16 +148,23 @@ class Othello(JuegoSumaCeros2T):
                 return None
 
 def utilidad_othello(x):
-	return None
+
+def movimiento_valido(reng,col): #SE VA A ESTAR MOVIENDO POR EL TABLERO
+	"""
+	este método dice si una casilla es válida para poner una pieza en ella.
+	@param reng: renglon de la casilla
+    @param col: columna de la casilla 
+    @return: una lista con las direcciones en las cuales puede voltear piezas, vacía si es un movimiento incorrecto """
+    
+    #lista de posibles direcciones donde se colocara la pieza 
+    direcciones=[]
+
+    for i in 
 
 def ordena_jugadas(juego):
     """
     Ordena las jugadas de acuerdo al jugador actual, en función
     de las más prometedoras.
-
-    Para que funcione le puse simplemente las jugadas aleatorias
-    pero es un criterio bastante inaceptable
-
     """
     jugadas = list(juego.jugadas_legales())
     shuffle(jugadas)
