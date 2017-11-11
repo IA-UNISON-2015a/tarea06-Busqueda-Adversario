@@ -56,7 +56,7 @@ class Othello(JuegoSumaCeros2T):
     def validar_posicion(posicion):
     	"""
     	NOTA: TODAVIA LE FALTA PERO AHI VA LA IDEA
-    	
+
         Método para validar si es posible usar la posicion para poner una ficha y asi realizar una jugada.
         @return: una lista con las direcciones en las cuales puede realizar un movimiento.
         """
@@ -68,7 +68,7 @@ class Othello(JuegoSumaCeros2T):
         for i in aux:
         	#nos movemos en la direccion tomando en cuenta nuesta posicion actual(indice)
         	aux2+=posicion+aux
-        	while(still_in_tablero(self.x[aux2])): #mientras no se salga del tablero
+        	while(self.x[aux2]<64 or self.x[aux2]>0): #mientras no se salga del tablero
         		aux2+=posicion+aux #Nos seguimos moviendo en la direccion
 		    	#se va checando si en la direccion en que se camina existen fichas contrarias
 		    	if self.x[aux2]!= 1 or self.x[aux2] == self.jugador: 
@@ -149,17 +149,6 @@ class Othello(JuegoSumaCeros2T):
 
 def utilidad_othello(x):
 
-def movimiento_valido(reng,col): #SE VA A ESTAR MOVIENDO POR EL TABLERO
-	"""
-	este método dice si una casilla es válida para poner una pieza en ella.
-	@param reng: renglon de la casilla
-    @param col: columna de la casilla 
-    @return: una lista con las direcciones en las cuales puede voltear piezas, vacía si es un movimiento incorrecto """
-    
-    #lista de posibles direcciones donde se colocara la pieza 
-    direcciones=[]
-
-    for i in 
 
 def ordena_jugadas(juego):
     """
