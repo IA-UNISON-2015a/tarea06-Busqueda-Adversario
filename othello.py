@@ -59,9 +59,6 @@ class othello(JuegoSumaCeros2T):
         
         #solo donde encierra a las fichas contrincantes (self.jugador*-1)
         for i in range(64):
-            if i+1==17:
-                if i%8<6  and self.x[i+1]== -1*self.jugador:
-                    print(i,self.x[i], i%8,-1*self.jugador, self.x[i+1])
             if self.x[i]==0:
                 if i<46 and i%8<6 and i+9<64 and self.x[i+9]== -1*self.jugador:
                     #si enciera en diagonal abajo derecha
@@ -87,10 +84,10 @@ class othello(JuegoSumaCeros2T):
                     
                 if i>15 and i%8<6 and i-7>=0 and self.x[i-7]== -1*self.jugador:
                     #si enciera en diagonal arriba derecha
-                    #print("entre")
+                    
                     
                     flag, index = False, i-14
-                    #print(index,self.x[index],self.jugador)
+                    
                     while not flag and index>=0:
                         if self.x[index]==0:
                             flag=True
@@ -125,7 +122,6 @@ class othello(JuegoSumaCeros2T):
                         
                 if i%8<6  and self.x[i+1]== -1*self.jugador:
                     #si encierra en renglones derecha
-                    print("renglon derecha", i)
                     flag, index, cota= False, i+2, int(i/8)*8+8
                     while not flag and index < cota:
                         if self.x[index]==0:
@@ -183,7 +179,6 @@ class othello(JuegoSumaCeros2T):
         self.jugador *= -1
         
     def cambiar(self,i):
-        #print("Entre a cambios")
         self.x[i] = self.jugador
 
 
@@ -195,7 +190,6 @@ class othello(JuegoSumaCeros2T):
         lcambios=[]
         if i<46 and i%8<6 and i+9<64 and self.x[i+9]== -1*self.jugador:
             #si enciera en diagonal abajo derecha
-            #print("caso diagonal abajo derecha")
             lcambios.append(i+9)
             cambio,flag, index = False,False, i+18
             while not flag and not cambio and index <64:
@@ -213,7 +207,6 @@ class othello(JuegoSumaCeros2T):
         lcambios=[]                    
         if i<48 and i%8>1 and i+7<64 and self.x[i+7]== -1*self.jugador:
             #si enciera en diagonal abajo izquierda
-            #print("caso diagonal abajo izquierda")
             lcambios.append(i+7)
             cambio,flag, index = False,False, i+14
             while not flag and not cambio and index <64:
@@ -230,7 +223,6 @@ class othello(JuegoSumaCeros2T):
         lcambios=[]
         if i>15 and i%8<6 and i-7>=0 and self.x[i-7]== -1*self.jugador:
             #si enciera en diagonal arriba derecha
-            #print("caso diagonal arriba derecha")
             lcambios.append(i-7)
             cambio,flag, index = False,False, i-14
             while not flag and not cambio and index>=0:
@@ -248,7 +240,6 @@ class othello(JuegoSumaCeros2T):
         lcambios=[]
         if i>17 and i%8>1 and i-9>=0 and self.x[i-9]== -1*self.jugador:
             #si enciera en diagonal arriba izquierda
-            #print("caso diagonal arriba izquierda")
             lcambios.append(i-9)
             cambio,flag, index = False,False, i-18
             while not flag and not cambio and index>=0:
@@ -265,7 +256,6 @@ class othello(JuegoSumaCeros2T):
         lcambios=[]
         if i%8>1 and self.x[i-1]== -1*self.jugador:
             #si encierra en renglones izquierda
-            #print("caso renglones izquierda")
             lcambios.append(i-1)
             cambio,flag, index = False,False, i-2
             while not flag and not cambio and index>= int(i/8)*8:
@@ -282,7 +272,6 @@ class othello(JuegoSumaCeros2T):
         lcambios=[]
         if i%8<6  and self.x[i+1]== -1*self.jugador:
             #si encierra en renglones derecha
-            #print("caso renglones derecha")
             lcambios.append(i+1)
             cambio,flag, index = False,False, i+2
             while not flag and not cambio and index< int(i/8)*8+8:
@@ -299,7 +288,6 @@ class othello(JuegoSumaCeros2T):
         lcambios=[]
         if i<48 and i+8<64 and self.x[i+8]== -1*self.jugador:
             #si encierra en columna abajo
-            #print("caso columna abajo")
             lcambios.append(i+8)
             cambio,flag, index = False,False, i+16
             while not flag and not cambio and index<64:
@@ -316,7 +304,6 @@ class othello(JuegoSumaCeros2T):
         lcambios=[]
         if i>15  and self.x[i-8]== -1*self.jugador:
             #si encierra en columna arriba
-            #print("caso columna arriba")
             lcambios.append(i-8)
             cambio,flag, index = False,False, i-16
             while not flag and not cambio and index>=0:
