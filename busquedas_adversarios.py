@@ -47,7 +47,7 @@ class JuegoSumaCeros2T:
     3. hacer_jugada(jugada): Realiza la jugada, modifica el estado.
 
     """
-    def __init__(self, x0, jugador=-1):
+    def __init__(self, x0, jugador=1):
         """
         Inicializa el estado inicial del juego y el jugador
         que comienza (típicamente el primero)
@@ -85,23 +85,49 @@ def minimax(juego, dmax=100, utilidad=None, ordena_jugadas=None, transp=None):
     if utilidad is None:
         def utilidad(juego):
             return juego.terminal()
-        dmax = int(1e10)
+        dmax = 100
 
+    
+    if not ordena_jugadas(juego):
+        return None
+        
     return max((a for a in ordena_jugadas(juego)),
                key=lambda a: min_val(juego, a, dmax, utilidad, ordena_jugadas,
                                      -1e10, 1e10, juego.jugador, transp))
-
+    """
+    maximo = -1e10
+    
+    for a in ordena_jugadas(juego):
+        
+        x=min_val(juego, a, dmax, utilidad, ordena_jugadas,
+                                     -1e10, 1e10, juego.jugador, transp)
+        if x>maximo:
+            maximo = x
+            am=a
+            
+        print(a, "min val:", x)
+    
+    return a
+    """
 
 def min_val(juego, jugada, d, utilidad, ordena_jugadas,
             alfa, beta, primero, transp):
 
+    #print("entre min_val, hacer jugada,..")
     juego.hacer_jugada(jugada)
+    #pprint_othello(juego.x)
+    
 
-    ganancia = juego.terminal()
+    ganancia = juego.terminal(primero)
+    #print("ganancia:", ganancia)
     if ganancia is not None:
         juego.deshacer_jugada()
+        #print("des-hacer jugada jugada,..")
+        #pprint_othello(juego.x)
+        #input()
         return primero * ganancia
 
+    #print(jugada,d, primero)
     if d == 0:
         u = utilidad(juego.x)
         juego.deshacer_jugada()
@@ -127,13 +153,22 @@ def min_val(juego, jugada, d, utilidad, ordena_jugadas,
 def max_val(juego, jugada, d, utilidad, ordena_jugadas,
             alfa, beta, primero, transp):
 
+    #print("entre max_val, hacer jugada")
     juego.hacer_jugada(jugada)
-
-    ganancia = juego.terminal()
+    #pprint_othello(juego.x)
+    #input()
+    
+    ganancia = juego.terminal(primero)
+    #print("ganancia:", ganancia)
     if ganancia is not None:
+        #print("des-hacer_jugada")
         juego.deshacer_jugada()
+        #pprint_othello(juego.x)
+        #input()
         return primero * ganancia
 
+        
+    #print(jugada,d, primero)
     if d == 0:
         u = utilidad(juego.x)
         juego.deshacer_jugada()
@@ -166,3 +201,25 @@ def minimax_t(juego, tmax=5, utilidad=None, ordena_jugadas=None, transp=None):
         tb = perf_counter()
         if bf * (tb - ta) > t_ini + tmax - tb:
             return jugada
+
+            
+            
+def pprint_othello(x):
+    y = [('X' if x[i] > 0 else 'O' if x[i] < 0 else str(i))
+         for i in range(64)]
+    print(" {} \t| {} \t| {} \t| {} \t| {} \t| {} \t| {} \t| {} ".format(y[0],y[1],y[2],y[3],y[4],y[5],y[6],y[7] ).center(60))
+    print("+------\t+------\t+------\t+------\t+------\t+------\t+------\t+------\t+------\t+".center(60))
+    print(" {} \t| {} \t| {} \t| {} \t| {} \t| {} \t| {} \t| {} ".format(y[8],y[9],y[10],y[11],y[12],y[13],y[14],y[15] ).center(60))
+    print("+------\t+------\t+------\t+------\t+------\t+------\t+------\t+------\t+------\t+".center(60))
+    print(" {} \t| {} \t| {} \t| {} \t| {} \t| {} \t| {} \t| {} ".format(y[16],y[17],y[18],y[19],y[20],y[21],y[22],y[23]).center(60))
+    print("+------\t+------\t+------\t+------\t+------\t+------\t+------\t+------\t+------\t+".center(60))
+    print(" {} \t| {} \t| {} \t| {} \t| {} \t| {} \t| {} \t| {} ".format(y[24],y[25],y[26],y[27],y[28],y[29],y[30],y[31]).center(60))
+    print("+------\t+------\t+------\t+------\t+------\t+------\t+------\t+------\t+------\t+".center(60))
+    print(" {} \t| {} \t| {} \t| {} \t| {} \t| {} \t| {} \t| {} ".format(y[32],y[33],y[34],y[35],y[36],y[37],y[38],y[39]).center(60))
+    print("+------\t+------\t+------\t+------\t+------\t+------\t+------\t+------\t+------\t+".center(60))
+    print(" {} \t| {} \t| {} \t| {} \t| {} \t| {} \t| {} \t| {} ".format(y[40],y[41],y[42],y[43],y[44],y[45],y[46],y[47]).center(60))
+    print("+------\t+------\t+------\t+------\t+------\t+------\t+------\t+------\t+------\t+".center(60))
+    print(" {} \t| {} \t| {} \t| {} \t| {} \t| {} \t| {} \t| {} ".format(y[48],y[49],y[50],y[51],y[52],y[53],y[54],y[55]).center(60))
+    print("+------\t+------\t+------\t+------\t+------\t+------\t+------\t+------\t+------\t+".center(60))
+    print(" {} \t| {} \t| {} \t| {} \t| {} \t| {} \t| {} \t| {} ".format(y[56],y[57],y[58],y[59],y[60],y[61],y[62],y[63]).center(60))
+    print("+------\t+------\t+------\t+------\t+------\t+------\t+------\t+------\t+------\t+".center(60))
