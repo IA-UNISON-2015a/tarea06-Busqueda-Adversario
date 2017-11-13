@@ -94,9 +94,14 @@ class Negamax:
         if depth == 0 or pos.terminal:
             return player * self.utility(pos), None
 
+        moves = self.order_moves(pos.legal_moves)
+        if entry:
+            moves.remove(entry.move)
+            moves.insert(0, entry.move)
+
         best_score = -inf
         best_move = None
-        for move in self.order_moves(pos.legal_moves):
+        for move in moves:
             new_pos = pos.make_move(move)
             v, m = self.nega_run(new_pos, depth-1, -beta, -alpha, -player)
             v = -v

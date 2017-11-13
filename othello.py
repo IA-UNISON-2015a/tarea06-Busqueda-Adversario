@@ -9,7 +9,6 @@ El juego de Otello implementado por ustes mismos, con jugador inteligente
 """
 from games import Position, Negamax
 from itertools import product
-import os
 import numpy as np
 import random
 
@@ -54,6 +53,10 @@ class ReversiPosition(Position):
         return ReversiPosition(new_board, -self.player)
 
     def walk(self, direction, coord, player):
+        '''
+        Regresa las fichas en directiom que player voltearia si colocara en
+        coord. Espero que esa explicación haya servido.
+        '''
         dx, dy = direction
         xi, yi = coord
         xi, yi = xi + dx, yi + dy
@@ -71,6 +74,7 @@ class ReversiPosition(Position):
 
     @staticmethod
     def valid_coord(x, y):
+        # Regresa si una coordenada esta dentro del tablero.
         return 0 <= x < 8 and 0 <= y < 8
 
     @property
@@ -82,6 +86,10 @@ class ReversiPosition(Position):
         return 0
 
     def hashable_pos(self):
+        '''
+        Uso esto porque no puedo usar un arreglo de numpy como llave de
+        diccionario.
+        '''
         return self.board.tostring(), self.player
 
     def pprint(self):
@@ -93,8 +101,8 @@ class ReversiPosition(Position):
                   '  ┌───┬───┬───┬───┬───┬───┬───┬───┐')
 
         def pick_symbol(val):
-            return '●' if val == 1 else '○' \
-                       if val == -1 else ' '
+            return ('●' if val == 1 else
+                    '○' if val == -1 else ' ')
 
         filler = '\n  ├───┼───┼───┼───┼───┼───┼───┼───┤\n'
         rows = filler.join([str(i) + ' │ ' + ' │ '.join([pick_symbol(val)
@@ -109,6 +117,8 @@ class ReversiPosition(Position):
         print('Conteo: {} ●, {} ○'.format(np.sum(self.board == 1),
                                           np.sum(self.board == -1)))
 
+
+''' FUNCIONES DE UTILIDAD '''
 
 SQUARE_SCORE = np.array([[9, 1, 3, 3, 3, 3, 1, 9],
                          [1, 1, 1, 1, 1, 1, 1, 1],
@@ -155,6 +165,11 @@ def make_reversi():
     return ReversiPosition(board, 1)
 
 
+'''
+PRECAUCION: LAS SIGUIENTES ~100 LINEAS SON COSAS DE LA INTERFAZ.
+'''
+
+
 def make_alg_notation(move):
     if move == 'pass':
         return 'Pasar'
@@ -188,7 +203,7 @@ def human_player(game):
 # Solo dios puede juzgarme
 move_descriptions = [', ¡un movimiento excelente!',
                      '. ¡Hasta un bebé lo pudo ver venir!',
-                     '. ¿Que esta pensando?',
+                     '. ¿Qué está pensando?',
                      '. He visto mejores.',
                      '. ¿Será este su fin?',
                      '. Una jugada elegante sin duda.',
