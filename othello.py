@@ -168,8 +168,10 @@ class othello(JuegoSumaCeros2T):
         if not self.jugadas_legales():
             self.jugador=-1*self.jugador
             if not self.jugadas_legales():
-                return utilidad(self.x)           
+                self.jugador=-1*self.jugador
+                return utilidad(self.x)
             self.jugador=-1*self.jugador
+            
             
         return None
         
@@ -495,14 +497,14 @@ class OthelloTK:
         self.actualiza_tablero(juego.x)
         u = utilidad(juego.x)
         if u == 0:
-            print("UN ASQUEROSO EMPATE".center(60))
+            fin = "UN ASQUEROSO EMPATE"
         elif (primero<0 and u>0) or (primero>0 and u<0):
-            print("¡Gané! ¡Juar, juar, juar!, ¿Quieres jugar otra vez?".center(60))
+            fin ="¡Gané! ¡Juar, juar, juar!, ¿Quieres jugar otra vez?"
         else:
-            print("Ganaste, bye.")
+            fin ="Ganaste, bye."
             
         print("\n\nFin del juego")
-        self.anuncio['text'] = finstr
+        self.anuncio['text'] = fin
         self.anuncio.update()
 
     def escoge_jugada(self, juego):

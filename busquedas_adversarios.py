@@ -102,7 +102,7 @@ def minimax(juego, dmax=100, utilidad=None, ordena_jugadas=None, transp=None):
 def min_val(juego, jugada, d, utilidad, ordena_jugadas,
             alfa, beta, primero, transp):
     
-    print("entre min_val, hacer jugada,..", jugada)
+    #print("entre min_val, hacer jugada,..", jugada)
     juego.hacer_jugada(jugada)
     #pprint_othello(juego.x)
     #input()
@@ -150,7 +150,7 @@ def min_val(juego, jugada, d, utilidad, ordena_jugadas,
 def max_val(juego, jugada, d, utilidad, ordena_jugadas,
             alfa, beta, primero, transp):
     
-    print("entre max_val, hacer jugada", jugada)
+    #print("entre max_val, hacer jugada", jugada)
     juego.hacer_jugada(jugada)
     #pprint_othello(juego.x)
     #input()
