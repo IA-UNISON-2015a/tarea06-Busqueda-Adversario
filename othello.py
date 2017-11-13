@@ -10,6 +10,7 @@ El juego de Otello implementado por ustes mismos, con jugador inteligente
 from games import Position, Negamax
 from itertools import product
 import os
+import numpy as np
 
 __author__ = 'Rafael Castillo'
 
@@ -23,75 +24,63 @@ class ReversiPosition(Position):
 
     @property
     def legal_moves(self):
-        return self.moves_for(self.player)
+        moves = list(self.moves_for(self.player))
+        return moves if moves else ['pass']
 
     def moves_for(self, player):
-        return [i for (i, v) in enumerate(self.board)
-                if self.is_legal(i, player)]
+        return (coord for (coord, _) in np.ndenumerate(self.board)
+                if self.is_legal(coord, player))
 
-    def is_legal(self, i, player):
-        x, y = self.index_to_coord(i)
-        if self.board[i]:
+    def is_legal(self, coord, player):
+        if self.board[coord]:
             return False
-        for walk in (self.walk(d, i, player) for d in self.directions):
+        for walk in (self.walk(d, coord, player) for d in self.directions):
             for _ in walk:
                 return True
         return False
 
     def make_move(self, move):
-        if move == -1:
-            return ReversiPosition(self.board, self.player, self.length + 1)
+        if move == 'pass':
+            return ReversiPosition(self.board, self.player)
 
-        new_board = list(self.board)
+        new_board = np.copy(self.board)
 
-        x, y = self.index_to_coord(move)
         new_board[move] = self.player
         for walk in (self.walk(d, move, self.player) for d in self.directions):
-            for i in walk:
-                new_board[i] = self.player
+            for coord in walk:
+                new_board[coord] = self.player
 
-        return ReversiPosition(tuple(new_board), -self.player, self.length + 1)
+        return ReversiPosition(new_board, -self.player)
 
-    def walk(self, direction, i, player):
+    def walk(self, direction, coord, player):
         dx, dy = direction
-        xi, yi = self.index_to_coord(i)
+        xi, yi = coord
         xi, yi = xi + dx, yi + dy
         walk = []
         while self.valid_coord(xi, yi):
-            i = self.coord_to_index(xi, yi)
-            if not self.board[i]:
+            if not self.board[xi, yi]:
                 break
-            if self.board[i] == player:
+            if self.board[xi, yi] == player:
                 return walk
-            walk.append(i)
+            walk.append((xi, yi))
 
             xi, yi = xi + dx, yi + dy
 
         return []
 
     @staticmethod
-    def coord_to_index(x, y):
-        return 8 * y + x
-
-    @staticmethod
     def valid_coord(x, y):
         return 0 <= x < 8 and 0 <= y < 8
 
-    @staticmethod
-    def index_to_coord(i):
-        return i % 8, i // 8
-
     @property
     def terminal(self):
-        if all(v != 0 for v in self.board) or not self.legal_moves:
-            return max((-1, 1), key=self.board.count)
+        if (not np.sum(self.board == 0) or
+                self.moves_for(1) == self.moves_for(-1) == ['pass']):
+            return max((-1, 1), key=lambda p: np.sum(self.board == p))
         return 0
 
-    def empty_neighbors(self, i):
-        x, y = self.index_to_coord(i)
-        return (self.coord_to_index(x + dx, y + dy)
-                for (dx, dy) in self.directions
-                if self.valid_coord(x + dx, y + dy))
+    def hashable_pos(self):
+        return self.board.tostring(), self.player
 
     """
     Me robé la interfaz del dui, nomas dejo esta nota si olvido reemplazarla
@@ -125,53 +114,56 @@ class ReversiPosition(Position):
             tablero += str(reng)
             for col in range(8):
                 tablero += "│"
-                tablero += " O " if self.board[8*reng + col] == 1 else " X " \
-                           if self.board[8*reng + col] == -1 else "   "
+                tablero += " ● " if self.board[reng, col] == 1 else " ○ " \
+                           if self.board[reng, col] == -1 else "   "
             tablero += "│\n"
             tablero += " ├───┼───┼───┼───┼───┼───┼───┼───┤\n" if reng < 7 \
                        else " └───┴───┴───┴───┴───┴───┴───┴───┘\n"
 
-        blancas, negras = self.board.count(1), self.board.count(-1)
+        blancas, negras = np.sum(self.board == 1), np.sum(self.board == -1)
 
-        tablero += "O: " + str(blancas) + "\n"
-        tablero += "X: " + str(negras) + "\n"
+        tablero += "●: " + str(blancas) + "\n"
+        tablero += "○: " + str(negras) + "\n"
 
         print(tablero)
 
 
-SQUARE_SCORE = [9, 3, 3, 3, 3, 3, 3, 9,
-                3, 1, 1, 1, 1, 1, 1, 3,
-                3, 1, 1, 1, 1, 1, 1, 3,
-                3, 1, 1, 1, 1, 1, 1, 3,
-                3, 1, 1, 1, 1, 1, 1, 3,
-                3, 1, 1, 1, 1, 1, 1, 3,
-                3, 1, 1, 1, 1, 1, 1, 3,
-                9, 3, 3, 3, 3, 3, 3, 9]
+SQUARE_SCORE = np.array([[9, 1, 3, 3, 3, 3, 1, 9],
+                         [1, 1, 1, 1, 1, 1, 1, 1],
+                         [3, 1, 1, 1, 1, 1, 1, 3],
+                         [3, 1, 1, 1, 1, 1, 1, 3],
+                         [3, 1, 1, 1, 1, 1, 1, 3],
+                         [3, 1, 1, 1, 1, 1, 1, 3],
+                         [1, 1, 1, 1, 1, 1, 1, 1],
+                         [9, 1, 3, 3, 3, 3, 1, 9]])
 
 
-def reversi_utility(position):
-    max_pot_mob = sum(len(position.empty_neighbors())
-                      for i in range(64) if position.board[i] == -1)
-    min_pot_mob = sum(len(position.empty_neighbors())
-                      for i in range(64) if position.board[i] == 1)
+def corner_utility(position):
+    corners = position.board[[0, 0, -1, -1], [0, -1, 0, -1]]
+    max_corners = len(corners == 1)
+    min_corners = len(corners == -1)
 
-    if max_pot_moby + min_pot_mob:
-        potential_mobility = ((max_pot_mob - min_pot_mob)
-                              / max_pot_mob + min_pot_mob)
+    return ((max_corners - min_corners) / (max_corners + min_corners)
+            if (max_corners + min_corners) else 0)
+
+
+def bad_utility(position):
+    return np.sum(position.board)
+
+
+def static_utility(position):
+    return np.sum(np.multiply(SQUARE_SCORE, position.board))
+
+
+def hybrid_utility(position):
+    max_chips = np.sum(position.board == 1)
+    min_chips = -np.sum(position.board == -1)
+    total_chips = max_chips + min_chips
+
+    if total_chips < 48:
+        return static_utility(position)
     else:
-        potential_mobility = 0
-
-    if position.length < 32:
-        partial = sum(SQUARE_SCORE[i] * position.board[i] for i in range(64))
-    else:
-        my_pieces = sum(1 for i in position.board if i == 1)
-        his_pieces = sum(1 for i in position.board if i == -1)
-        partial = (my_pieces - his_pieces / 64)
-
-    mobility = position.player * (len(position.moves_for(position.player))
-                                  - len(position.moves_for(-position.player)))
-
-    return mobility + partial
+        return (max_chips - min_chips) / total_chips
 
 
 def jugar():
@@ -186,7 +178,7 @@ def jugar():
     while res != "s" and res != "n":
         res = input("¿Quieres ser primeras(s/n)?")
 
-    minimax = Negamax(reversi_utility)
+    minimax = Negamax(hybrid_utility)
 
     if res == "n":
         juego.dibuja_tablero()
@@ -196,12 +188,13 @@ def jugar():
         juego = juego.make_move(jugada)
 
     while not juego.terminal:
+        print(np.multiply(SQUARE_SCORE, juego.board))
         juego.dibuja_tablero()
 
         jugadas = list(juego.legal_moves)
         print("Jugadas: ")
         for i in range(len(jugadas)):
-            print(i, ":", juego.index_to_coord(jugadas[i]),
+            print(i, ":", jugadas[i],
                   "  ", sep='', end='')
 
         opc = input("\nOpción: ")
@@ -229,15 +222,24 @@ def jugar():
 
 
 def make_reversi():
-    return ReversiPosition((0, 0, 0, 0, 0, 0, 0, 0,
-                            0, 0, 0, 0, 0, 0, 0, 0,
-                            0, 0, 0, 0, 0, 0, 0, 0,
-                            0, 0, 0, 1, -1, 0, 0, 0,
-                            0, 0, 0, -1, 1, 0, 0, 0,
-                            0, 0, 0, 0, 0, 0, 0, 0,
-                            0, 0, 0, 0, 0, 0, 0, 0,
-                            0, 0, 0, 0, 0, 0, 0, 0), 1, 0)
+    board = np.zeros((8, 8), dtype=np.int8)
+    board[3, [3, 4]] = [1, -1]
+    board[4, [3, 4]] = [-1, 1]
+    return ReversiPosition(board, 1)
 
 
 if __name__ == '__main__':
-    jugar()
+    reversi = make_reversi()
+
+    bad_player = Negamax(hybrid_utility)
+    good_player = Negamax(hybrid_utility)
+
+    next = bad_player
+
+    while not reversi.terminal:
+        print('juega', reversi.player)
+        reversi.dibuja_tablero()
+        move = next(reversi)
+        reversi = reversi.make_move(move)
+        next = bad_player if next == good_player else good_player
+    reversi.dibuja_tablero()
