@@ -19,6 +19,7 @@ from busquedas_adversarios import JuegoSumaCeros2T
 from busquedas_adversarios import minimax
 import tkinter as tk
 from random import shuffle
+import time
 
 
 class othello(JuegoSumaCeros2T):
@@ -155,12 +156,22 @@ class othello(JuegoSumaCeros2T):
                                 
         return tuple(set(jugadas))
             
-    def terminal(self, jugador):
-        #print("entre a terminal")
+    def terminal(self):
+        """
+        Devuelve None si no es terminal el estado actual,
+        en otro caso devuelve la ganancia para el jugador 1.
+        """
         if 0 not in self.x:
-            return None
+            return utilidad(self.x)
             
-        return utilidad(self.x, jugador)
+            
+        if not self.jugadas_legales():
+            self.jugador=-1*self.jugador
+            if not self.jugadas_legales():
+                return utilidad(self.x)           
+            self.jugador=-1*self.jugador
+            
+        return None
         
         
     def hacer_jugada(self, jugada):
@@ -185,21 +196,28 @@ class othello(JuegoSumaCeros2T):
         def hacerCambio(L):
             for i in L:
                 self.x[i]=self.jugador
+
+        def agregarCambio(i,lc,pasos, cota, fun):
             
-        #print("Entre a cambios")
-        lcambios=[]
-        if i<46 and i%8<6 and i+9<64 and self.x[i+9]== -1*self.jugador:
-            #si enciera en diagonal abajo derecha
-            lcambios.append(i+9)
-            cambio,flag, index = False,False, i+18
-            while not flag and not cambio and index <64:
+            index = i + pasos
+            lc.append(index)
+            cambio,flag, index = False,False, index + pasos
+            while not flag and not cambio and fun(index,cota):
                 if self.x[index]==0:
                     flag=True
                 elif self.x[index]==self.jugador:
                     cambio=True
                 else:
-                    lcambios.append(index)
-                index+=9   
+                    lc.append(index)
+                index+=pasos
+                
+            return cambio
+            
+            
+        lcambios=[]
+        if i<46 and i%8<6 and i+9<64 and self.x[i+9]== -1*self.jugador:
+            #si enciera en diagonal abajo derecha
+            cambio = agregarCambio(i,lcambios,9, 64, lambda x,y : x<y)
             if cambio:
                 hacerCambio(lcambios)
         
@@ -207,113 +225,49 @@ class othello(JuegoSumaCeros2T):
         lcambios=[]                    
         if i<48 and i%8>1 and i+7<64 and self.x[i+7]== -1*self.jugador:
             #si enciera en diagonal abajo izquierda
-            lcambios.append(i+7)
-            cambio,flag, index = False,False, i+14
-            while not flag and not cambio and index <64:
-                if self.x[index]==0:
-                    flag=True
-                elif self.x[index]==self.jugador:
-                    cambio=True
-                else:
-                    lcambios.append(index)
-                index+=7
+            cambio = agregarCambio(i,lcambios,7, 64, lambda x,y : x<y)
             if cambio:
                 hacerCambio(lcambios)
                     
         lcambios=[]
         if i>15 and i%8<6 and i-7>=0 and self.x[i-7]== -1*self.jugador:
             #si enciera en diagonal arriba derecha
-            lcambios.append(i-7)
-            cambio,flag, index = False,False, i-14
-            while not flag and not cambio and index>=0:
-                if self.x[index]==0:
-                    flag=True
-                elif self.x[index]==self.jugador:
-                    cambio=True
-                else:
-                    lcambios.append(index)
-                    
-                index-=7
+            cambio = agregarCambio(i,lcambios,-7, 0, lambda x,y : x>=y)
             if cambio:
                 hacerCambio(lcambios)
         
         lcambios=[]
         if i>17 and i%8>1 and i-9>=0 and self.x[i-9]== -1*self.jugador:
             #si enciera en diagonal arriba izquierda
-            lcambios.append(i-9)
-            cambio,flag, index = False,False, i-18
-            while not flag and not cambio and index>=0:
-                if self.x[index]==0:
-                    flag=True
-                elif self.x[index]==self.jugador:
-                    cambio=True
-                else:
-                    lcambios.append(index)
-                index-=9
+            cambio = agregarCambio(i,lcambios,-9, 0, lambda x,y : x>=y)
             if cambio:
                 hacerCambio(lcambios)
         
         lcambios=[]
         if i%8>1 and self.x[i-1]== -1*self.jugador:
             #si encierra en renglones izquierda
-            lcambios.append(i-1)
-            cambio,flag, index = False,False, i-2
-            while not flag and not cambio and index>= int(i/8)*8:
-                if self.x[index]==0:
-                    flag=True
-                elif self.x[index]==self.jugador:
-                    cambio=True
-                else:
-                    lcambios.append(index)
-                index-=1
+            cambio = agregarCambio(i,lcambios,-1, int(i/8)*8, lambda x,y : x>=y)
             if cambio:
                 hacerCambio(lcambios)
         
         lcambios=[]
         if i%8<6  and self.x[i+1]== -1*self.jugador:
             #si encierra en renglones derecha
-            lcambios.append(i+1)
-            cambio,flag, index = False,False, i+2
-            while not flag and not cambio and index< int(i/8)*8+8:
-                if self.x[index]==0:
-                    flag=True
-                elif self.x[index]==self.jugador:
-                    cambio=True
-                else:
-                    lcambios.append(index)
-                index+=1
+            cambio = agregarCambio(i,lcambios,1, int(i/8)*8+8, lambda x,y : x<y)
             if cambio:
                 hacerCambio(lcambios)
         
         lcambios=[]
         if i<48 and i+8<64 and self.x[i+8]== -1*self.jugador:
             #si encierra en columna abajo
-            lcambios.append(i+8)
-            cambio,flag, index = False,False, i+16
-            while not flag and not cambio and index<64:
-                if self.x[index]==0:
-                    flag=True
-                elif self.x[index]==self.jugador:
-                    cambio=True
-                else:
-                    lcambios.append(index)
-                index+=8
+            cambio = agregarCambio(i,lcambios,8, 64, lambda x,y : x<y)
             if cambio:
                 hacerCambio(lcambios)
                        
         lcambios=[]
         if i>15  and self.x[i-8]== -1*self.jugador:
             #si encierra en columna arriba
-            lcambios.append(i-8)
-            cambio,flag, index = False,False, i-16
-            while not flag and not cambio and index>=0:
-                if self.x[index]==0:
-                    flag=True
-                elif self.x[index]==self.jugador:
-                    cambio=True
-                else:
-                    lcambios.append(index)
-                index-=8
+            cambio = agregarCambio(i,lcambios,-8, 0, lambda x,y : x>=y)
             if cambio:
                 hacerCambio(lcambios)
 
@@ -321,17 +275,35 @@ class othello(JuegoSumaCeros2T):
                         
         
 
-def utilidad(x, jugador):
+def utilidad(x):
     cont=0
+    """
     for i in range(64):
         if x[i]==jugador:
             cont+=1
     return cont
-        
+    """
+    for i in range(64):
+        cont+=x[i]
+
+    return cont
+       
 def ordena_jugadas(juego):
     jugadas = list(juego.jugadas_legales())
-    shuffle(jugadas)
-    return jugadas
+    jugadas2 = []
+    #primero esquinas
+    for thing in [0,7,56,63]:
+        if thing in jugadas: jugadas.remove(thing), jugadas2.append(thing)
+    #despues marcos de la cuadricula, entre más cercanos a la orilla, mayor prioridad
+    for i in range(4):
+        if jugadas:
+            for j in jugadas:
+                if j%8==i and j not in jugadas2: jugadas2.append(j)
+                elif j%8==7-i and j not in jugadas2: jugadas2.append(j)
+                elif int(j/8) == i and j not in jugadas2: jugadas2.append(j)
+                elif int(j/8)==7-i and j not in jugadas2: jugadas2.append(j)
+                
+    return jugadas2
     
 def juega_othello(jugador=1):
     
@@ -347,7 +319,7 @@ def juega_othello(jugador=1):
 
     acabado = False
 
-    while not acabado:
+    for _ in range(64):
         pprint_othello(juego.x)
         legales = juego.jugadas_legales()
         print("yo" ,legales)
@@ -367,32 +339,33 @@ def juega_othello(jugador=1):
 
             juego.hacer_jugada(jugada)
             
-            if juego.terminal(jugador) is None:
-                acabado = True
+            #if juego.terminal(jugador) is None:
+            #   acabado = True
 
         else: #si pasa de turno
             juego.jugador = -1 * juego.jugador
         
         
-        if not acabado:
-            legales = juego.jugadas_legales()
-            print("maquina" ,legales)
-            jugada = minimax(juego)
+        
+        legales = juego.jugadas_legales()
+        print("maquina" ,legales)
+        print(utilidad)
+        jugada = minimax(juego,10, utilidad)
             
-            if jugada:
-                print("jugada M", jugada)
-                juego.hacer_jugada(jugada)
-                if juego.terminal(jugador) is None:
-                    acabado = True
-            else:
-                juego.jugador = -1 * juego.jugador
+        if jugada:
+            print("jugada M", jugada)
+            juego.hacer_jugada(jugada)
+            #if juego.terminal(jugador) is None:
+            #    acabado = True
+        else:
+            juego.jugador = -1 * juego.jugador
 
                 
     pprint_othello(juego.x)
-    ganador = utilidad(juego.x, jugador)
-    if ganador == 32:
+    u = utilidad(juego.x)
+    if u == 0:
         print("UN ASQUEROSO EMPATE".center(60))
-    elif (ganador < 32 ):
+    elif (primero<0 and u>0) or (primero>0 and u<0):
         print("¡Gané! ¡Juar, juar, juar!, ¿Quieres jugar otra vez?".center(60))
     else:
         print("Ganaste, bye.")
@@ -418,6 +391,12 @@ def pprint_othello(x):
     print(" {} \t| {} \t| {} \t| {} \t| {} \t| {} \t| {} \t| {} ".format(y[56],y[57],y[58],y[59],y[60],y[61],y[62],y[63]).center(60))
     print("+------\t+------\t+------\t+------\t+------\t+------\t+------\t+------\t+------\t+".center(60))
     
+def puntos(x, jugador):
+    cont=0
+    for i in range(64):
+        if x[i]==jugador:
+            cont+=1
+    return cont
     
 class OthelloTK:
     def __init__(self, escala=2):
@@ -431,17 +410,27 @@ class OthelloTK:
                                   justify=tk.CENTER, text=tmpstr,
                                   width=8 * L)
         self.anuncio.pack()
+        
+        
 
         barra = tk.Frame(app)
         barra.pack()
+        
+        self.userpoints = tk.Label(barra, bg='light grey', text="YO: ")
+        self.userpoints.grid(column=0, row=0)
+       
+        
         botonX = tk.Button(barra,
                            command=lambda x=1: self.jugar(x),
                            text='(re)iniciar con X')
-        botonX.grid(column=0, row=0)
+        botonX.grid(column=1, row=0)
         botonO = tk.Button(barra,
                            command=lambda x=-1: self.jugar(x),
                            text='(re)iniciar con O')
-        botonO.grid(column=1, row=0)
+        botonO.grid(column=2, row=0)
+        self.Mpoints = tk.Label(barra, bg='light grey',  text="Máquina: ")
+        self.Mpoints.grid(column=3, row=0)
+        
 
         ctn = tk.Frame(app, bg='black')
         ctn.pack()
@@ -460,38 +449,59 @@ class OthelloTK:
     def jugar(self, primero):
         juego = othello()
 
+        
         if  primero == -1:
-            jugada = minimax(juego)
+            jugada = minimax(juego,5, utilidad, ordena_jugadas)
             juego.hacer_jugada(jugada)
 
         self.anuncio['text'] = "A ver de que cuero salen más correas"
         for _ in range(64):
             self.actualiza_tablero(juego.x)
             if juego.jugadas_legales():
+                
                 jugada = self.escoge_jugada(juego)
                 juego.hacer_jugada(jugada)
-                ganador = juego.terminal(primero)
-                if ganador is None:
+                
+                #actualiza los puntos
+                self.userpoints['text'] = "YO: {} ".format(puntos(juego.x, primero))
+                self.userpoints.update()
+                self.Mpoints['text'] = "M: {} ".format(puntos(juego.x, -1*primero))
+                self.Mpoints.update()
+                #actualiza tablero
+                self.actualiza_tablero(juego.x)
+                ganador = juego.terminal()
+                if ganador is not None:
                     break
             else:
+                print("No hay jugadas para ti...")
                 juego.jugador = -1*juego.jugador
                 
             if juego.jugadas_legales():
-                jugada = minimax(juego)
+                jugada = minimax(juego,5, utilidad, ordena_jugadas)
                 juego.hacer_jugada(jugada)
-                ganador = juego.terminal(primero)
-                if ganador is None:
+                #actualiza los puntos
+                self.userpoints['text'] = "YO: {} ".format(puntos(juego.x, primero))
+                self.userpoints.update()
+                self.Mpoints['text'] = "M: {} ".format(puntos(juego.x, -1*primero))
+                self.Mpoints.update()
+                
+                ganador = juego.terminal()
+                if ganador is not None:
                     break
-            else: 
+            else:
+                print("No hay jugadas para la máquina...")
                 juego.jugador = -1*juego.jugador
 
         self.actualiza_tablero(juego.x)
-        g = utilidad(juego.x, primero)
-        finstr = ("UN ASQUEROSO EMPATE, aggggg" if g == 32 else
-                  "Ganaste, bye"
-                  if (g > 32) 
-                  else "¡Gané¡  Juar, juar, juar.")
-        
+        u = utilidad(juego.x)
+        if u == 0:
+            print("UN ASQUEROSO EMPATE".center(60))
+        elif (primero<0 and u>0) or (primero>0 and u<0):
+            print("¡Gané! ¡Juar, juar, juar!, ¿Quieres jugar otra vez?".center(60))
+        else:
+            print("Ganaste, bye.")
+            
+        print("\n\nFin del juego")
         self.anuncio['text'] = finstr
         self.anuncio.update()
 
@@ -501,12 +511,13 @@ class OthelloTK:
             return jugadas_posibles[0]
 
         seleccion = tk.IntVar(self.tablero[0].master, -1, 'seleccion')
-
+        
         def entrada(evento):
             evento.widget.color_original = evento.widget['bg']
-            evento.widget['bg'] = 'grey'
+            evento.widget['bg'] = 'blue'
 
         def salida(evento):
+            
             evento.widget['bg'] = evento.widget.color_original
 
         def presiona_raton(evento):
@@ -546,7 +557,7 @@ if __name__ == '__main__':
     print(o.jugador)
     print(o.jugadas_legales())
     pprint_othello(o.x)
-    jugada = minimax(o,100,utilidad)
+    jugada = minimax(o,7,utilidad,ordena_jugadas)
     print(jugada)
     o.hacer_jugada(jugada)
     pprint_othello(o.x)

@@ -82,11 +82,12 @@ def minimax(juego, dmax=100, utilidad=None, ordena_jugadas=None, transp=None):
     if ordena_jugadas is None:
         def ordena_jugadas(juego):
             return juego.jugadas_legales()
+    
     if utilidad is None:
         def utilidad(juego):
             return juego.terminal()
         dmax = 100
-
+    
     
     if not ordena_jugadas(juego):
         return None
@@ -94,35 +95,25 @@ def minimax(juego, dmax=100, utilidad=None, ordena_jugadas=None, transp=None):
     return max((a for a in ordena_jugadas(juego)),
                key=lambda a: min_val(juego, a, dmax, utilidad, ordena_jugadas,
                                      -1e10, 1e10, juego.jugador, transp))
-    """
-    maximo = -1e10
     
-    for a in ordena_jugadas(juego):
-        
-        x=min_val(juego, a, dmax, utilidad, ordena_jugadas,
-                                     -1e10, 1e10, juego.jugador, transp)
-        if x>maximo:
-            maximo = x
-            am=a
-            
-        print(a, "min val:", x)
+
     
-    return a
-    """
 
 def min_val(juego, jugada, d, utilidad, ordena_jugadas,
             alfa, beta, primero, transp):
-
-    #print("entre min_val, hacer jugada,..")
+    
+    print("entre min_val, hacer jugada,..", jugada)
     juego.hacer_jugada(jugada)
     #pprint_othello(juego.x)
+    #input()
     
 
-    ganancia = juego.terminal(primero)
+    ganancia = juego.terminal()
     #print("ganancia:", ganancia)
+    
     if ganancia is not None:
+        #print("des-hacer_jugada")
         juego.deshacer_jugada()
-        #print("des-hacer jugada jugada,..")
         #pprint_othello(juego.x)
         #input()
         return primero * ganancia
@@ -130,7 +121,10 @@ def min_val(juego, jugada, d, utilidad, ordena_jugadas,
     #print(jugada,d, primero)
     if d == 0:
         u = utilidad(juego.x)
+        #print("des-hacer_jugada")
         juego.deshacer_jugada()
+        #pprint_othello(juego.x)
+        #input()
         return primero * u
 
     if transp is not None and tuple(juego.x) in transp:
@@ -138,9 +132,12 @@ def min_val(juego, jugada, d, utilidad, ordena_jugadas,
         if d_tt >= d and tipo_tt is 'beta':
             beta = min(alfa, val_tt)
 
+    
     for jugada_nueva in ordena_jugadas(juego):
+        #print("PROFUNDIDAD", d)
         beta = min(beta, max_val(juego, jugada_nueva, d - 1, utilidad,
                                  ordena_jugadas, alfa, beta, primero, transp))
+        #print("Regrese de max_val")
         if beta <= alfa:
             break
     else:
@@ -152,14 +149,15 @@ def min_val(juego, jugada, d, utilidad, ordena_jugadas,
 
 def max_val(juego, jugada, d, utilidad, ordena_jugadas,
             alfa, beta, primero, transp):
-
-    #print("entre max_val, hacer jugada")
+    
+    print("entre max_val, hacer jugada", jugada)
     juego.hacer_jugada(jugada)
     #pprint_othello(juego.x)
     #input()
     
-    ganancia = juego.terminal(primero)
+    ganancia = juego.terminal()
     #print("ganancia:", ganancia)
+    
     if ganancia is not None:
         #print("des-hacer_jugada")
         juego.deshacer_jugada()
@@ -171,7 +169,10 @@ def max_val(juego, jugada, d, utilidad, ordena_jugadas,
     #print(jugada,d, primero)
     if d == 0:
         u = utilidad(juego.x)
+        #print("des-hacer_jugada")
         juego.deshacer_jugada()
+        #pprint_othello(juego.x)
+        #input()
         return primero * u
 
     if transp is not None and tuple(juego.x) in transp:
@@ -180,8 +181,10 @@ def max_val(juego, jugada, d, utilidad, ordena_jugadas,
             alfa = max(alfa, val_tt)
 
     for jugada_nueva in ordena_jugadas(juego):
+        #print("PROFUNDIDAD", d)
         alfa = max(alfa, min_val(juego, jugada_nueva, d - 1, utilidad,
                                  ordena_jugadas, alfa, beta, primero, transp))
+        #print("Regrese de min_val")
         if beta <= alfa:
             break
     else:
