@@ -53,8 +53,8 @@ class Negamax:
             def utility(pos):
                 return pos.terminal
         if order_moves is None:
-            def order_moves(positions):
-                p = list(positions)
+            def order_moves(position):
+                p = list(position.legal_moves)
                 random.shuffle(p)
                 return p
 
@@ -94,7 +94,7 @@ class Negamax:
         if depth == 0 or pos.terminal:
             return player * self.utility(pos), None
 
-        moves = self.order_moves(pos.legal_moves)
+        moves = self.order_moves(pos)
         if entry:
             moves.remove(entry.move)
             moves.insert(0, entry.move)

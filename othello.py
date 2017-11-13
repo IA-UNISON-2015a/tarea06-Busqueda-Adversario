@@ -158,6 +158,12 @@ def hybrid_utility(position):
         return (max_chips - min_chips) / total_chips
 
 
+def simple_order(position):
+    moves = list(position.legal_moves)
+    moves.sort(key=lambda m: SQUARE_SCORE[m], reverse=(position.player == 1))
+    return moves
+
+
 def make_reversi():
     board = np.zeros((8, 8), dtype=np.int8)
     board[3, [3, 4]] = [1, -1]
@@ -257,7 +263,7 @@ def play(*players):
 
 
 if __name__ == '__main__':
-    ai = ai_pretty_wrapper(Negamax(hybrid_utility))
+    ai = ai_pretty_wrapper(Negamax(hybrid_utility, simple_order))
     print('!' * 80)
     print('Buen dia. Este es el otelo. Si quieres cambiar quien empieza o \n'
           'ponerlo para que dos maquinas se agarren a fregazos, vas a tener \n'
