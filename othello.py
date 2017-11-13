@@ -11,6 +11,7 @@ from games import Position, Negamax
 from itertools import product
 import os
 import numpy as np
+import random
 
 __author__ = 'Rafael Castillo'
 
@@ -75,57 +76,38 @@ class ReversiPosition(Position):
     @property
     def terminal(self):
         if (not np.sum(self.board == 0) or
-                self.moves_for(1) == self.moves_for(-1) == ['pass']):
+                (not sum(1 for _ in self.moves_for(1)) and
+                 not sum(1 for _ in self.moves_for(1)))):
             return max((-1, 1), key=lambda p: np.sum(self.board == p))
         return 0
 
     def hashable_pos(self):
         return self.board.tostring(), self.player
 
-    """
-    Me robé la interfaz del dui, nomas dejo esta nota si olvido reemplazarla
-    por una propia y borrar esto
-    """
-    def dibuja_tablero(self):
-        """
-        Método para dibujar el tablero, lo dibuja en el siguiente formato:
-           1   2   3   4   5   6   7   8
-         ┌───┬───┬───┬───┬───┬───┬───┬───┐
-        1│   │   │   │   │   │   │   │   │
-         ├───┼───┼───┼───┼───┼───┼───┼───┤
-        2│   │   │   │   │   │   │   │   │
-         ├───┼───┼───┼───┼───┼───┼───┼───┤
-        3│   │   │   │   │   │   │   │   │
-         ├───┼───┼───┼───┼───┼───┼───┼───┤
-        4│   │   │   │ O │ X │   │   │   │
-         ├───┼───┼───┼───┼───┼───┼───┼───┤
-        5│   │   │   │ X │ O │   │   │   │
-         ├───┼───┼───┼───┼───┼───┼───┼───┤
-        6│   │   │   │   │   │   │   │   │
-         ├───┼───┼───┼───┼───┼───┼───┼───┤
-        7│   │   │   │   │   │   │   │   │
-         ├───┼───┼───┼───┼───┼───┼───┼───┤
-        8│   │   │   │   │   │   │   │   │
-         └───┴───┴───┴───┴───┴───┴───┴───┘
-        """
-        tablero = "   0   1   2   3   4   5   6   7\n"
-        tablero += " ┌───┬───┬───┬───┬───┬───┬───┬───┐\n"
-        for reng in range(8):
-            tablero += str(reng)
-            for col in range(8):
-                tablero += "│"
-                tablero += " ● " if self.board[reng, col] == 1 else " ○ " \
-                           if self.board[reng, col] == -1 else "   "
-            tablero += "│\n"
-            tablero += " ├───┼───┼───┼───┼───┼───┼───┼───┤\n" if reng < 7 \
-                       else " └───┴───┴───┴───┴───┴───┴───┴───┘\n"
+    def pprint(self):
+        '''
+        Imprime el otelo con una apariencia decentona. El resultado me lo robé
+        de la interfaz del dui, pero la implementación es mayormente original
+        '''
+        header = ('    A   B   C   D   E   F   G   H\n'
+                  '  ┌───┬───┬───┬───┬───┬───┬───┬───┐')
 
-        blancas, negras = np.sum(self.board == 1), np.sum(self.board == -1)
+        def pick_symbol(val):
+            return '●' if val == 1 else '○' \
+                       if val == -1 else ' '
 
-        tablero += "●: " + str(blancas) + "\n"
-        tablero += "○: " + str(negras) + "\n"
+        filler = '\n  ├───┼───┼───┼───┼───┼───┼───┼───┤\n'
+        rows = filler.join([str(i) + ' │ ' + ' │ '.join([pick_symbol(val)
+                                                         for val in row])
+                            + ' │'
+                            for i, row in enumerate(self.board)])
 
-        print(tablero)
+        print(header)
+        print(rows)
+        print('  └───┴───┴───┴───┴───┴───┴───┴───┘\n')
+
+        print('Conteo: {} ●, {} ○'.format(np.sum(self.board == 1),
+                                          np.sum(self.board == -1)))
 
 
 SQUARE_SCORE = np.array([[9, 1, 3, 3, 3, 3, 1, 9],
@@ -166,61 +148,6 @@ def hybrid_utility(position):
         return (max_chips - min_chips) / total_chips
 
 
-def jugar():
-    juego = make_reversi()
-    os.system('cls' if os.name == 'nt' else 'clear')
-    print("Juego de othello contra una máquina con el algoritmo minimax.\n")
-    print("En este juego siempre empiezan las negras: ")
-    print("X: Piezas negras.")
-    print("O: Piezas blancas.\n")
-    res = ""
-
-    while res != "s" and res != "n":
-        res = input("¿Quieres ser primeras(s/n)?")
-
-    minimax = Negamax(hybrid_utility)
-
-    if res == "n":
-        juego.dibuja_tablero()
-        print("Esperando el movimiento de la máquina...")
-        jugada = minimax(juego, 4)
-
-        juego = juego.make_move(jugada)
-
-    while not juego.terminal:
-        print(np.multiply(SQUARE_SCORE, juego.board))
-        juego.dibuja_tablero()
-
-        jugadas = list(juego.legal_moves)
-        print("Jugadas: ")
-        for i in range(len(jugadas)):
-            print(i, ":", jugadas[i],
-                  "  ", sep='', end='')
-
-        opc = input("\nOpción: ")
-
-        while int(opc) >= len(jugadas) or int(opc) < 0:
-            print("Opción incorrecta...")
-            opc = input("Opción: ")
-
-        juego = juego.make_move(jugadas[int(opc)])
-        juego.dibuja_tablero()
-
-        print("Esperando el movimiento de la máquina...")
-
-        jugada = minimax(juego, 4)
-
-        juego = juego.make_move(jugada)
-
-    juego.dibuja_tablero()
-
-    mensaje = ("Ganaron las blancas" if juego.terminal() == 1
-               else "Ganaron las negras" if juego.terminal() == -1
-               else "Empate D:")
-
-    print(mensaje)
-
-
 def make_reversi():
     board = np.zeros((8, 8), dtype=np.int8)
     board[3, [3, 4]] = [1, -1]
@@ -228,18 +155,116 @@ def make_reversi():
     return ReversiPosition(board, 1)
 
 
+def make_alg_notation(move):
+    if move == 'pass':
+        return 'Pasar'
+    y, x = move
+    return '{}{}'.format(chr(ord('A') + x), y)
+
+
+def human_player(game):
+    moves = list(game.legal_moves)
+    prompt = ' '.join(["{0}: {1}".format(i, make_alg_notation(move))
+                       for i, move in enumerate(moves)])
+
+    print('Jugadas legales: ')
+    print(prompt)
+    print('Escoge una opción: ')
+    choice = input()
+    try:
+        choice = int(choice)
+        if 0 <= choice < len(moves):
+            print('Escogiste jugar en {}'
+                  .format(make_alg_notation(moves[choice])))
+            return moves[choice]
+    except ValueError:
+        pass
+
+    print('Entrada invalida, intenta de nuevo')
+
+    return human_player(game)
+
+
+# Solo dios puede juzgarme
+move_descriptions = [', ¡un movimiento excelente!',
+                     '. ¡Hasta un bebé lo pudo ver venir!',
+                     '. ¿Que esta pensando?',
+                     '. He visto mejores.',
+                     '. ¿Será este su fin?',
+                     '. Una jugada elegante sin duda.',
+                     '. La situación se calienta.',
+                     '. Se siente la tensión en el aire',
+                     '. No sé que decir.',
+                     '. Una jugada espectacular',
+                     '.']
+
+
+def ai_pretty_wrapper(ai):
+    '''
+    Decorador sencillo que solo imprime texto sobre la movida de la maquina
+    '''
+    def wrapped(game):
+        print('La computadora esta pensando. '
+              'Esperemos que se le ocurra algo bueno.')
+
+        move = ai(game)
+
+        print('La computadora ha elegido jugar en {}{}'
+              .format(make_alg_notation(move),
+                      random.choice(move_descriptions)))
+
+        return move
+
+    return wrapped
+
+
+def play(*players):
+    game = make_reversi()
+
+    next = 0
+    while not game.terminal:
+        next_player = players[next]
+
+        game.pprint()
+
+        move = next_player(game)
+        game = game.make_move(move)
+
+        next = (next + 1) % len(players)
+
+    game.pprint()
+
+    result = game.terminal
+    if result == 1:
+        print('Ganaron las blancas!')
+    elif result == -1:
+        print('Ganaron las negras!')
+
+
 if __name__ == '__main__':
-    reversi = make_reversi()
+    ai = ai_pretty_wrapper(Negamax(hybrid_utility))
+    print('!' * 80)
+    print('Buen dia. Este es el otelo. Si quieres cambiar quien empieza o \n'
+          'ponerlo para que dos maquinas se agarren a fregazos, vas a tener \n'
+          'que cambiar el código')
+    print('¡' * 80)
 
-    bad_player = Negamax(hybrid_utility)
-    good_player = Negamax(hybrid_utility)
+    '''
+    Afortunadamente cambiar quienes juegan es sencillo. Ahorita esta puesto
+    para jugar un humano contra un jugador de computadora:
+    '''
+    play(human_player, ai)
 
-    next = bad_player
+    '''
+    Pero fácilmente  podría haber dos personas jugando entre sí (¿por qué?)
 
-    while not reversi.terminal:
-        print('juega', reversi.player)
-        reversi.dibuja_tablero()
-        move = next(reversi)
-        reversi = reversi.make_move(move)
-        next = bad_player if next == good_player else good_player
-    reversi.dibuja_tablero()
+    play(human_player, human_player)
+
+
+    O incluso dos maquinas (util para comparar utilidades!)
+
+    other_ai = ai_pretty_wrapper(Negamax(dumb_utility))
+
+    play(ai, other_ai)
+
+    '''
