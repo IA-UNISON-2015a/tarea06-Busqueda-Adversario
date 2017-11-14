@@ -145,6 +145,7 @@ def ordena_jugadas(juego):
     de las más prometedoras.
     """
     jugadas = list(juego.jugadas_legales())
+    print(jugadas)
     shuffle(jugadas)
     return jugadas
 

@@ -33,15 +33,15 @@ __author__ = 'Patricia Quiroz'
 class Othello(JuegoSumaCeros2T):
   
     def __init__(self):
-    	x=[]
-		for i in range(8*8):
-			if i==35 or i==28 :
-  				x.append(1)
-			elif i== 36 or i==27:
-  				x.append(-1)
-			else:
-  				x.append(0)
-  		"""
+        x=[]
+        for i in range(64):
+        	if i==35 or i==28 :
+        			x.append(1)
+        	elif i== 36 or i==27:
+        			x.append(-1)
+        	else:
+        			x.append(0)
+        """
  		0	0	0	 0	 0	 0	 0	 0
 		0	0	0	 0	 0	 0	 0	 0
 		0	0	0	 0	 0	 0	 0	 0
@@ -51,11 +51,11 @@ class Othello(JuegoSumaCeros2T):
 		0	0	0	 0	 0	 0	 0	 0
 		0	0	0	 0	 0	 0	 0	 0
   		"""
-        super().__init__(tuple(x),-1)
+        super().__init__(tuple(x))
 
-    def validar_posicion(posicion):
-    	"""
-    	NOTA: TODAVIA LE FALTA PERO AHI VA LA IDEA
+    def validar_posicion(self,posicion):
+        """
+        NOTA: TODAVIA LE FALTA PERO AHI VA LA IDEA
 
         Método para validar si es posible usar la posicion para poner una ficha y asi realizar una jugada.
         @return: una lista con las direcciones en las cuales puede realizar un movimiento.
@@ -63,37 +63,40 @@ class Othello(JuegoSumaCeros2T):
         mov=[]
         #Revisar si la casilla no esta ocupada
         #Revisar posibles direcciones al colocar la ficha 
-        aux=[1,6,7,8,-1,-6,-7,-8] #8 formas de moverte respecto a la posicion
+        aux=[-1,-6,-7,-8,1,6,7,8] #8 formas de moverte respecto a la posicion
+        if self.x[posicion]!=0:
+            return False
         #Se empieza a mover por las direcciones
         for i in aux:
-        	#nos movemos en la direccion tomando en cuenta nuesta posicion actual(indice)
-        	aux2+=posicion+aux
-        	while(self.x[aux2]<64 or self.x[aux2]>0): #mientras no se salga del tablero
-        		aux2+=posicion+aux #Nos seguimos moviendo en la direccion
-		    	#se va checando si en la direccion en que se camina existen fichas contrarias
-		    	if self.x[aux2]!= 1 or self.x[aux2] == self.jugador: 
-		    		break #no existen al menos una ficha contraria que voltear
-		    	#si llega a un espacio
-		    	if self.x[aux2] == 0:
-		    		mov.append(i) #se agrega la direccion a la lista
-       	return mov
+            aux2=posicion+i
+            if (aux2>63 or aux2<0) or self.x[aux2]!= -self.jugador:
+                continue
+            #nos movemos en la direccion tomando en cuenta nuesta posicion actual(indice)
+            while(aux2<=63 and aux2>=0): #mientras no se salga del tablero
+                if self.x[aux2] == 0:
+                    break 
+                if self.x[aux2] == self.jugador: 
+                    #print("horaay")
+                    return True
+                    break 
+                aux2+=i 
+        #return mov
 
     def jugadas_legales(self):
-    	return None
-    	"""
+        """
         Las jugadas legales son las posiciones donde se puede colocar una ficha 
         del propio color en una casilla vacía. Entre la ficha recién colocada y otra
-		del mismo color (previamente en el tablero) debe haber fichas del color contrario en la misma
-		línea (ya sea en dirección diagonal, horizontal o vertical).
+        del mismo color (previamente en el tablero) debe haber fichas del color contrario en la misma
+        línea (ya sea en dirección diagonal, horizontal o vertical).
 
-		@return: una lista de jugadas que se pueden realizar
-		"""
+        @return: una lista de jugadas que se pueden realizar
+        """
         jugadas_legales = []
         for i in range(64):
-           direcciones = self.validar_posicion(i)
-           jugadas_legales.append( ((reng,col), direcciones) ) 
+            direcciones = self.validar_posicion(i)
+            if direcciones==True:
+                jugadas_legales.append(i) 
         return jugadas_legales
-
 
     def terminal(self):
         """
@@ -105,7 +108,7 @@ class Othello(JuegoSumaCeros2T):
         """
         f_negras = self.x.count(-1) #se obtiene el numero de fichas negras en el tablero
         f_blancas = self.x.count(1) #se obtiene el numero de fichas blancas en el tablero
-        if 0 not in x:
+        if 0 not in self.x:
             return 0
 
         if f_blancas>f_negras:
@@ -118,37 +121,37 @@ class Othello(JuegoSumaCeros2T):
         return ganador
 
     def hacer_jugada(self, jugada):
-    	#MODIFICAR, FALTAN DETALLES DE OTHELLO
-    	"""
-    	Metodo para hacer una jugada, recibe una jugada previamente validada por jugadas_legales.
+        #MODIFICAR, FALTAN DETALLES DE OTHELLO
+        """
+        Metodo para hacer una jugada, recibe una jugada previamente validada por jugadas_legales.
 
-    	Voltear las fichas del color contrario que quedan entre la ficha recién colocada y cualquier
-		otra del mismo color ya colocada. De esta forma, cambian de color.
-       	"""
+        Voltear las fichas del color contrario que quedan entre la ficha recién colocada y cualquier
+        otra del mismo color ya colocada. De esta forma, cambian de color.
+        """
 
-    	#Me muevo a traves del tablero 
-   		#Si existe una ficha de color y de manera tanto vertical, diagonal y horizontal existe
-   		#una o mas fichas de mi oponente, entonces, pongo una de mis fichas
-   		#¿como checar si existen una serie fichas del oponente?
-   		#primero checamos si existe ficha de oponente de manera horizontal
-	   for i in range(0, 41, 7):
-    	if self.x[i + jugada] == 0:
-        self.x[i + jugada] = self.jugador
-        self.historial.append(jugada) #Se guarda la jugada en el historial
-        self.jugador *= -1#Cambio mis ficha"""
+        #Me muevo a traves del tablero 
+        #Si existe una ficha de color y de manera tanto vertical, diagonal y horizontal existe
+        #una o mas fichas de mi oponente, entonces, pongo una de mis fichas
+        #¿como checar si existen una serie fichas del oponente?
+        #primero checamos si existe ficha de oponente de manera horizontal
+        for i in range(64):
+            if self.x[jugada] == 0:
+                #SE AGREGA LA FICHA EN LA POSICION 
+                self.x[jugada] = self.jugador
+                self.historial.append(jugada) #Se guarda la jugada en el historial
+                self.jugador *= -1#Cambio mis ficha"""
+                #SE NECESITA CAMBIAR LAS FICHAS DEPENDIENDO DE LA ORIENTACION DE LA JUGADA
         return None
 
     def deshacer_jugada(self):
-    	#MODIFICAR, FALTAN DETALLES DE OTHELLO
+        #MODIFICAR, FALTAN DETALLES DE OTHELLO
         pos = self.historial.pop() #Saco la ultima jugada realizada
-    	for i in range(64): #Me muevo a traves del tablero
+        for i in range(64): #Me muevo a traves del tablero
             if self.x[i + pos] != 0: #Si la casilla esta ocupada
                 self.x[i + pos] = 0 #Cambiamos la posicion a estar disponible de nuevo
                 self.jugador *= -1 #Cambio mi ficha
-                return None
-
-def utilidad_othello(x):
-
+        return None
+#def utilidad_othello(x):
 
 def ordena_jugadas(juego):
     """
@@ -184,31 +187,31 @@ class OthelloTK:
         self.app.title("Othello")
         self.L = L = int(escala) * 25
 
-        tmpstr = "Escoge, X siempre empiezan"
-        self.anuncio = tk.Message(app, bg='white', borderwidth=1,
+        tmpstr = "Juego del othello"
+        self.anuncio = tk.Message(app, bg='light grey', borderwidth=1,
                                   justify=tk.CENTER, text=tmpstr,
-                                  width=3 * L)
+                                  width=5 * L)
         self.anuncio.pack()
 
         barra = tk.Frame(app)
         barra.pack()
         botonX = tk.Button(barra,
                            command=lambda x=True: self.jugar(x),
-                           text='(re)iniciar con X')
+                           text='Iniciar Nuevo Juego')
         botonX.grid(column=0, row=0)
-        botonO = tk.Button(barra,
-                           command=lambda x=False: self.jugar(x),
-                           text='(re)iniciar con O')
-        botonO.grid(column=1, row=0)
+        #botonO = tk.Button(barra,
+        #                   command=lambda x=False: self.jugar(x),
+        #                   text='(re)iniciar con O')
+        #botonO.grid(column=1, row=0)
 
         ctn = tk.Frame(app, bg='black')
         ctn.pack()
         self.tablero = [None for _ in range(64)]
         self.textos = [None for _ in range(64)]
-        letra = ('Helvetica', -int(0.9 * L), 'bold')
+        letra = ('Helvetica', -int(1.1 * L), 'bold')
         for i in range(64):
             self.tablero[i] = tk.Canvas(ctn, height=L, width=L,
-                                        bg='light grey', borderwidth=0)
+                                        bg='light grey', borderwidth=3)
             self.tablero[i].grid(row=i // 8, column=i % 8)
             self.textos[i] = self.tablero[i].create_text(L // 2, L // 2,
                                                          font= letra, text=' ')
