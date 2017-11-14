@@ -92,7 +92,7 @@ class ReversiPosition(Position):
         '''
         return self.board.tostring(), self.player
 
-    def pprint(self):
+    def pprint(self, moves={}):
         '''
         Imprime el otelo con una apariencia decentona. El resultado me lo robé
         de la interfaz del dui, pero la implementación es mayormente original
@@ -100,15 +100,16 @@ class ReversiPosition(Position):
         header = ('    A   B   C   D   E   F   G   H\n'
                   '  ┌───┬───┬───┬───┬───┬───┬───┬───┐')
 
-        def pick_symbol(val):
-            return ('●' if val == 1 else
-                    '○' if val == -1 else ' ')
+        def pick_symbol(val, y, x):
+            move = (y, x)
+            return (moves[move] if move in moves else
+                    '●' if val == 1 else '○' if val == -1 else ' ')
 
         filler = '\n  ├───┼───┼───┼───┼───┼───┼───┼───┤\n'
-        rows = filler.join([str(i) + ' │ ' + ' │ '.join([pick_symbol(val)
-                                                         for val in row])
-                            + ' │'
-                            for i, row in enumerate(self.board)])
+        rows = filler.join([str(i) + ' │ ' + ' │ '.join([pick_symbol(val, i, j)
+                                                         for j, val
+                                                         in enumerate(row)]) +
+                            ' │' for i, row in enumerate(self.board)])
 
         print(header)
         print(rows)
@@ -184,22 +185,24 @@ def make_alg_notation(move):
 
 
 def human_player(game):
-    moves = list(game.legal_moves)
-    prompt = ' '.join(["{0}: {1}".format(i, make_alg_notation(move))
-                       for i, move in enumerate(moves)])
+    moves = {move: chr(ord('a') + i)
+             for i, move in enumerate(game.legal_moves)}
+    rev_moves = {value: key for key, value in moves.items()}
+    prompt = ' '.join(["{0}: {1}".format(c, make_alg_notation(move))
+                       for move, c in moves.items()])
+
+    print(moves.values())
+
+    game.pprint(moves)
 
     print('Jugadas legales: ')
     print(prompt)
     print('Escoge una opción: ')
     choice = input()
-    try:
-        choice = int(choice)
-        if 0 <= choice < len(moves):
-            print('Escogiste jugar en {}'
-                  .format(make_alg_notation(moves[choice])))
-            return moves[choice]
-    except ValueError:
-        pass
+    if choice in rev_moves:
+        print('Escogiste jugar en {}'
+              .format(make_alg_notation(rev_moves[choice])))
+        return rev_moves[choice]
 
     print('Entrada invalida, intenta de nuevo')
 
@@ -225,6 +228,7 @@ def ai_pretty_wrapper(ai):
     Decorador sencillo que solo imprime texto sobre la movida de la maquina
     '''
     def wrapped(game):
+        game.pprint()
         print('La computadora esta pensando. '
               'Esperemos que se le ocurra algo bueno.')
 
@@ -246,8 +250,6 @@ def play(*players):
     while not game.terminal:
         next_player = players[next]
 
-        game.pprint()
-
         move = next_player(game)
         game = game.make_move(move)
 
@@ -263,7 +265,7 @@ def play(*players):
 
 
 if __name__ == '__main__':
-    ai = ai_pretty_wrapper(Negamax(hybrid_utility, simple_order))
+    ai = ai_pretty_wrapper(Negamax(hybrid_utility))
     print('!' * 80)
     print('Buen dia. Este es el otelo. Si quieres cambiar quien empieza o \n'
           'ponerlo para que dos maquinas se agarren a fregazos, vas a tener \n'

@@ -11,7 +11,6 @@ es la implementación desde 0 del juego de Otello.
 
 """
 from busquedas_adversarios import JuegoSumaCeros2T
-from busquedas_adversarios import minimax_t
 from busquedas_adversarios import minimax
 from random import shuffle
 import tkinter as tk
@@ -51,23 +50,23 @@ class ConectaCuatro(JuegoSumaCeros2T):
                 if x[i + 21] == 0 or x[i + 14] != x[i + 21]:
                     continue
                 if ((x[i] == x[i + 7] == x[i + 14]) or
-                    (x[i + 7] == x[i + 14] == x[i + 28]) or
-                    (x[i + 14] == x[i + 28] == x[i + 35])):
+                        (x[i + 7] == x[i + 14] == x[i + 28]) or
+                        (x[i + 14] == x[i + 28] == x[i + 35])):
                     return x[i + 14]
             # Diagonales
             for j in (0, 7, 14):
                 for i in (0, 1, 2, 3):
                     # Hacia arriba
                     if (x[i + j + 24] != 0 and
-                        x[i + j + 24] == x[i + j + 16] and
-                        x[i + j + 16] == x[i + j + 8] and
-                        x[i + j + 8] == x[i + j]):
+                            x[i + j + 24] == x[i + j + 16] and
+                            x[i + j + 16] == x[i + j + 8] and
+                            x[i + j + 8] == x[i + j]):
                         return x[i + j]
                     # Hacia abajo
                     if (x[i + j + 21] != 0 and
-                        x[i + j + 21] == x[i + j + 15] and
-                        x[i + j + 15] == x[i + j + 9] and
-                        x[i + j + 9] == x[i + j + 3]):
+                            x[i + j + 21] == x[i + j + 15] and
+                            x[i + j + 15] == x[i + j + 9] and
+                            x[i + j + 9] == x[i + j + 3]):
                         return x[i + j + 3]
         # Ahora checamos renglones
         for i in range(0, 41, 7):
@@ -98,7 +97,7 @@ class ConectaCuatro(JuegoSumaCeros2T):
                 return None
 
 
-def utilidad_c4(x):
+def utilidad_c4(juego):
     """
     Calcula la utilidad de una posición del juego conecta 4
     para el jugador max (las fichas rojas, o el que empieza)
@@ -110,6 +109,7 @@ def utilidad_c4(x):
     Para probar solo busque el número de conecciones de las
     bolitas de mas arriba con su alrededor
     """
+    x = juego.x
     cum = 0
     for i in range(7):
         for j in (35, 28, 21, 14, 7, 0):
@@ -137,8 +137,15 @@ def ordena_jugadas(juego):
     pero es un criterio bastante inaceptable
 
     """
+    def revisar(jugada):
+        juego.hacer_jugada(jugada)
+        terminal = juego.terminal()
+        terminal = terminal if terminal else 0
+        juego.deshacer_jugada()
+        return juego.jugador * terminal
+
     jugadas = list(juego.jugadas_legales())
-    shuffle(jugadas)
+    jugadas.sort(key=revisar)
     return jugadas
 
 

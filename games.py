@@ -71,8 +71,8 @@ class Negamax:
             score, move = self.nega_run(pos, depth, -inf, inf, pos.player)
             local_end = perf_counter()
 
-            if (branching_factor * (local_end - local_start)
-                    > start_time + max_time - local_end):
+            if (branching_factor * (local_end - local_start) >
+                    start_time + max_time - local_end):
 
                 return move
         return move

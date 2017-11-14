@@ -104,7 +104,7 @@ def min_val(juego, jugada, d, utilidad, ordena_jugadas,
         return primero * ganancia
 
     if d == 0:
-        u = utilidad(juego.x)
+        u = utilidad(juego)
         juego.deshacer_jugada()
         return primero * u
 
@@ -136,7 +136,7 @@ def max_val(juego, jugada, d, utilidad, ordena_jugadas,
         return primero * ganancia
 
     if d == 0:
-        u = utilidad(juego.x)
+        u = utilidad(juego)
         juego.deshacer_jugada()
         return primero * u
 
