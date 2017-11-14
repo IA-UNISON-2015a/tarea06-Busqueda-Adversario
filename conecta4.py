@@ -128,6 +128,112 @@ def utilidad_c4(x):
     return cum / 42
 
 
+def utilidad_c4_2(x):
+    #Ganador por columnas:
+    cont=0
+    for i in range(7):
+        s = sum(x[j] for j in range(0+i,42,7))
+        cont+=1 if s>0 else 0 if s==0 else -1
+        
+    #Ganador por filas:
+    for i in (0,7,14,21,28,35):
+        s = sum(x[j] for j in range(i,i+7))
+        cont+=1 if s>0 else 0 if s==0 else -1
+    
+    #Ganador por diagonales 
+    
+    return cont 
+
+
+def utilidad_c4_3(x):
+    #De cuanto es el mayor logro hasta ahora...
+    #si estan juntas las fichas del mismo color, se suman los puntos.
+    
+    s=0
+    #por columna
+    
+    for i in range(7):
+        signo1 = x[i]
+        for j in range(i+7,42,7):
+            signo2=x[j]
+            if signo2==signo1:
+                s+=x[j] #ira sumando 1 si van 2 fichas rojas consejucutivas o 2 si son 3
+            else:
+                signo1=signo2
+            
+    
+    #por renglon
+    for i in (35, 28, 21, 14, 7, 0):
+        signo1 = x[i]
+        for j in range(7):
+            signo2=x[j]
+            if signo2==signo1:
+                s+=x[j] #ira sumando 1 si van 2 fichas rojas consejucutivas o 2 si son 3
+            else:
+                signo1=signo2
+    
+    #por diagonal
+    
+        
+    return s                               
+def utilidad_c4_4(x):
+    # maximo numero de fichas juntas entre cuatro para el jugadar con mayor número de fichas
+    # apiladas. Si ambas tienen el mismo máximo se devuelve un cero. 
+    
+    def busquedaRen(jug):
+        maximo=0
+        c=0
+        for ren in [0,7,14,21,28,35]:
+            for col in range(7):
+                if x[ren+col]==jug:
+                    c+=1
+                else:
+                    if c > maximo:
+                        maximo = c
+                    c=0
+            c=0
+        return maximo
+        
+    def busquedaCol(jug):
+        maximo=0
+        c=0
+        for col in range(7):
+            for ren in [col,41,7]:
+                if x[ren]==jug:
+                    c+=1
+                else:
+                    if c>maximo:
+                        maximo = c
+                    c=0
+            c=0
+        return maximo
+                
+    def busquedaD(jug):
+        
+        def submaxd(dom,caso):
+            maximo=0
+            c,t=0,4
+            for d in dom:
+                for ren in range(t):
+                    aux=ren*8 if caso else ren*6
+                    if x[d + aux]==jug:
+                        c+=1
+                    else:
+                        if c>maximo:
+                            maximo = c
+                        c=0
+                c,t=0,t+1
+    
+            return maximo
+            
+        return max(submaxd((14,7,0),True), submaxd((3,2,1),True),submaxd((20,13,6),False),submaxd((3,4,5),False))
+        
+    m1 = max(busquedaRen(1), busquedaCol(1), busquedaD(1))
+    m2 = max(busquedaRen(-1), busquedaCol(-1), busquedaD(-1))
+    
+    return  m1/4 if m1>m2 else m2/4 if m2>m1 else 0 
+    
+    
 def ordena_jugadas(juego):
     """
     Ordena las jugadas de acuerdo al jugador actual, en función
@@ -141,7 +247,16 @@ def ordena_jugadas(juego):
     shuffle(jugadas)
     return jugadas
 
+def ordena_jugadas2(juego):
+    #Toma en cuenta las jugadas de las líneas del centro por abrir más campo de posibilidades
+    jl = list(juego.jugadas_legales())
+    j = []
+    for i in (3,2,4):
+        if i in jl: j.append(i) 
+    for i in (0,1,5,6):
+        if i in jl: j.append(i) 
 
+    return tuple(j)
 class Conecta4GUI:
     def __init__(self, tmax=10, escala=1):
 
@@ -214,8 +329,8 @@ class Conecta4GUI:
             for i in range(7):
                 self.botones[i]['state'] = tk.DISABLED
 
-            jugada = minimax(juego, dmax=6, utilidad=utilidad_c4,
-                             ordena_jugadas=ordena_jugadas,
+            jugada = minimax_t(juego, 5, utilidad=utilidad_c4_4,
+                             ordena_jugadas=ordena_jugadas2,
                              transp=self.tr_ta)
             juego.hacer_jugada(jugada)
             self.actualiza_tablero(jugada, color_p)
@@ -241,8 +356,8 @@ class Conecta4GUI:
                 self.botones[i]['state'] = tk.DISABLED
                 self.botones[i].update()
 
-            jugada = minimax(juego, dmax=6, utilidad=utilidad_c4,
-                             ordena_jugadas=ordena_jugadas,
+            jugada = minimax_t(juego, 5, utilidad=utilidad_c4_4,
+                             ordena_jugadas=ordena_jugadas2,
                              transp=self.tr_ta)
             juego.hacer_jugada(jugada)
             self.actualiza_tablero(jugada, color_p)
@@ -270,7 +385,6 @@ class Conecta4GUI:
 
     def arranca(self):
         self.app.mainloop()
-
-
+        
 if __name__ == '__main__':
     Conecta4GUI(tmax=10).arranca()
