@@ -40,7 +40,7 @@ class ConectaCuatro(JuegoSumaCeros2T):
         Las jugadas legales son las columnas donde se puede
         poner una ficha (0, ..., 6), si no está llena.
         """
-        return (j for j in range(7) if self.x[35 + j] == 0)
+        return (j for j in range(7) if self.x[35 + j] == 0) #return columnas no llenas
 
     def terminal(self):
         x = self.x
@@ -82,11 +82,11 @@ class ConectaCuatro(JuegoSumaCeros2T):
         return None
 
     def hacer_jugada(self, jugada):
-        for i in range(0, 41, 7):
+        for i in range(0, 41, 7): #busca casilla vacia en una columna
             if self.x[i + jugada] == 0:
-                self.x[i + jugada] = self.jugador
-                self.historial.append(jugada)
-                self.jugador *= -1
+                self.x[i + jugada] = self.jugador #marca casilla con numero de jugador
+                self.historial.append(jugada) #se añade al historial
+                self.jugador *= -1 #se cambia de jugador
                 return None
 
     def deshacer_jugada(self):
@@ -98,35 +98,29 @@ class ConectaCuatro(JuegoSumaCeros2T):
                 return None
 
 
+
 def utilidad_c4(x):
-    """
-    Calcula la utilidad de una posición del juego conecta 4
-    para el jugador max (las fichas rojas, o el que empieza)
 
-    @param x: Una lista con el estado del tablero
-
-    @return: Un número entre -1 y 1 con la ganancia esperada
-
-    Para probar solo busque el número de conecciones de las
-    bolitas de mas arriba con su alrededor
-    """
-    cum = 0
+    ut = 0
     for i in range(7):
-        for j in (35, 28, 21, 14, 7, 0):
-            if x[i] != 0:
-                if 0 < i < 6:
-                    biases = (-6, -7, -8, -1, 1, 6, 8)
-                elif i == 0:
-                    biases = (-7, -8, 1, 8)
-                else:
-                    biases = (-6, -7, -1, 6)
-                con = sum(x[i] for bias in biases
-                          if i + bias >= 0 and x[i] == x[i + bias])
-                cum += con / len(biases)
-                break
+        cont = sum(x[j] for j in range(0+i,42,7))
+        if cont > 0:
+            ut += 1
+        elif cont < 0:
+            ut -= 1
+        else:
+            continue
 
-    return cum / 42
+    for i in (0,7,14,21,28,35):
+        s = sum(x[j] for j in range(i,i+7))
+        if cont > 0:
+            ut += 1
+        elif cont < 0:
+            ut -= 1
+        else:
+            continue
 
+    return ut
 
 def ordena_jugadas(juego):
     """
