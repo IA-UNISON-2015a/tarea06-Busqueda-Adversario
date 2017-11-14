@@ -40,7 +40,8 @@ class ConectaCuatro(JuegoSumaCeros2T):
         Las jugadas legales son las columnas donde se puede
         poner una ficha (0, ..., 6), si no está llena.
         """
-        return (j for j in range(7) if self.x[35 + j] == 0)
+        return [j for j in range(7) if self.x[35 + j] == 0]
+
 
     def terminal(self):
         x = self.x
@@ -59,9 +60,9 @@ class ConectaCuatro(JuegoSumaCeros2T):
                 for i in (0, 1, 2, 3):
                     # Hacia arriba
                     if (x[i + j + 24] != 0 and
-                        x[i + j + 24] == x[i + j + 16] and
-                        x[i + j + 16] == x[i + j + 8] and
-                        x[i + j + 8] == x[i + j]):
+                            x[i + j + 24] == x[i + j + 16] and
+                            x[i + j + 16] == x[i + j + 8] and
+                            x[i + j + 8] == x[i + j]):
                         return x[i + j]
                     # Hacia abajo
                     if (x[i + j + 21] != 0 and
@@ -76,7 +77,7 @@ class ConectaCuatro(JuegoSumaCeros2T):
             for j in range(4):
                 if (x[i + j] == x[i + j + 1] == x[i + j + 2] == x[i + j + 3]):
                     return x[i + 3]
-        # Ahora checamos si no se lleno el tabero
+        # Ahora checamos si no se lleno el tablero
         if 0 not in x:
             return 0
         return None
@@ -99,6 +100,10 @@ class ConectaCuatro(JuegoSumaCeros2T):
 
 
 def utilidad_c4(x):
+    pass
+
+
+'''def utilidad_c4(x):
     """
     Calcula la utilidad de una posición del juego conecta 4
     para el jugador max (las fichas rojas, o el que empieza)
@@ -107,7 +112,7 @@ def utilidad_c4(x):
 
     @return: Un número entre -1 y 1 con la ganancia esperada
 
-    Para probar solo busque el número de conecciones de las
+    Para probar solo busque el número de conexiones de las
     bolitas de mas arriba con su alrededor
     """
     cum = 0
@@ -124,11 +129,21 @@ def utilidad_c4(x):
                           if i + bias >= 0 and x[i] == x[i + bias])
                 cum += con / len(biases)
                 break
-
     return cum / 42
-
+'''
 
 def ordena_jugadas(juego):
+    jugadas = list(juego.jugadas_legales())
+    aux_sort = []
+    for play in jugadas:
+        juego.hacer_jugada(play)
+        aux_sort.append((utilidad_c4(juego.x), play))
+        juego.deshacer_jugada()
+    aux_sort.sort(reverse=True)
+    return [jugadas_chidas for i, jugadas_chidas in aux_sort]
+
+
+'''def ordena_jugadas(juego):
     """
     Ordena las jugadas de acuerdo al jugador actual, en función
     de las más prometedoras.
@@ -140,7 +155,7 @@ def ordena_jugadas(juego):
     jugadas = list(juego.jugadas_legales())
     shuffle(jugadas)
     return jugadas
-
+'''
 
 class Conecta4GUI:
     def __init__(self, tmax=10, escala=1):
