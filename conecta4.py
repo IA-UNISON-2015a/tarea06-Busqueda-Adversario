@@ -100,10 +100,6 @@ class ConectaCuatro(JuegoSumaCeros2T):
 
 
 def utilidad_c4(x):
-    pass
-
-
-'''def utilidad_c4(x):
     """
     Calcula la utilidad de una posición del juego conecta 4
     para el jugador max (las fichas rojas, o el que empieza)
@@ -130,7 +126,7 @@ def utilidad_c4(x):
                 cum += con / len(biases)
                 break
     return cum / 42
-'''
+
 
 def ordena_jugadas(juego):
     jugadas = list(juego.jugadas_legales())
