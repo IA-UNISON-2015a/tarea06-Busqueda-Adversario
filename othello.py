@@ -148,11 +148,11 @@ class Othello(JuegoSumaCeros2T):
         return None
 
 def utilidad_othello(x):
-    negras = x.count(-1) /100 #se obtiene el numero de fichas negras en el tablero
-    blancas = x.count(1) /100#se obtiene el numero de fichas blancas en el tablero
-    #fichas = negras + blancas
+    negras = x.count(-1) #se obtiene el numero de fichas negras en el tablero
+    blancas = x.count(1) #se obtiene el numero de fichas blancas en el tablero
+    fichas = negras + blancas
 
-    return (negras-blancas) #/ fichas
+    return (negras-blancas)/ fichas
         
 def ordena_jugadas(juego):
     """
