@@ -35,35 +35,32 @@ class Othello(JuegoSumaCeros2T):
     def __init__(self):
         x=[]
         for i in range(64):
-        	if i==35 or i==28 :
-        			x.append(1)
-        	elif i== 36 or i==27:
-        			x.append(-1)
-        	else:
-        			x.append(0)
+            if i==35 or i==28 :
+                    x.append(1)
+            elif i== 36 or i==27:
+                    x.append(-1)
+            else:
+                    x.append(0)
         """
- 		0	0	0	 0	 0	 0	 0	 0
-		0	0	0	 0	 0	 0	 0	 0
-		0	0	0	 0	 0	 0	 0	 0
-		0	0	0	 1	-1	 0	 0	 0
-		0	0	0	-1	 1	 0	 0	 0
-		0	0	0	 0	 0	 0	 0	 0
-		0	0	0	 0	 0	 0	 0	 0
-		0	0	0	 0	 0	 0	 0	 0
-  		"""
+        0   0   0    0   0   0   0   0
+        0   0   0    0   0   0   0   0
+        0   0   0    0   0   0   0   0
+        0   0   0    1  -1   0   0   0
+        0   0   0   -1   1   0   0   0
+        0   0   0    0   0   0   0   0
+        0   0   0    0   0   0   0   0
+        0   0   0    0   0   0   0   0
+        """
         super().__init__(tuple(x))
 
     def validar_posicion(self,posicion):
         """
-        NOTA: TODAVIA LE FALTA PERO AHI VA LA IDEA
-
         Método para validar si es posible usar la posicion para poner una ficha y asi realizar una jugada.
         @return: una lista con las direcciones en las cuales puede realizar un movimiento.
         """
         mov=[]
-        #Revisar si la casilla no esta ocupada
-        #Revisar posibles direcciones al colocar la ficha 
-        aux=[-1,-6,-7,-8,1,6,7,8] #8 formas de moverte respecto a la posicion
+        #Revisar posibles direcciones al colocar la ficha
+        aux=[1,6,7,8,-1,-6,-7,-8] #8 formas de moverte respecto a la posicion
         if self.x[posicion]!=0:
             return False
         #Se empieza a mover por las direcciones
@@ -100,23 +97,30 @@ class Othello(JuegoSumaCeros2T):
 
     def terminal(self):
         """
-		La partida acaba cuando nadie puede mover (normalmente cuando el tablero está lleno o casi
-		lleno) y gana quien en ese momento tenga más fichas sobre el tablero.
-		****Existe un caso especial donde se le terminan las fichas a un jugador.****
+        La partida acaba cuando nadie puede mover (normalmente cuando el tablero está lleno o casi
+        lleno) y gana quien en ese momento tenga más fichas sobre el tablero.
+        ****Existe un caso especial donde se le terminan las fichas a un jugador.****
 
-		@return: quien gano
+        @return: quien gano
         """
         f_negras = self.x.count(-1) #se obtiene el numero de fichas negras en el tablero
         f_blancas = self.x.count(1) #se obtiene el numero de fichas blancas en el tablero
+
+        if f_negras == 0 or f_blancas == 0:
+            return 1 if f_blancas>f_negras else -1
+
+        if 0 in self.x:
+            return None
+
         if 0 not in self.x:
-            return 0
+            return utilidad_othello(self.x)
 
         if f_blancas>f_negras:
-        	ganador=1
+            ganador=1
         elif f_negras > f_blancas:
-        	ganador=-1
+            ganador=-1
         else: #EMPATE
-        	ganador=0
+            ganador=0
 
         return ganador
 
@@ -129,30 +133,30 @@ class Othello(JuegoSumaCeros2T):
         otra del mismo color ya colocada. De esta forma, cambian de color.
         """
 
-        #Me muevo a traves del tablero 
-        #Si existe una ficha de color y de manera tanto vertical, diagonal y horizontal existe
-        #una o mas fichas de mi oponente, entonces, pongo una de mis fichas
-        #¿como checar si existen una serie fichas del oponente?
-        #primero checamos si existe ficha de oponente de manera horizontal
         for i in range(64):
             if self.x[jugada] == 0:
-                #SE AGREGA LA FICHA EN LA POSICION 
+                #SE AGREGA LA FICHA EN LA POSICION
                 self.x[jugada] = self.jugador
+                #print(self.x[jugada])
                 self.historial.append(jugada) #Se guarda la jugada en el historial
                 self.jugador *= -1#Cambio mis ficha"""
-                #SE NECESITA CAMBIAR LAS FICHAS DEPENDIENDO DE LA ORIENTACION DE LA JUGADA
+                    #SE NECESITA CAMBIAR LAS FICHAS DEPENDIENDO DE LA ORIENTACION DE LA JUGADA
         return None
 
     def deshacer_jugada(self):
-        #MODIFICAR, FALTAN DETALLES DE OTHELLO
         pos = self.historial.pop() #Saco la ultima jugada realizada
-        for i in range(64): #Me muevo a traves del tablero
-            if self.x[i + pos] != 0: #Si la casilla esta ocupada
-                self.x[i + pos] = 0 #Cambiamos la posicion a estar disponible de nuevo
-                self.jugador *= -1 #Cambio mi ficha
+        if self.x[pos] != 0: #Si la casilla esta ocupada
+           self.x[pos] = 0 #Cambiamos la posicion a estar disponible de nuevo
+           self.jugador *= -1 #Cambio mi ficha
         return None
-#def utilidad_othello(x):
 
+def utilidad_othello(x):
+    negras = x.count(-1) #se obtiene el numero de fichas negras en el tablero
+    blancas = x.count(1) #se obtiene el numero de fichas blancas en el tablero
+    fichas = negras + blancas
+
+    return (negras-blancas) / fichas
+        
 def ordena_jugadas(juego):
     """
     Ordena las jugadas de acuerdo al jugador actual, en función
@@ -160,26 +164,26 @@ def ordena_jugadas(juego):
     """
     jugadas = list(juego.jugadas_legales())
     shuffle(jugadas)
-    return jugadas	
+    return jugadas  
 
 def pprint_gato(x):
-	y = [('X' if x[i] > 0 else 'O' if x[i] < 0 else str(i)) for i in range(64)]
-	print(" {} | {} | {} | {} | {} | {} | {} | {} ".format(y[0], y[1], y[2], y[3], y[4], y[5], y[6], y[7]).center(60))
-	print("---+---+---".center(60))
-	print(" {} | {} | {} | {} | {} | {} | {} | {} ".format(y[8], y[9], y[10], y[11], y[12], y[13], y[14], y[15]).center(60))
-	print("---+---+---".center(60))
-	print(" {} | {} | {} | {} | {} | {} | {} | {} ".format(y[16], y[17], y[18], y[19], y[20], y[21], y[22], y[23]).center(60))
-	print("---+---+---".center(60))
-	print(" {} | {} | {} | {} | {} | {} | {} | {} ".format(y[24], y[25], y[26], y[27], y[28], y[29], y[30], y[31]).center(60))
-	print("---+---+---".center(60))
-	print(" {} | {} | {} | {} | {} | {} | {} | {} ".format(y[32], y[33], y[34], y[35], y[36], y[37], y[38], y[39]).center(60))
-	print("---+---+---".center(60))
-	print(" {} | {} | {} | {} | {} | {} | {} | {} ".format(y[40], y[41], y[42], y[43], y[44], y[45], y[46], y[47]).center(60))
-	print("---+---+---".center(60))
-	print(" {} | {} | {} | {} | {} | {} | {} | {} ".format(y[48], y[49], y[50], y[51], y[52], y[53], y[54], y[55]).center(60))
-	print("---+---+---".center(60))
-	print(" {} | {} | {} | {} | {} | {} | {} | {} ".format(y[56], y[57], y[58], y[59], y[60], y[61], y[62], y[63]).center(60))
-
+    y = [('X' if x[i] > 0 else 'O' if x[i] < 0 else str(i)) for i in range(64)]
+    print("---+---+---".center(60))
+    print(" {} | {} | {} | {} | {} | {} | {} | {} ".format(y[56], y[57], y[58], y[59], y[60], y[61], y[62], y[63]).center(60))
+    print("---+---+---".center(60))
+    print(" {} | {} | {} | {} | {} | {} | {} | {} ".format(y[48], y[49], y[50], y[51], y[52], y[53], y[54], y[55]).center(60))
+    print("---+---+---".center(60))
+    print(" {} | {} | {} | {} | {} | {} | {} | {} ".format(y[40], y[41], y[42], y[43], y[44], y[45], y[46], y[47]).center(60))
+    print("---+---+---".center(60))
+    print(" {} | {} | {} | {} | {} | {} | {} | {} ".format(y[32], y[33], y[34], y[35], y[36], y[37], y[38], y[39]).center(60))
+    print("---+---+---".center(60))
+    print(" {} | {} | {} | {} | {} | {} | {} | {} ".format(y[24], y[25], y[26], y[27], y[28], y[29], y[30], y[31]).center(60))
+    print("---+---+---".center(60))
+    print(" {} | {} | {} | {} | {} | {} | {} | {} ".format(y[16], y[17], y[18], y[19], y[20], y[21], y[22], y[23]).center(60))
+    print("---+---+---".center(60))
+    print(" {} | {} | {} | {} | {} | {} | {} | {} ".format(y[8], y[9], y[10], y[11], y[12], y[13], y[14], y[15]).center(60))
+    print("---+---+---".center(60))
+    print(" {} | {} | {} | {} | {} | {} | {} | {} ".format(y[0], y[1], y[2], y[3], y[4], y[5], y[6], y[7]).center(60))
 class OthelloTK:
     def __init__(self, escala=2):
 
@@ -199,10 +203,6 @@ class OthelloTK:
                            command=lambda x=True: self.jugar(x),
                            text='Iniciar Nuevo Juego')
         botonX.grid(column=0, row=0)
-        #botonO = tk.Button(barra,
-        #                   command=lambda x=False: self.jugar(x),
-        #                   text='(re)iniciar con O')
-        #botonO.grid(column=1, row=0)
 
         ctn = tk.Frame(app, bg='black')
         ctn.pack()
@@ -290,5 +290,4 @@ class OthelloTK:
         self.app.mainloop()
 
 if __name__ == '__main__':
-    # juega_gato('X')
     OthelloTK().arranca()

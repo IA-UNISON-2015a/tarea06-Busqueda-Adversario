@@ -17,7 +17,6 @@ Se ilustra con el juego del gato
 
 from time import perf_counter
 
-
 class JuegoSumaCeros2T:
     """
     Clase abstracta para juegos de suma cero, por turnos para 2 jugadores.
