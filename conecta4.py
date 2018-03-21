@@ -16,7 +16,7 @@ from busquedas_adversarios import minimax
 from random import shuffle
 import tkinter as tk
 
-__author__ = 'juliowaissman'
+__author__ = 'luis fernando'
 
 
 class ConectaCuatro(JuegoSumaCeros2T):
@@ -274,3 +274,4 @@ class Conecta4GUI:
 
 if __name__ == '__main__':
     Conecta4GUI(tmax=10).arranca()
+
