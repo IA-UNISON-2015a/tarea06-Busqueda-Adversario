@@ -97,6 +97,53 @@ class ConectaCuatro(JuegoSumaCeros2T):
                 self.jugador *= -1
                 return None
 
+"""
+    35  36  37  38  39  40  41
+    28  29  30  31  32  33  34
+    21  22  23  24  25  26  27
+    14  15  16  17  18  19  20
+     7   8   9  10  11  12  13
+     0   1   2   3   4   5   6
+"""
+def falta1ParaDiagonal(x):
+    for j in (0, 7, 14):
+        for i in (0, 1, 2, 3):
+            # Hacia arriba
+            if (x[i + j + 24] == 0 and #si no hay ficha en 24 pero si
+                x[i + j + 17] != 0 and #en 17, se puede poner en 24
+                x[i + j + 16] != 0 and
+                x[i + j + 16] == x[i + j + 8] == x[i + j]):
+
+                return True
+            # Hacia abajo
+            if (x[i + j + 21] == 0 and #si no hay ficha en 21 pero si
+                x[i + j + 14] != 0 and #en 14, se puede poner en 21
+                x[i + j + 15] != 0 and
+                x[i + j + 15] == x[i + j + 9] == x[i + j + 3]):
+                return True
+
+    return False
+
+def falta1ParaVertical(x):
+    for i in range(7):
+        for j in range(0, 21, 7):
+        if (x[i] != 0 and
+            x[i + j + 21] == 0 and #revisa si la cuarta posicion esta ocupada
+            (x[i + j] == x[i + j + 7] == x[i + j + 14]):
+            return True
+
+    return False
+
+def falta1ParaHorizontal(x):
+    # Ahora checamos renglones
+    for i in range(0, 41, 7):
+        for j in range(4):
+            if (x[i + j] != 0 and
+                x[i + j + 3] == 0 and #revisa que la cuarta posicion este desocupada
+                x[i + j] == x[i + j + 1] == x[i + j + 2]):
+                return True
+
+    return False
 
 def utilidad_c4(x):
     """
