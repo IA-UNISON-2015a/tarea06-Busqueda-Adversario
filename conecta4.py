@@ -110,22 +110,65 @@ def utilidad_c4(x):
     Para probar solo busque el número de conecciones de las
     bolitas de mas arriba con su alrededor
     """
-    cum = 0
-    for i in range(7):
-        for j in (35, 28, 21, 14, 7, 0):
-            if x[i] != 0:
-                if 0 < i < 6:
-                    biases = (-6, -7, -8, -1, 1, 6, 8)
-                elif i == 0:
-                    biases = (-7, -8, 1, 8)
-                else:
-                    biases = (-6, -7, -1, 6)
-                con = sum(x[i] for bias in biases
-                          if i + bias >= 0 and x[i] == x[i + bias])
-                cum += con / len(biases)
-                break
+    utilidad = 0
 
-    return cum / 42
+    # Revisamos cuantas secuencias verticales de 3 fichas hay.
+    for c in range(7):
+        for r in (c, c+7, c+14, c+21, c+28):
+            tres_seguidos = x[r] == x[r+7] #and x[r] == x[r+14]
+            hay_pos = r + 21 < 42
+
+            if tres_seguidos and x[r] == 1:
+                utilidad += 1
+            elif tres_seguidos and hay_pos:
+                if x[r + 14] == 1:
+                    utilidad += 10
+                else:
+                    utilidad -= 10
+
+    # Revisamos cuantas secuencias horizontales de 3 fichas hay.
+    for r in (0, 7, 14, 21, 28, 35):
+        for c in (r, r+1, r+2, r+3):
+            tres_seguidos = x[c] == x[c+1] and x[c] == x[c+2]
+            hay_pos = c > r
+
+            if tres_seguidos:
+                if x[c] == 1: utilidad += 1
+                if hay_pos:
+                    if x[c - 1] == 1: utilidad += 3
+                    else: utilidad -= 10
+                if x[c + 3] == 1: utilidad += 3
+                else: utilidad -= 10
+
+    # Revisamos cuantas secuencias diagonales de 3 fichas hay.
+    for r in (0, 7, 14):
+        for c in (r, r+1, r+2, r+3):
+            tres_seguidos = x[c] == x[c+8] and x[c] == x[c+16]
+            hay_pos = c > 6 and c != r
+
+            if tres_seguidos:
+                if x[c] == 1: utilidad += 1
+                if hay_pos:
+                    if x[c - 8] == 1: utilidad += 3
+                    else: utilidad -= 10
+                if x[c + 24] == 1: utilidad += 3
+                else: utilidad -= 10
+
+    # Revisamos la otra direccion de las diagonales.
+    for r in (0, 7, 14):
+        for c in (r+3, r+4, r+5, r+6):
+            tres_seguidos = x[c] == x[c+6] and x[c] == x[c+12]
+            hay_pos = c > 6 and c != r+6
+
+            if tres_seguidos:
+                if x[c] == 1: utilidad += 1
+                if hay_pos:
+                    if x[c - 6] == 1: utilidad += 3
+                    else: utilidad -= 10
+                if x[c + 18] == 1: utilidad += 3
+                else: utilidad -= 10
+
+    return utilidad
 
 
 def ordena_jugadas(juego):
@@ -138,9 +181,13 @@ def ordena_jugadas(juego):
 
     """
     jugadas = list(juego.jugadas_legales())
-    shuffle(jugadas)
-    return jugadas
+    x = juego.x
 
+    orden = sorted([(abs(sum([1 for i in range(jug, jug + 36, 7)
+                              if x[i] != 0]) - 3.5),
+                     jug) for jug in jugadas])
+
+    return [j[1] for j in orden]
 
 class Conecta4GUI:
     def __init__(self, tmax=10, escala=1):
