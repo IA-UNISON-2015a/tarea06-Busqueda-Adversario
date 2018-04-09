@@ -17,7 +17,6 @@ Se ilustra con el juego del gato
 
 from time import perf_counter
 
-
 class JuegoSumaCeros2T:
     """
     Clase abstracta para juegos de suma cero, por turnos para 2 jugadores.
@@ -108,7 +107,7 @@ def min_val(juego, jugada, d, utilidad, ordena_jugadas,
         return primero * u
 
     if transp is not None and tuple(juego.x) in transp:
-        val_tt, d_tt, tipo_tt = transp[tuple(juego.x)]
+        d_tt,val_tt, tipo_tt = transp[tuple(juego.x)]
         if d_tt >= d and tipo_tt is 'beta':
             beta = min(alfa, val_tt)
 
@@ -140,7 +139,7 @@ def max_val(juego, jugada, d, utilidad, ordena_jugadas,
         return primero * u
 
     if transp is not None and tuple(juego.x) in transp:
-        val_tt, d_tt, tipo_tt = transp[tuple(juego.x)]
+        d_tt,val_tt, tipo_tt = transp[tuple(juego.x)]
         if d_tt >= d and tipo_tt is 'alfa':
             alfa = max(alfa, val_tt)
 

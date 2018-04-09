@@ -16,11 +16,11 @@ import tkinter as tk
 __author__ = 'Patricia Quiroz'
 
 """
-	Inicializa el juego, esto es: el número de columnas y
-	renglones y el estado inicial del juego. Cuyas posiciones
-	estan dadas como:
+    Inicializa el juego, esto es: el número de columnas y
+    renglones y el estado inicial del juego. Cuyas posiciones
+    estan dadas como:
 
-    56  57  58  59  60  61  62  63		
+    56  57  58  59  60  61  62  63      
     48  49  50  51  52  53  54  55
     40  41  42  43  44  45  46  47
     32  33  34  35  36  37  38  39
@@ -92,7 +92,7 @@ class Othello(JuegoSumaCeros2T):
         for i in range(64):
             direcciones = self.validar_posicion(i)
             if direcciones==True:
-                jugadas_legales.append(i)
+                jugadas_legales.append(i) 
         return jugadas_legales
 
     def terminal(self):
@@ -111,6 +111,9 @@ class Othello(JuegoSumaCeros2T):
 
         if 0 in self.x:
             return None
+
+        if 0 not in self.x:
+            return utilidad_othello(self.x)
 
         if f_blancas>f_negras:
             ganador=1
@@ -152,7 +155,7 @@ def utilidad_othello(x):
     blancas = x.count(1) #se obtiene el numero de fichas blancas en el tablero
     fichas = negras + blancas
 
-    return (negras-blancas)/ fichas
+    return (negras-blancas) / fichas
         
 def ordena_jugadas(juego):
     """
@@ -181,6 +184,7 @@ def pprint_gato(x):
     print(" {} | {} | {} | {} | {} | {} | {} | {} ".format(y[8], y[9], y[10], y[11], y[12], y[13], y[14], y[15]).center(60))
     print("---+---+---".center(60))
     print(" {} | {} | {} | {} | {} | {} | {} | {} ".format(y[0], y[1], y[2], y[3], y[4], y[5], y[6], y[7]).center(60))
+
 class OthelloTK:
     def __init__(self, escala=2):
 
@@ -200,6 +204,10 @@ class OthelloTK:
                            command=lambda x=True: self.jugar(x),
                            text='Iniciar Nuevo Juego')
         botonX.grid(column=0, row=0)
+        #botonO = tk.Button(barra,
+        #                   command=lambda x=False: self.jugar(x),
+        #                   text='(re)iniciar con O')
+        #botonO.grid(column=1, row=0)
 
         ctn = tk.Frame(app, bg='black')
         ctn.pack()
@@ -222,6 +230,7 @@ class OthelloTK:
             jugada = minimax(juego)
             juego.hacer_jugada(jugada)
 
+
         self.anuncio['text'] = "A ver de que cuero salen más correas"
         for _ in range(64):
             self.actualiza_tablero(juego.x)
@@ -230,6 +239,7 @@ class OthelloTK:
             ganador = juego.terminal()
             if ganador is not None:
                 break
+
             jugada = minimax(juego)
             juego.hacer_jugada(jugada)
             ganador = juego.terminal()
@@ -245,6 +255,7 @@ class OthelloTK:
         self.anuncio.update()
 
     def escoge_jugada(self, juego):
+        print("holi")
         jugadas_posibles = list(juego.jugadas_legales())
         if len(jugadas_posibles) == 1:
             return jugadas_posibles[0]
@@ -287,4 +298,5 @@ class OthelloTK:
         self.app.mainloop()
 
 if __name__ == '__main__':
+    # juega_gato('X')
     OthelloTK().arranca()
