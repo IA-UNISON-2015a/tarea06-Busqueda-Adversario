@@ -18,6 +18,7 @@ import tkinter as tk
 
 __author__ = 'juliowaissman'
 
+#Me pidió que comentara, así que trataré de hacerlo lo más claro posible :P
 
 class ConectaCuatro(JuegoSumaCeros2T):
     def __init__(self):
@@ -33,13 +34,13 @@ class ConectaCuatro(JuegoSumaCeros2T):
                          7   8   9  10  11  12  13
                          0   1   2   3   4   5   6
         """
-        super().__init__(tuple([0 for _ in range(6 * 7)]))
+        super().__init__(tuple([0 for _ in range(6 * 7)])) #tamaño del tablero
 
     def jugadas_legales(self):
         """
         Las jugadas legales son las columnas donde se puede
         poner una ficha (0, ..., 6), si no está llena.
-        """
+        """ 
         return (j for j in range(7) if self.x[35 + j] == 0)
 
     def terminal(self):
@@ -98,6 +99,53 @@ class ConectaCuatro(JuegoSumaCeros2T):
                 return None
 
 
+def u_renglon(estado, posición, jugador):
+    #Primero checo si se encuentran mas de 3 lugares a la izquierda quiere decir que hay 4 a la derecha, así es válido hacer la función
+    if posición%7 > 3:
+        return False
+    
+    #Después checamos si hay piezas mixtas a la derecha de la posición dada
+    for i in range(4):
+        if estado[posición+i] != jugador or estado[posición+i] != 0:       #se checa si el que sigue no es del mismo jugador o ya está ocuapda
+            return False
+    return True
+
+def u_columna(estado, posición, jugador):
+    #checamos si hay 3 más arriba del mismo jugador
+    if posición/7 < 3 :
+        return False
+    #Checamos si hay piezas mixtas
+    for i in range(3):
+        if estado[posición + 7] != jugador or estado[posición + 7] != 0:
+            return False
+        else:
+            posición += 7
+    return True
+
+def u_diagonal_derecha(estado, posición, jugador):
+    #Checa si hay 4 espacios a la derecha y hay 3 arriba.
+    if posición%7 < 3 and posición/7 < 3:
+        return False
+    #checar si hay piezas mixtas
+    for i in range(3):
+        if estado[posición + (7+1)] != jugador or estado[posición + (7+1)] != 0:
+            return False
+        posición += 8
+    return True
+
+def u_diagonal_izquierda(estado, posición, jugador):
+    #Checa si hay 4 espacios a la izq y hay 3 arriba.
+    if posición%7 >= 3 and posición/7 < 3:
+        return False
+    #checar si hay piezas mixtas
+    for i in range(3):
+        if estado[posición + (7-1)] != jugador or estado[posición + (7-1)] != 0:
+            return False
+        else:
+            posición += 6
+    return True
+
+
 def utilidad_c4(x):
     """
     Calcula la utilidad de una posición del juego conecta 4
@@ -110,7 +158,33 @@ def utilidad_c4(x):
     Para probar solo busque el número de conecciones de las
     bolitas de mas arriba con su alrededor
     """
-    cum = 0
+    c1 = 0 #contador jugador 1
+    c2 = 0 #contador jugador -1
+    for i in range(6*7): #Hay 6 renglones
+        if u_renglon(x, i, 1):
+            c1+=1
+        if u_renglon(x, i, -1):
+            c2+=1
+    for i in range((20)): #Hay 7 columnas
+        if u_columna(x, i, 1):
+            c1+=1
+        if u_columna(x, i, -1):
+            c2+=1
+    for i in range(20): #hasta el 17 es donde puede haber diagonal 
+        if u_diagonal_derecha(x, i, 1):
+            c1+=1
+        if u_diagonal_derecha(x, i, -1):
+            c2+=1
+    for i in range(20): #Hasta el 20 es donde puede haber diagonal
+        if u_diagonal_izquierda(x, i, 1):
+            c1+=1
+        if u_diagonal_izquierda(x, i, -1):
+            c2+=1
+
+    return c2-c1
+
+
+    """cum = 0
     for i in range(7):
         for j in (35, 28, 21, 14, 7, 0):
             if x[i] != 0:
@@ -126,7 +200,7 @@ def utilidad_c4(x):
                 break
 
     return cum / 42
-
+    """
 
 def ordena_jugadas(juego):
     """
@@ -138,8 +212,13 @@ def ordena_jugadas(juego):
 
     """
     jugadas = list(juego.jugadas_legales())
-    shuffle(jugadas)
-    return jugadas
+    jugadas_buenas = []
+    for jugada in jugadas:
+        juego.hacer_jugada(jugada)
+        jugadas_buenas.append((utilidad_c4(juego.x), jugada))
+        juego.deshacer_jugada()
+    jugadas_buenas.sort()
+    return [jugadas_final for _, jugadas_final in jugadas_buenas]
 
 
 class Conecta4GUI:
