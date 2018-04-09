@@ -82,26 +82,36 @@ def minimax(juego, dmax=100, utilidad=None, ordena_jugadas=None, transp=None):
     if ordena_jugadas is None:
         def ordena_jugadas(juego):
             return juego.jugadas_legales()
+    
     if utilidad is None:
         def utilidad(juego):
             return juego.terminal()
-        dmax = int(1e10)
-
+        dmax = 100
+    
+    
+    if not ordena_jugadas(juego):
+        return None
+        
     return max((a for a in ordena_jugadas(juego)),
                key=lambda a: min_val(juego, a, dmax, utilidad, ordena_jugadas,
                                      -1e10, 1e10, juego.jugador, transp))
+    
 
+    
 
 def min_val(juego, jugada, d, utilidad, ordena_jugadas,
             alfa, beta, primero, transp):
-
+    
+    
     juego.hacer_jugada(jugada)
-
     ganancia = juego.terminal()
+    
+    
     if ganancia is not None:
         juego.deshacer_jugada()
         return primero * ganancia
 
+    
     if d == 0:
         u = utilidad(juego.x)
         juego.deshacer_jugada()
@@ -112,9 +122,11 @@ def min_val(juego, jugada, d, utilidad, ordena_jugadas,
         if d_tt >= d and tipo_tt is 'beta':
             beta = min(alfa, val_tt)
 
+    
     for jugada_nueva in ordena_jugadas(juego):
         beta = min(beta, max_val(juego, jugada_nueva, d - 1, utilidad,
                                  ordena_jugadas, alfa, beta, primero, transp))
+       
         if beta <= alfa:
             break
     else:
@@ -126,14 +138,18 @@ def min_val(juego, jugada, d, utilidad, ordena_jugadas,
 
 def max_val(juego, jugada, d, utilidad, ordena_jugadas,
             alfa, beta, primero, transp):
-
+    
+   
     juego.hacer_jugada(jugada)
-
     ganancia = juego.terminal()
+    
+    
     if ganancia is not None:
         juego.deshacer_jugada()
         return primero * ganancia
 
+        
+    
     if d == 0:
         u = utilidad(juego.x)
         juego.deshacer_jugada()
@@ -166,3 +182,25 @@ def minimax_t(juego, tmax=5, utilidad=None, ordena_jugadas=None, transp=None):
         tb = perf_counter()
         if bf * (tb - ta) > t_ini + tmax - tb:
             return jugada
+
+            
+            
+def pprint_othello(x):
+    y = [('X' if x[i] > 0 else 'O' if x[i] < 0 else str(i))
+         for i in range(64)]
+    print(" {} \t| {} \t| {} \t| {} \t| {} \t| {} \t| {} \t| {} ".format(y[0],y[1],y[2],y[3],y[4],y[5],y[6],y[7] ).center(60))
+    print("+------\t+------\t+------\t+------\t+------\t+------\t+------\t+------\t+------\t+".center(60))
+    print(" {} \t| {} \t| {} \t| {} \t| {} \t| {} \t| {} \t| {} ".format(y[8],y[9],y[10],y[11],y[12],y[13],y[14],y[15] ).center(60))
+    print("+------\t+------\t+------\t+------\t+------\t+------\t+------\t+------\t+------\t+".center(60))
+    print(" {} \t| {} \t| {} \t| {} \t| {} \t| {} \t| {} \t| {} ".format(y[16],y[17],y[18],y[19],y[20],y[21],y[22],y[23]).center(60))
+    print("+------\t+------\t+------\t+------\t+------\t+------\t+------\t+------\t+------\t+".center(60))
+    print(" {} \t| {} \t| {} \t| {} \t| {} \t| {} \t| {} \t| {} ".format(y[24],y[25],y[26],y[27],y[28],y[29],y[30],y[31]).center(60))
+    print("+------\t+------\t+------\t+------\t+------\t+------\t+------\t+------\t+------\t+".center(60))
+    print(" {} \t| {} \t| {} \t| {} \t| {} \t| {} \t| {} \t| {} ".format(y[32],y[33],y[34],y[35],y[36],y[37],y[38],y[39]).center(60))
+    print("+------\t+------\t+------\t+------\t+------\t+------\t+------\t+------\t+------\t+".center(60))
+    print(" {} \t| {} \t| {} \t| {} \t| {} \t| {} \t| {} \t| {} ".format(y[40],y[41],y[42],y[43],y[44],y[45],y[46],y[47]).center(60))
+    print("+------\t+------\t+------\t+------\t+------\t+------\t+------\t+------\t+------\t+".center(60))
+    print(" {} \t| {} \t| {} \t| {} \t| {} \t| {} \t| {} \t| {} ".format(y[48],y[49],y[50],y[51],y[52],y[53],y[54],y[55]).center(60))
+    print("+------\t+------\t+------\t+------\t+------\t+------\t+------\t+------\t+------\t+".center(60))
+    print(" {} \t| {} \t| {} \t| {} \t| {} \t| {} \t| {} \t| {} ".format(y[56],y[57],y[58],y[59],y[60],y[61],y[62],y[63]).center(60))
+    print("+------\t+------\t+------\t+------\t+------\t+------\t+------\t+------\t+------\t+".center(60))
