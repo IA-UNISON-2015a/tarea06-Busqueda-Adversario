@@ -105,40 +105,40 @@ class ConectaCuatro(JuegoSumaCeros2T):
      7   8   9  10  11  12  13
      0   1   2   3   4   5   6
 """
-def falta1ParaDiagonal(x):
+def falta1ParaDiagonal(x, jugador):
     for j in (0, 7, 14):
         for i in (0, 1, 2, 3):
             # Hacia arriba
             if (x[i + j + 24] == 0 and #si no hay ficha en 24 pero si
                 x[i + j + 17] != 0 and #en 17, se puede poner en 24
-                x[i + j + 16] != 0 and
+                x[i + j + 16] == jugador and
                 x[i + j + 16] == x[i + j + 8] == x[i + j]):
 
                 return True
             # Hacia abajo
             if (x[i + j + 21] == 0 and #si no hay ficha en 21 pero si
                 x[i + j + 14] != 0 and #en 14, se puede poner en 21
-                x[i + j + 15] != 0 and
+                x[i + j + 15] == jugador and
                 x[i + j + 15] == x[i + j + 9] == x[i + j + 3]):
                 return True
 
     return False
 
-def falta1ParaVertical(x):
+def falta1ParaVertical(x, jugador):
     for i in range(7):
         for j in range(0, 21, 7):
-        if (x[i] != 0 and
-            x[i + j + 21] == 0 and #revisa si la cuarta posicion esta ocupada
-            (x[i + j] == x[i + j + 7] == x[i + j + 14]):
-            return True
+            if (x[i] == jugador and
+                x[i + j + 21] == 0 and #revisa si la cuarta posicion esta desocupada
+                x[i + j] == x[i + j + 7] == x[i + j + 14]):
+                return True
 
     return False
 
-def falta1ParaHorizontal(x):
+def falta1ParaHorizontal(x, jugador):
     # Ahora checamos renglones
     for i in range(0, 41, 7):
         for j in range(4):
-            if (x[i + j] != 0 and
+            if (x[i + j] == jugador and
                 x[i + j + 3] == 0 and #revisa que la cuarta posicion este desocupada
                 x[i + j] == x[i + j + 1] == x[i + j + 2]):
                 return True
@@ -157,6 +157,13 @@ def utilidad_c4(x):
     Para probar solo busque el número de conecciones de las
     bolitas de mas arriba con su alrededor
     """
+
+    jugador = 1
+    if (falta1ParaDiagonal(x, jugador) or
+        falta1ParaVertical(x, jugador) or
+        falta1ParaHorizontal(x, jugador)):
+        return 1
+
     cum = 0
     for i in range(7):
         for j in (35, 28, 21, 14, 7, 0):
@@ -173,7 +180,6 @@ def utilidad_c4(x):
                 break
 
     return cum / 42
-
 
 def ordena_jugadas(juego):
     """
