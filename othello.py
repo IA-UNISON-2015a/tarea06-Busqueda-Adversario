@@ -9,6 +9,7 @@ El juego de Otello implementado por ustes mismos, con jugador inteligente
 """
 
 from busquedas_adversarios import JuegoSumaCeros2T
+from random import shuffle
 
 __author__ = 'luis fernando'
 
@@ -151,11 +152,21 @@ class Othello(JuegoSumaCeros2T):
                 self.x[aux] = self.jugador
                 aux += dir_lineal
 
-        self.historial.append(jugada)
+        self.historial.append(self.x[:]) #guarda todo el estado
 
-    def deshacer_jugada(self, jugada):
-        pass
+    """
+    Deshace la ultima jugada hecha.
+    """
+    def deshacer_jugada(self):
+        self.x = self.historial.pop()
+        self.jugador *= -1
 
+    """
+    Ordena las jugadas legales.
+    """
     def ordena_jugadas(juego):
-        pass
+        #Para hacer pruebas primero ordena las jugadas al azar
+        jugadas = list(juego.jugadas_legales())
+        shuffle(jugadas)
+        return jugadas
 
