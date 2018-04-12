@@ -8,13 +8,17 @@ El juego de Otello implementado por ustedes mismos, con jugador 'inteligente.'
 
 """
 
+# -------------------------------------------------------------------------
+
 __author__ = 'Ivan Moreno'
 
 from collections import deque
 from copy import deepcopy
+import tkinter as tk
 
 import busquedas_adversarios as ba
 
+# -------------------------------------------------------------------------
 
 # -------------------------------------------------------------------------
 #              (60 puntos)
@@ -26,14 +30,14 @@ class Othello(ba.JuegoSumaCeros2T):
     Clase que implementa una representacion computacional del Othello.
 
     La tupla del estado es así:
-    56  57  58  59  60  61  62  63
-    48  49  50  51  52  53  54  55
-    40  41  42  43  44  45  46  47
-    32  33  34  35  36  37  38  39
-    24  25  26  27  28  29  30  31
-    16  17  18  19  20  21  22  23
-    8   9   10  11  12  13  14  15
     0   1   2   3   4   5   6   7
+    8   9   10  11  12  13  14  15
+    16  17  18  19  20  21  22  23
+    24  25  26  27  28  29  30  31
+    32  33  34  35  36  37  38  39
+    40  41  42  43  44  45  46  47
+    48  49  50  51  52  53  54  55
+    56  57  58  59  60  61  62  63
     """
 
     def __init__(self):
@@ -44,8 +48,8 @@ class Othello(ba.JuegoSumaCeros2T):
         x0 = (0, 0, 0, 0, 0, 0, 0, 0,
               0, 0, 0, 0, 0, 0, 0, 0,
               0, 0, 0, 0, 0, 0, 0, 0,
-              0, 0, 0,-1, 1, 0, 0, 0,
               0, 0, 0, 1,-1, 0, 0, 0,
+              0, 0, 0,-1, 1, 0, 0, 0,
               0, 0, 0, 0, 0, 0, 0, 0,
               0, 0, 0, 0, 0, 0, 0, 0,
               0, 0, 0, 0, 0, 0, 0, 0)
@@ -143,6 +147,7 @@ class Othello(ba.JuegoSumaCeros2T):
             sig_capturada = estado[casilla - 1] == -1*self.jugador
             if sig_capturada:
                 hilera = [estado[i] for i in range(casilla-2, casilla-x-1, -1)]
+                fila_capturada = False
                 for c in hilera:
                     if c == self.jugador:
                         fila_capturada = True
@@ -158,6 +163,7 @@ class Othello(ba.JuegoSumaCeros2T):
             sig_capturada = estado[casilla + 1] == -1*self.jugador
             if sig_capturada:
                 hilera = [estado[i] for i in range(casilla+2, casilla+8-x)]
+                fila_capturada = False
                 for c in hilera:
                     if c == self.jugador:
                         fila_capturada = True
@@ -168,11 +174,12 @@ class Othello(ba.JuegoSumaCeros2T):
                 if fila_capturada:
                     filas[1] = True
 
-        # Vertical hacia arriba.
+        # Vertical hacia abajo.
         if y < 6:
             sig_capturada = estado[casilla + 8] == -1*self.jugador
             if sig_capturada:
                 hilera = [estado[i] for i in range(casilla+16, casilla+((8-y)*8), 8)]
+                fila_capturada = False
                 for c in hilera:
                     if c == self.jugador:
                         fila_capturada = True
@@ -183,11 +190,12 @@ class Othello(ba.JuegoSumaCeros2T):
                 if fila_capturada:
                     filas[2] = True
 
-        # Vertical hacia abajo.
+        # Vertical hacia arriba.
         if y > 1:
             sig_capturada = estado[casilla - 8] == -1*self.jugador
             if sig_capturada:
                 hilera = [estado[i] for i in range(casilla-16, casilla-(8*y)-1, -8)]
+                fila_capturada = False
                 for c in hilera:
                     if c == self.jugador:
                         fila_capturada = True
@@ -198,7 +206,7 @@ class Othello(ba.JuegoSumaCeros2T):
                 if fila_capturada:
                     filas[3] = True
 
-        # Diagonal hacia arriba e izquierda.
+        # Diagonal hacia abajo e izquierda.
         if x > 1 and y < 6:
             sig_capturada = estado[casilla + 7] == -1*self.jugador
             x_sig = x - 1
@@ -206,8 +214,9 @@ class Othello(ba.JuegoSumaCeros2T):
 
             if sig_capturada:
                 c = casilla + 14
+                fila_capturada = False
 
-                while (x_sig > -1 and y_sig < 8):
+                while (x_sig > -1 and y_sig < 7):
                     if estado[c] == self.jugador:
                         fila_capturada = True
                         break
@@ -221,7 +230,7 @@ class Othello(ba.JuegoSumaCeros2T):
                 if fila_capturada:
                     filas[4] = True
 
-        # Diagonal hacia arriba y derecha.
+        # Diagonal hacia abajo y derecha.
         if x < 6 and y < 6:
             sig_capturada = estado[casilla + 9] == -1*self.jugador
             x_sig = x + 1
@@ -229,8 +238,9 @@ class Othello(ba.JuegoSumaCeros2T):
 
             if sig_capturada:
                 c = casilla + 18
+                fila_capturada = False
 
-                while (x_sig < 8 and y_sig < 8):
+                while (x_sig < 7 and y_sig < 7):
                     if estado[c] == self.jugador:
                         fila_capturada = True
                         break
@@ -244,7 +254,7 @@ class Othello(ba.JuegoSumaCeros2T):
                 if fila_capturada:
                     filas[5] = True
 
-        # Diagonal hacia abajo e izquierda.
+        # Diagonal hacia arriba e izquierda.
         if x > 1 and y > 1:
             sig_capturada = estado[casilla - 9] == -1*self.jugador
             x_sig = x - 1
@@ -252,6 +262,7 @@ class Othello(ba.JuegoSumaCeros2T):
 
             if sig_capturada:
                 c = casilla - 18
+                fila_capturada = False
 
                 while (x_sig > -1 and y_sig > -1):
                     if estado[c] == self.jugador:
@@ -267,7 +278,7 @@ class Othello(ba.JuegoSumaCeros2T):
                 if fila_capturada:
                     filas[6] = True
 
-        # Diagonal hacia abajo y derecha.
+        # Diagonal hacia arriba y derecha.
         if x < 6 and y > 1:
             sig_capturada = estado[casilla - 7] == -1*self.jugador
             x_sig = x + 1
@@ -275,8 +286,9 @@ class Othello(ba.JuegoSumaCeros2T):
 
             if sig_capturada:
                 c = casilla - 14
+                fila_capturada = False
 
-                while (x_sig < 8 and y_sig > -1):
+                while (x_sig < 7 and y_sig > -1):
                     if estado[c] == self.jugador:
                         fila_capturada = True
                         break
@@ -320,8 +332,26 @@ class Othello(ba.JuegoSumaCeros2T):
                     estado[cas_capturada] = self.jugador
                     cas_capturada += d
 
-        # Actualizamos y contamos la orilla de las fichas en el tablero.
-        for vecino in (-1, 7, 8, 9, 1, -7, -8, 9):
+        # Actualizamos la orilla de las fichas en el tablero.
+        vecinos = []
+        if x > 0:
+            vecinos.append(-1)
+            if y > 0:
+                vecinos.append(-9)
+            if y < 7:
+                vecinos.append(7)
+        if x < 7 :
+            vecinos.append(1)
+            if y > 0:
+                vecinos.append(-7)
+            if y < 7:
+                vecinos.append(9)
+        if y > 0:
+            vecinos.append(-8)
+        if y < 7:
+            vecinos.append(8)
+
+        for vecino in vecinos:
             if estado[casilla + vecino] == 0:
                 self.orilla.add(casilla+vecino)
 
@@ -339,8 +369,258 @@ class Othello(ba.JuegoSumaCeros2T):
         jugada_pasada = self.historial.pop()
         self.x = self.estados_anteriores.pop()
         self.orilla = self.orillas_pasadas.pop()
+        self.jugador *= -1
+
+    def contar_puntos(self, jugador):
+        """
+        Cuenta los puntos que tiene un jugador en el tablero.
+
+        @param jugador: 1 o -1, para indicar a qué jugador le estamos contando
+        los puntos.
+        """
+        puntos = 0
+
+        for i in range(64):
+            if self.x[i] == jugador:
+                puntos += 1
+        return puntos
+
+# -------------------------------------------------------------------------
+
+class OthelloGUI:
+    """
+    Clase que define el contenedor de Tkinter para desplegar una GUI
+    con la cual jugar Othello.
+    """
+
+    def __init__(self, escala = 2):
+        """
+        Inicializa una nueva ventana para jugar Othello.
+
+        @param escala: algo.
+        """
+        # Inicialización de todo el contenedor de Tk.
+        self.app = app = tk.Tk()
+        self.app.title('Othello V1.0')
+        self.L = L = int(escala) * 30
+
+        # Despliegue del aviso principal.
+        aviso = 'Escoge con qué juegas. Las negras siempre empiezan.'
+        self.anuncio = tk.Message(app, bg = 'white',
+                                  borderwidth = 1,
+                                  justify = tk.CENTER,
+                                  text = aviso,
+                                  width = 8 * L)
+        self.anuncio.pack()
+
+        # Desplegamos en pantalla la ventana de la aplicación.
+        barra = tk.Frame(app)
+        barra.pack()
+
+        # Creamos la barra de puntos del usuario.
+        self.puntos_usuario = tk.Label(barra,
+                                       bg = 'light grey',
+                                       text = 'Humano: ')
+        self.puntos_usuario.grid(column = 0, row = 0)
+
+        # Botones para iniciar el juego.
+        btn_inicio_neg = tk.Button(barra,
+                               command = lambda x = 1: self.jugar(x),
+                               text = 'Volver a iniciar con negras')
+        btn_inicio_neg.grid(column = 1, row = 0)
+
+        btn_inicio_blancas = tk.Button(barra,
+                                       command = lambda x = -1: self.jugar(x),
+                               text = 'Volver a iniciar con blancas')
+        btn_inicio_blancas.grid(column = 2, row = 0)
+
+        # Creamos la barra de puntos de la computadora.
+        self.puntos_cpu = tk.Label(barra,
+                                   bg = 'light grey',
+                                   text = 'CPU: ')
+        self.puntos_cpu.grid(column = 3, row = 0)
+
+        # Creamos un contenedor para el canvas sobre el que dibujaremos.
+        ctn = tk.Frame(app, bg = 'black')
+        ctn.pack()
+
+        # Dibujamos un tablero vacío.
+        self.tablero = [None for _ in range(64)]
+        self.textos = [None for _ in range(64)]
+        letra = ('Helvetica', -int(0.4 * L), 'bold') # Que bonito si tienes Helvetica.
+
+        for i in range(64):
+            self.tablero[i] = tk.Canvas(ctn,
+                                        height = L,
+                                        width = L,
+                                        bg = 'light grey',
+                                        borderwidth = 0)
+
+            # Posicionamos a la casilla dentro del canvas.
+            self.tablero[i].grid(row = i // 8,
+                                 column = i % 8)
+            self.textos[i] = self.tablero[i].create_text(L // 2,
+                                                         L // 2,
+                                                         font = letra,
+                                                         text = ' ')
+            # Inicializamos los atributos que después ocuparemos para
+            # actualizar el tablero.
+            self.tablero[i].val = 0
+            self.tablero[i].pos = i
+
+    def jugar(self, fichas_hum):
+        """
+        Inicia un nuevo juego de Othello.
+
+        @param fichas_hum: Indica que color de fichas usará el usuario.
+        1 es negras, -1 es blancas.
+        """
+        juego = Othello()
+
+        # Cuando la computadora empieza.
+        if fichas_hum == -1:
+            # FALTAN LAS FUNCIONES DE UTILIDAD  Y ORDENAMIENTO, Y
+            # LA TABLA DE TRANSPOSICIONES.
+            jugada = ba.minimax_t(juego, 5, utilidad = utilidad_othello)
+            juego.hacer_jugada(jugada)
+
+        # lmao
+        self.anuncio['text'] = 'Si pierdes, te das de baja.'
+
+        # Ahora si, repetimos el proceso de jugar hasta que alguien pierda.
+        for _ in range(64):
+            self.actualizar_tablero(juego.x)
+
+            if juego.jugadas_legales():
+                casilla = self.escoger_jugada(juego)
+                jugada = (casilla % 8, casilla // 8)
+                juego.hacer_jugada(jugada)
+
+                self.actualizar_puntos(juego, fichas_hum)
+                self.actualizar_tablero(juego.x)
+            else:
+                print('Ya valiste, no hay jugadas para ti durante este turno.')
+                juego.jugador *= -1
+
+            ganador = juego.terminal()
+            if ganador: break
+
+            if juego.jugadas_legales():
+                print('La máquina está viendo que hace')
+                jugada = ba.minimax_t(juego, 5, utilidad = utilidad_othello)
+                juego.hacer_jugada(jugada)
+
+                self.actualizar_puntos(juego, fichas_hum)
+                self.actualizar_tablero(juego.x)
+                print('La máquina ha elegido.')
+            else:
+                print('Oh, no, no hay jugadas para la máquina, se supone que ibas a perder.')
+                juego.jugador *= -1
+
+            ganador = juego.terminal()
+            if ganador: break
+
+        self.actualizar_puntos(juego, fichas_hum)
+        self.actualizar_tablero(juego.x)
+
+        if ganador == fichas_hum:
+            anuncio_final = 'Demonios, le ganaste a varios GB de RAM y a al menos 4 núcleos de procesamiento poderosos'
+        elif ganador == -1*fichas_hum:
+            anuncio_final = 'Y así, las computadoras vuelven a mostrar su superioridad'
+        else:
+            anuncio_final = 'lmao, un empate. Que anticlimático, si me preguntas'
+
+        self.anuncio['text'] = anuncio_final
+        self.anuncio.update()
+
+    def escoger_jugada(self, juego):
+        """
+        Permite al usuario escoger en qué casilla jugar durante su turno.
+
+        @param juego: Objeto Othello con el estado actual del juego.
+        """
+        jugadas_posibles = juego.jugadas_legales()
+
+        seleccion = tk.IntVar(self.tablero[0].master, -1, 'seleccion')
+
+        # Definimos los cambios que sufrirán las casillas cuando el usuario
+        # mueva el ratón sobre ellas.
+        def entrada(evento):
+            evento.widget.color_original = evento.widget['bg']
+            evento.widget['bg'] = 'blue'
+
+        def salida(evento):
+            evento.widget['bg'] = evento.widget.color_original
+
+        def presionar_raton(evento):
+            evento.widget['bg'] = evento.widget.color_original
+            seleccion.set(evento.widget.pos)
+
+        # Indicamos a las casillas de posibles jugadas sobre el comportamiento
+        # que deben tener.
+        for (x, y) in jugadas_posibles:
+            casilla = x + 8*y
+
+            self.tablero[casilla].bind('<Enter>', entrada)
+            self.tablero[casilla].bind('<Leave>', salida)
+            self.tablero[casilla].bind('<Button-1>', presionar_raton)
+
+        self.tablero[0].master.wait_variable('seleccion')
+
+        # Les quitamos el comportamiento para que no se vea raro.
+        for (x, y) in jugadas_posibles:
+            casilla = x + 8*y
+
+            self.tablero[casilla].unbind('<Enter>')
+            self.tablero[casilla].unbind('<Leave>')
+            self.tablero[casilla].unbind('<Button-1>')
+
+        return seleccion.get()
+
+    def actualizar_tablero(self, estado_nuevo):
+        """
+        Actualiza las casillas de la ventana del juego.
+
+        @param estado_nuevo: Tupla que describe el estado nuevo del tablero.
+        """
+        for i in range(64):
+            if self.tablero[i].val != estado_nuevo[i]:
+                self.tablero[i].itemconfigure(self.textos[i],
+                                              text = ' xo'[estado_nuevo[i]])
+                self.tablero[i].val = estado_nuevo[i]
+                self.tablero[i].update()
+
+    def actualizar_puntos(self, juego, fichas_hum):
+        """
+        Actualiza las etiquetas que despliegan los puntos de los
+        jugadores.
+
+        @param juego: Objeto Othello que contiene el estado actual del juego.
+        @param fichas_hum: Indica las fichas que está usando el usuario.
+        """
+        self.puntos_usuario['text'] = 'Humano: {}'.format(juego.contar_puntos(fichas_hum))
+        self.puntos_usuario.update()
+        self.puntos_cpu['text'] = 'CPU: {}'.format(juego.contar_puntos(-1*fichas_hum))
+        self.puntos_cpu.update()
+
+    def iniciar(self):
+        """
+        Inicia el ciclo de actualización de la ventana del juego.
+        """
+        self.app.mainloop()
+
+# -------------------------------------------------------------------------
+
+def utilidad_othello(estado):
+    """
+    Devuelve cuantas fichas negras hay en el tablero.
+    """
+    return estado.count(1)
+
+# -------------------------------------------------------------------------
 
 if __name__ == '__main__':
+    """
     juego = Othello()
     jugadas = [(5, 4), (3, 5), (2, 6), (5, 3), (3, 2)]
 
@@ -366,4 +646,7 @@ if __name__ == '__main__':
 
     juego.hacer_jugada(jugadas[4])
     print(juego)
+    """
+    juego = OthelloGUI()
+    juego.iniciar()
 
