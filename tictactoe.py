@@ -152,6 +152,7 @@ class GatoTK:
         juego = Gato()
 
         if not primero:
+            juego.jugador *= -1
             jugada = minimax(juego)
             juego.hacer_jugada(jugada)
 
