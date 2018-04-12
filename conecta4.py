@@ -140,6 +140,16 @@ def ordena_jugadas(juego):
     jugadas = list(juego.jugadas_legales())
     shuffle(jugadas)
     return jugadas
+def ordena_jugadas_chila(juego):
+    """
+    Las mejores jugasdas estan en el centro
+    Fuente: https://es.wikihow.com/ganar-en-Conecta-4#_note-7
+    """
+    jugadas = list(juego.jugadas_legales())
+    mejores = []
+    for i in (3,2,4,1,5,0,6):
+        if i in jugadas: mejores.append(i) 
+    return tuple(mejores)
 
 
 class Conecta4GUI:
