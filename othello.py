@@ -9,6 +9,7 @@ El juego de Otello implementado por ustes mismos, con jugador inteligente
 """
 
 from busquedas_adversarios import JuegoSumaCeros2T
+from busquedas_adversarios import minimax
 from random import shuffle
 
 __author__ = 'luis fernando'
@@ -27,22 +28,23 @@ class Othello(JuegoSumaCeros2T):
     estan dadas como:
     8x8
 
-    56  57  58  59  60  61  62  63
-    48  49  50  51  52  53  54  55
-    40  41  42  43  44  45  46  47
-    32  33  34  35  36  37  38  39
-    24  25  26  27  28  29  30  31
-    16  17  18  19  20  21  22  23
-     8   9  10  11  12  13  14  15
      0   1   2   3   4   5   6   7
+     8   9  10  11  12  13  14  15
+    16  17  18  19  20  21  22  23
+    24  25  26  27  28  29  30  31
+    32  33  34  35  36  37  38  39
+    40  41  42  43  44  45  46  47
+    48  49  50  51  52  53  54  55
+    56  57  58  59  60  61  62  63
     """
     def __init__(self):
         board = [0 for _ in range(8 * 8)]
-        board[35] = 1
-        board[28] = 1
+        board[27] = 1
+        board[36] = 1
 
-        board[36] = -1
-        board[27] = -1
+        board[28] = -1
+        board[35] = -1
+
         super().__init__(tuple(board))
 
     """
@@ -51,7 +53,7 @@ class Othello(JuegoSumaCeros2T):
     """
     def jugadas_legales(self):
         return (i + 8*j for i in range(8) for j in range(8)
-                if jugada_legal((i,j)) and self.x[i + 8*j] == 0)
+                if self.x[i + 8*j] == 0 and self.jugada_legal((i,j)))
 
     """
     Una jugada legal es un indice del tablero (vacio) donde el jugador de
@@ -60,16 +62,13 @@ class Othello(JuegoSumaCeros2T):
     @param pos: Tupla (x,y) indicando el lugar en el tablero
     """
     def jugada_legal(self, pos):
-        #direcciones = (-1 + 8,  0 + 8,  1 + 8,
-        #               -1 + 0,          1 + 0,
-        #               -1 - 8,  0 - 8,  1 - 8)
-
-        direcciones = ((-1,1),  (0,1),  (1,1),
+        direcciones = ((-1,-1), (0,-1), (1,-1),
                        (-1,0),          (1,0),
-                       (-1,-1), (0,-1), (1,-1))
+                       (-1,1),  (0,1),  (1,1))
+
 
         for direccion in direcciones:
-            if any(fichas_seguidas(pos, direccion) for direccion in direcciones):
+            if any(self.fichas_seguidas(pos, direccion) for direccion in direcciones):
                 return True
 
         return False
@@ -84,16 +83,14 @@ class Othello(JuegoSumaCeros2T):
             fichas del oponente y valores una tupla de direcciones.
     """
     def voltea_dir(self, pos):
-        direcciones = {ne:(-1,1),  n:(0,1),  no:(1,1),
-                        e:(-1,0),             o:(1,0),
-                       se:(-1,-1), s:(0,-1), so:(1,-1)}
+        #direcciones = ((-1,1),  (0,1),  (1,1),
+        #               (-1,0),          (1,0),
+        #               (-1,-1), (0,-1), (1,-1))
+        direcciones = ((-1,-1), (0,-1), (1,-1),
+                       (-1,0),          (1,0),
+                       (-1,1),  (0,1),  (1,1))
 
-        dir_volteo = dict()
-        for direccion in direcciones:
-            if fichas_seguidas(pos, direccion):
-                dir_volteo[direccion] = direcciones[direccion]
-
-        return dir_volteo
+        return [direccion for direccion in direcciones if self.fichas_seguidas(pos, direccion)]
 
     #def es_orilla(pos):
         #return pos in {0,1,2,3,4,5,6,7, 57,58,59,60,61,62,63,64} or
@@ -102,7 +99,7 @@ class Othello(JuegoSumaCeros2T):
     """
     Recibe una tupla de la forma (x,y), indicando una posicion en el tablero
     """
-    def dentro_tablero(pos):
+    def dentro_tablero(self, pos):
         return 0 <= pos[0] < 8 and 0 <= pos[1] < 8
 
     """
@@ -114,11 +111,15 @@ class Othello(JuegoSumaCeros2T):
     """
     def fichas_seguidas(self, pos, direccion):
         aux = pos[0] + direccion[0], pos[1] + direccion[1]
-        if dentro_tablero(aux) and self.x[aux[0] + 8*aux[1]] == self.jugador*-1:
-            while dentro_tablero(aux) and self.x[aux[0] + 8*aux[1]] != 0:
-                aux = aux[0] + direccion[0], aux[1] + direccion[1]
+
+        if self.dentro_tablero(aux) and self.x[aux[0] + 8*aux[1]] == self.jugador*-1:
+            aux = aux[0] + direccion[0], aux[1] + direccion[1]
+
+            while self.dentro_tablero(aux) and self.x[aux[0] + 8*aux[1]] != 0:
                 if self.x[aux[0] + 8*aux[1]] == self.jugador:
                     return True
+
+                aux = aux[0] + direccion[0], aux[1] + direccion[1]
 
         return False
 
@@ -127,10 +128,21 @@ class Othello(JuegoSumaCeros2T):
     en otro caso devuelve la ganancia para el jugador 1.
     """
     def terminal(self):
-        if 0 not in self.x:
-            jug_leg = [jl for jl in jugadas_legales()]
-            if not jug_leg:
-                return self.x.count(1)
+        jugadas = [jugada for jugada in self.jugadas_legales()]
+        if not jugadas:
+            self.jugador *= -1
+            jugadas = [jugada for jugada in self.jugadas_legales()]
+            if jugadas:
+                self.jugador *= -1
+            else:
+                negras = self.x.count(1)
+                blancas = self.x.count(-1)
+                if negras > blancas:
+                    return 1
+                elif blancas > negras:
+                    return -1
+                else:
+                    return 0
 
         return None
 
@@ -140,11 +152,14 @@ class Othello(JuegoSumaCeros2T):
     correspondientes del contrincante.
     """
     def hacer_jugada(self, jugada):
+        self.historial.append(self.x[:]) #guarda todo el estado
+
         self.x[jugada] = self.jugador
 
-        direcciones = voltea_dir((jugada%8, int(jugada/8)))
+        direcciones = self.voltea_dir((jugada%8, int(jugada/8)))
 
-        for direccion in direcciones.values():
+
+        for direccion in direcciones:
             dir_lineal = direccion[0] + 8*direccion[1]
             aux = jugada + dir_lineal
 
@@ -152,7 +167,7 @@ class Othello(JuegoSumaCeros2T):
                 self.x[aux] = self.jugador
                 aux += dir_lineal
 
-        self.historial.append(self.x[:]) #guarda todo el estado
+        self.jugador *= -1
 
     """
     Deshace la ultima jugada hecha.
