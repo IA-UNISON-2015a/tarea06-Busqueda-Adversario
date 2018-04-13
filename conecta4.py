@@ -87,6 +87,7 @@ class ConectaCuatro(JuegoSumaCeros2T):
                 self.x[i + jugada] = self.jugador
                 self.historial.append(jugada)
                 self.jugador *= -1
+
                 return None
 
     def deshacer_jugada(self):
@@ -98,52 +99,59 @@ class ConectaCuatro(JuegoSumaCeros2T):
                 return None
 
 """
-    35  36  37  38  39  40  41
-    28  29  30  31  32  33  34
-    21  22  23  24  25  26  27
-    14  15  16  17  18  19  20
-     7   8   9  10  11  12  13
+    Para estas funciones tomare los lugares de la siguiente manera:
      0   1   2   3   4   5   6
+     7   8   9  10  11  12  13
+    14  15  16  17  18  19  20
+    21  22  23  24  25  26  27
+    28  29  30  31  32  33  34
+    35  36  37  38  39  40  41
 """
-def falta1ParaDiagonal(x, jugador):
-    for j in (0, 7, 14):
-        for i in (0, 1, 2, 3):
-            # Hacia arriba
-            if (x[i + j + 24] == 0 and #si no hay ficha en 24 pero si
-                x[i + j + 17] != 0 and #en 17, se puede poner en 24
-                x[i + j + 16] == jugador and
-                x[i + j + 16] == x[i + j + 8] == x[i + j]):
+"""
+    Indica cuantos bloques de 4 en 4 todavia pueden ser ganados por
+    el jugador en horizontal.
 
-                return True
-            # Hacia abajo
-            if (x[i + j + 21] == 0 and #si no hay ficha en 21 pero si
-                x[i + j + 14] != 0 and #en 14, se puede poner en 21
-                x[i + j + 15] == jugador and
-                x[i + j + 15] == x[i + j + 9] == x[i + j + 3]):
-                return True
+    @param x: Estado del juego
+    @param jugador: Jugador de turno, 1 o -1
+"""
+def contarHorizontal(x, jugador):
+    renglones = [i for i in range(6)]
+    return sum(1 for renglon in renglones for i in range(4)
+               if all(x[7*renglon + i + j] != -jugador for j in range(4)))
 
-    return False
+"""
+    Indica cuantos bloques de 4 en 4 todavia pueden ser ganados por
+    el jugador en vertical.
 
-def falta1ParaVertical(x, jugador):
-    for i in range(7):
-        for j in range(0, 21, 7):
-            if (x[i] == jugador and
-                x[i + j + 21] == 0 and #revisa si la cuarta posicion esta desocupada
-                x[i + j] == x[i + j + 7] == x[i + j + 14]):
-                return True
+    @param x: Estado del juego
+    @param jugador: Jugador de turno, 1 o -1
+"""
+def contarVertical(x, jugador):
+    columnas = [i for i in range(7)]
+    return sum(1 for columna in columnas for i in range(2)
+               if all(x[columna + 7*(i + j)] != -jugador for j in range(4)))
 
-    return False
+"""
+    Indica cuantos bloques de 4 en 4 todavia pueden ser ganados por
+    el jugador en diagonal.
 
-def falta1ParaHorizontal(x, jugador):
-    # Ahora checamos renglones
-    for i in range(0, 41, 7):
-        for j in range(4):
-            if (x[i + j] == jugador and
-                x[i + j + 3] == 0 and #revisa que la cuarta posicion este desocupada
-                x[i + j] == x[i + j + 1] == x[i + j + 2]):
-                return True
+    @param x: Estado del juego
+    @param jugador: Jugador de turno, 1 o -1
+"""
+def contarDiagonal(x, jugador):
+    #diagonales \
+    inicial_ren = [0, 1, 2]
+    inicial_col = [0, 1, 2, 3]
+    cont1 = sum(1 for ren in inicial_ren for col in inicial_col
+               if all(x[col + ren*7 + i + i*7] for i in range(4)))
 
-    return False
+    #diagonales /
+    inicial_ren = [0, 1, 2]
+    inicial_col = [3, 4, 5, 6]
+    cont2 = sum(1 for ren in inicial_ren for col in inicial_col
+               if all(x[col + ren*7 - i + i*7] for i in range(4)))
+
+    return cont1 + cont2
 
 def utilidad_c4(x):
     """
@@ -158,28 +166,15 @@ def utilidad_c4(x):
     bolitas de mas arriba con su alrededor
     """
 
-    jugador = 1
-    if (falta1ParaDiagonal(x, jugador) or
-        falta1ParaVertical(x, jugador) or
-        falta1ParaHorizontal(x, jugador)):
-        return 1
+    jugadas1 = [contarHorizontal(x, 1),
+                contarVertical(x, 1),
+                contarDiagonal(x, 1)]
 
-    cum = 0
-    for i in range(7):
-        for j in (35, 28, 21, 14, 7, 0):
-            if x[i] != 0:
-                if 0 < i < 6:
-                    biases = (-6, -7, -8, -1, 1, 6, 8)
-                elif i == 0:
-                    biases = (-7, -8, 1, 8)
-                else:
-                    biases = (-6, -7, -1, 6)
-                con = sum(x[i] for bias in biases
-                          if i + bias >= 0 and x[i] == x[i + bias])
-                cum += con / len(biases)
-                break
+    jugadas2 = [contarHorizontal(x, -1),
+                contarVertical(x, -1),
+                contarDiagonal(x, -1)]
 
-    return cum / 42
+    return sum(lineaj1 - lineaj2 for lineaj1, lineaj2 in zip(jugadas1, jugadas2)) / 3
 
 def ordena_jugadas(juego):
     """
