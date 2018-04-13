@@ -138,7 +138,7 @@ def utilidad_c4_chila(x):
         for j in range(i+7,42,7):
             ficha=x[j]
             if ficha==jugador:
-                utilidad+=x[j]+[ficha*bonus]
+                utilidad+=x[j]+(ficha*bonus)
                 bonus += 1
             else:
                 bonus = 0
@@ -152,7 +152,7 @@ def utilidad_c4_chila(x):
         for j in range(7):
             ficha=x[j]
             if ficha==jugador:
-                utilidad+=x[j] +[ficha*bonus]
+                utilidad+=x[j] +(ficha*bonus)
                 bonus += 1
             else:
                 bonus = 0
@@ -175,6 +175,7 @@ def ordena_jugadas(juego):
     jugadas = list(juego.jugadas_legales())
     shuffle(jugadas)
     return jugadas
+
 def ordena_jugadas_chila(juego):
     """
     Las mejores jugasdas estan en el centro
@@ -184,7 +185,7 @@ def ordena_jugadas_chila(juego):
     mejores = []
     for i in (3,2,4,1,5,0,6):
         if i in jugadas: mejores.append(i) 
-    return tuple(mejores)
+    return mejores
 
 
 class Conecta4GUI:
@@ -259,8 +260,8 @@ class Conecta4GUI:
             for i in range(7):
                 self.botones[i]['state'] = tk.DISABLED
 
-            jugada = minimax(juego, dmax=6, utilidad=utilidad_c4,
-                             ordena_jugadas=ordena_jugadas,
+            jugada = minimax(juego, dmax=6, utilidad=utilidad_c4_chila,
+                             ordena_jugadas=ordena_jugadas_chila,
                              transp=self.tr_ta)
             juego.hacer_jugada(jugada)
             self.actualiza_tablero(jugada, color_p)
@@ -286,8 +287,8 @@ class Conecta4GUI:
                 self.botones[i]['state'] = tk.DISABLED
                 self.botones[i].update()
 
-            jugada = minimax(juego, dmax=6, utilidad=utilidad_c4,
-                             ordena_jugadas=ordena_jugadas,
+            jugada = minimax(juego, dmax=6, utilidad=utilidad_c4_chila,
+                             ordena_jugadas=ordena_jugadas_chila,
                              transp=self.tr_ta)
             juego.hacer_jugada(jugada)
             self.actualiza_tablero(jugada, color_p)
