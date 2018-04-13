@@ -67,9 +67,10 @@ class Othello(JuegoSumaCeros2T):
     def imprimirTablero2(self):
         print(self.tablero)
 
-    def hacer_jugada(self, x, y, jugador):
-        piezasTomadas = 0
-        self.tablero[y][x] = jugador
+    def hacer_jugada(self, jugada):
+        #piezasTomadas = 0
+        x, y = jugada
+        self.tablero[y][x] = self.jugador
         for d in range(8): # 8 direcciones
             ctr = 0
             for i in range(8): #El tamaño del tablero
@@ -80,7 +81,7 @@ class Othello(JuegoSumaCeros2T):
                 if dx < 0 or dx > 9 or dy < 0 or dy > 9:
                     ctr = 0
                     break
-                elif self.tablero[dy][dx] == jugador:
+                elif self.tablero[dy][dx] == self.jugador:
                     break
                 elif self.tablero[dy][dx] == 0:
                     ctr = 0
@@ -90,8 +91,36 @@ class Othello(JuegoSumaCeros2T):
             for i in range(ctr):
                 dx = x + dirx[d]*(i+1)
                 dy = y + diry[d]*(i+1)
-                self.tablero[dy][dx] = jugador
-            piezasTomadas += ctr
+                self.tablero[dy][dx] = self.jugador
+        self.historial.append(jugada)
+        self.jugador *= -1
+
+    def deshacer_jugada(self):
+        x,y = self.historial.pop()
+        self.tablero[y][x] = 0
+        for d in range(8): # 8 direcciones
+            ctr = 0
+            for i in range(8): #El tamaño del tablero
+                # Calcula la coordenada de la direccion en la que esta buscando
+                dx = x + self.dirx[d]*(i+1)
+                dy = y + self.diry[d]*(i+1)
+                # Si se sale del tablero entonces se sale del ciclo
+                if dx < 0 or dx > 9 or dy < 0 or dy > 9:
+                    ctr = 0
+                    break
+                elif self.tablero[dy][dx] == self.jugador:
+                    break
+                elif self.tablero[dy][dx] == 0:
+                    ctr = 0
+                    break
+                else:
+                    ctr += 1
+            for i in range(ctr):
+                dx = x + dirx[d]*(i+1)
+                dy = y + diry[d]*(i+1)
+                self.tablero[dy][dx] = -self.jugador
+        self.historial.append(jugada)
+        self.jugador *= -1
 
     def verificar_jugada(self, tablero, x, y, jugador):
         """
