@@ -127,6 +127,41 @@ def utilidad_c4(x):
 
     return cum / 42
 
+def utilidad_c4_chila(x):
+
+    utilidad=0
+    
+    #por columna
+    for i in range(7):
+        jugador = x[i]
+        bonus = 0
+        for j in range(i+7,42,7):
+            ficha=x[j]
+            if ficha==jugador:
+                utilidad+=x[j]+[ficha*bonus]
+                bonus += 1
+            else:
+                bonus = 0
+                jugador=ficha
+            
+    
+    #por renglon
+    for i in (35, 28, 21, 14, 7, 0):
+        jugador = x[i]
+        bonus = 0
+        for j in range(7):
+            ficha=x[j]
+            if ficha==jugador:
+                utilidad+=x[j] +[ficha*bonus]
+                bonus += 1
+            else:
+                bonus = 0
+                jugador=ficha
+    
+    #por diagonal
+    
+        
+    return utilidad   
 
 def ordena_jugadas(juego):
     """
