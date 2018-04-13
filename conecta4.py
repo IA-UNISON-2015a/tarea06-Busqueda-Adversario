@@ -138,7 +138,7 @@ def utilidad_c4_chila(x):
         for j in range(i+7,42,7):
             ficha=x[j]
             if ficha==jugador:
-                utilidad+=x[j]+(ficha*bonus)
+                utilidad+=ficha+(ficha*bonus)
                 bonus += 1
             else:
                 bonus = 0
@@ -152,7 +152,7 @@ def utilidad_c4_chila(x):
         for j in range(7):
             ficha=x[j]
             if ficha==jugador:
-                utilidad+=x[j] +(ficha*bonus)
+                utilidad+=ficha+(ficha*bonus)
                 bonus += 1
             else:
                 bonus = 0
