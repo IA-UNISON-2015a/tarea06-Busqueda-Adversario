@@ -90,3 +90,13 @@ class othello():
                 tablero[dy][dx] = jugador
             numFichasOpp += fichasOpp
         return (tablero, numFichasOpp)
+    
+    def esLegal(self,tablero, x, y, jugador):
+        if x < 0 or x > self.n - 1 or y < 0 or y > n - 1:
+            return False
+        if tablero[y][x] != '0':
+            return False
+        (tableroTemp, numFichasOpp) = self.hacerMoviento(self.copy.deepcopy(tablero), x, y, jugador)
+        if numFichasOpp == 0:
+            return False
+        return True
