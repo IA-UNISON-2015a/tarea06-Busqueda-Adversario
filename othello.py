@@ -4,14 +4,16 @@
 othello.py
 ------------
 
-El juego de Otello implementado por ustes mismos, con jugador inteligente
+El juego de Otello implementado por ustedes mismos, con jugador inteligente
 
 """
 
 from busquedas_adversarios import JuegoSumaCeros2T
 from busquedas_adversarios import minimax
+from busquedas_adversarios import minimax_t
 from random import shuffle
 import tkinter as tk
+
 __author__ = 'luis fernando'
 
 
@@ -83,18 +85,11 @@ class Othello(JuegoSumaCeros2T):
             fichas del oponente y valores una tupla de direcciones.
     """
     def voltea_dir(self, pos):
-        #direcciones = ((-1,1),  (0,1),  (1,1),
-        #               (-1,0),          (1,0),
-        #               (-1,-1), (0,-1), (1,-1))
         direcciones = ((-1,-1), (0,-1), (1,-1),
                        (-1,0),          (1,0),
                        (-1,1),  (0,1),  (1,1))
 
         return [direccion for direccion in direcciones if self.fichas_seguidas(pos, direccion)]
-
-    #def es_orilla(pos):
-        #return pos in {0,1,2,3,4,5,6,7, 57,58,59,60,61,62,63,64} or
-               #pos % 8 == 0 or pos % 8 == 7
 
     """
     Recibe una tupla de la forma (x,y), indicando una posicion en el tablero
@@ -128,10 +123,12 @@ class Othello(JuegoSumaCeros2T):
     en otro caso devuelve la ganancia para el jugador 1.
     """
     def terminal(self):
-        jugadas = [jugada for jugada in self.jugadas_legales()]
+        #jugadas = [jugada for jugada in self.jugadas_legales()]
+        jugadas = list(self.jugadas_legales())
         if not jugadas:
             self.jugador *= -1
-            jugadas = [jugada for jugada in self.jugadas_legales()]
+            #jugadas = [jugada for jugada in self.jugadas_legales()]
+            jugadas = list(self.jugadas_legales())
             if jugadas:
                 self.jugador *= -1
             else:
@@ -154,6 +151,8 @@ class Othello(JuegoSumaCeros2T):
     def hacer_jugada(self, jugada):
         self.historial.append(self.x[:]) #guarda todo el estado
 
+        #print("en hacer_jugada, jugada recibida")
+        #print(jugada)
         self.x[jugada] = self.jugador
 
         direcciones = self.voltea_dir((jugada%8, int(jugada/8)))
@@ -177,7 +176,23 @@ class Othello(JuegoSumaCeros2T):
         self.jugador *= -1
 
 """
-Implementacion bien copiada de belen.
+Ordena las jugadas legales.
+Unicamente pone primero las jugadas de las esquinas y
+pone al final las jugadas en las casi esquinas.
+Si no hay en ninguno, es el mismo que el orden de generacion
+de jugadas.
+"""
+def ordena_jugadas(juego):
+    jugadas = list(juego.jugadas_legales())
+    esquinas = {0, 7, 56, 63}
+    casi_esquinas = {9, 14, 49, 54}
+
+    return sorted(jugadas,
+                  key=lambda x: 1 if x in esquinas else -1 if x in casi_esquinas else 0,
+                  reverse=True)
+
+"""
+Implementacion copiada de belen y ligeramente cambiada.
 """
 class OthelloTK:
     def __init__(self, escala=2):
