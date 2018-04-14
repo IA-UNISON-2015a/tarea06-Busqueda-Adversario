@@ -126,7 +126,6 @@ def utilidad_c4(x):
 
     return cum / 42
 
-
 def utilidad_c4_2(x):
     """
     Calcula la utilidad de una posición del juego conecta 4
@@ -147,8 +146,8 @@ def utilidad_c4_2(x):
     # verticales
     for i in range(7):
         # checa si hay 3 de algun jugador y el siguiente no hay nada
-        for j in range(4):
-            indice = i+j
+        for j in range(3):
+            indice = i+7*j
             if x[indice] != 0 and x[indice] == x[indice+7] == x[indice+14] and x[indice+21] == 0:
                 return 1 if x[indice] == 1 else -1
     # diagonales derechas
@@ -341,7 +340,6 @@ class Conecta4GUI:
 
     def arranca(self):
         self.app.mainloop()
-
 
 if __name__ == '__main__':
     Conecta4GUI(tmax=10).arranca()
