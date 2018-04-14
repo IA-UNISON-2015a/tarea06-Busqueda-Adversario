@@ -18,7 +18,6 @@ import tkinter as tk
 
 __author__ = 'juliowaissman'
 
-
 class ConectaCuatro(JuegoSumaCeros2T):
     def __init__(self):
         """
@@ -121,12 +120,67 @@ def utilidad_c4(x):
                 else:
                     biases = (-6, -7, -1, 6)
                 con = sum(x[i] for bias in biases
-                          if i + bias >= 0 and x[i] == x[i + bias])
+                            if i + bias >= 0 and x[i] == x[i + bias])
                 cum += con / len(biases)
                 break
 
     return cum / 42
 
+
+def utilidad_c4_2(x):
+    """
+    Calcula la utilidad de una posición del juego conecta 4
+    para el jugador max (las fichas rojas, o el que empieza)
+
+    @param x: Una lista con el estado del tablero
+
+    @return: Un número con la ganancia esperada
+    """
+    # horizontales
+    for i in range(0, 36, 7):
+        # checa areas de 4 casillas si hay 3 de algun jugador
+        for j in range(4):
+            area = x[j:j+4]
+            suma = sum(area) 
+            if sum in (3, -3) and 0 in area:
+                return 1 if suma == 3 else -1                  
+    # verticales
+    for i in range(7):
+        # checa si hay 3 de algun jugador y el siguiente no hay nada
+        for j in range(4):
+            indice = i+j
+            if x[indice] != 0 and x[indice] == x[indice+7] == x[indice+14] and x[indice+21] == 0:
+                return 1 if x[indice] == 1 else -1
+    # diagonales derechas
+    for i in range(4):
+        # si no hay vacios en el rango no se revisa
+        if 0 not in x[i:i+4]:
+            for j in range(0, 15, 7):
+                indice = i+j
+                area = ( x[indice+k] for k in range(0, 25, 8) ) # area de la diagonal
+                suma = sum( area )
+                if suma in (3, -3) and 0 in area:
+                    indice_cero = indice + area.index(0) * 8
+                    # si abajo de donde se puede ganar no hay nada, pues no se gana xd
+                    if (indice_cero > 7 and x[indice_cero-7] == 0):
+                        continue
+                    return 1 if suma == 3 else -1
+    # diagonales izquierdas
+    for i in range(2, 7):
+        # si no hay vacios en el rango no se revisa
+        if 0 not in x[i:i+4]:
+            for j in range(0, 15, 7):
+                indice = i+j
+                area = ( x[indice+k] for k in range(0, 19, 6) ) # area de la diagonal
+                suma = sum( area )
+                if suma in (3, -3) and 0 in area:
+                    indice_cero = indice + area.index(0) * 6
+                    # si abajo de donde se puede ganar no hay nada, pues no se gana xd
+                    if (indice_cero > 7 and x[indice_cero-7] == 0):
+                        continue
+                    return 1 if suma == 3 else -1
+                            
+    return 0
 
 def ordena_jugadas(juego):
     """
@@ -141,6 +195,23 @@ def ordena_jugadas(juego):
     shuffle(jugadas)
     return jugadas
 
+def ordena_jugadas_2(juego):
+    """
+    Ordena las jugadas de acuerdo al jugador actual, en función
+    de las más prometedoras.
+
+    Devuelve primero las jugadas del centro, ya que son las que pueden
+    generar mas conexiones
+    """
+    jugadas = list(juego.jugadas_legales())
+    jugadas_ordenadas = []
+    for jugada in jugadas:
+        if 5 > jugada > 1:
+            jugadas_ordenadas.insert(0, jugada)
+        else:
+            jugadas_ordenadas.append(jugada) 
+
+    return jugadas_ordenadas
 
 class Conecta4GUI:
     def __init__(self, tmax=10, escala=1):
@@ -214,8 +285,8 @@ class Conecta4GUI:
             for i in range(7):
                 self.botones[i]['state'] = tk.DISABLED
 
-            jugada = minimax(juego, dmax=6, utilidad=utilidad_c4,
-                             ordena_jugadas=ordena_jugadas,
+            jugada = minimax(juego, dmax=6, utilidad=utilidad_c4_2,
+                             ordena_jugadas=ordena_jugadas_2,
                              transp=self.tr_ta)
             juego.hacer_jugada(jugada)
             self.actualiza_tablero(jugada, color_p)
@@ -241,8 +312,8 @@ class Conecta4GUI:
                 self.botones[i]['state'] = tk.DISABLED
                 self.botones[i].update()
 
-            jugada = minimax(juego, dmax=6, utilidad=utilidad_c4,
-                             ordena_jugadas=ordena_jugadas,
+            jugada = minimax(juego, dmax=6, utilidad=utilidad_c4_2,
+                             ordena_jugadas=ordena_jugadas_2,
                              transp=self.tr_ta)
             juego.hacer_jugada(jugada)
             self.actualiza_tablero(jugada, color_p)
