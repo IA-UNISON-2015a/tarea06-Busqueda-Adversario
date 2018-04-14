@@ -101,6 +101,7 @@ class Othello(ba.JuegoSumaCeros2T):
         jugadas = []
 
         for casilla in list(self.orilla):
+        #for casilla in range(64):
             # Se calculan las coordenadas de la casilla actual.
             x = casilla % 8
             y = casilla // 8
@@ -116,10 +117,10 @@ class Othello(ba.JuegoSumaCeros2T):
         Revisa si ambos oponentes tendrán que pasar en el próximo turno.
         Regresa la utilidad en base al jugador de fichas negras.
         """
-        if not self.jugadas_legales():
+        if len(self.jugadas_legales()) == 0:
             self.jugador *= -1
 
-            if not self.jugadas_legales():
+            if len(self.jugadas_legales()) == 0:
                 self.jugador *= -1
 
                 negras = self.x.count(1)
@@ -141,6 +142,9 @@ class Othello(ba.JuegoSumaCeros2T):
         casilla = x + 8*y
         estado = self.x
         filas = [False for i in range(8)]
+
+        if estado[casilla] != 0:
+            return filas
 
         # Horizontal <-
         if x > 1:
@@ -312,6 +316,7 @@ class Othello(ba.JuegoSumaCeros2T):
         """
         # Por si el jugador pasa su turno.
         if jugada is None:
+            self.historial.append(jugada)
             self.jugador *= -1
             return
 
@@ -371,13 +376,18 @@ class Othello(ba.JuegoSumaCeros2T):
         Viaja en el tiempo y restaura el estado anterior del juego, mientras
         al estado actual lo manda a volar y actualiza la orilla de las fichas.
         """
-        x, y = self.historial.pop()
-        casilla_pasada = x + 8*y
-        if self.x[casilla_pasada] == -1*self.jugador:
-            self.jugador *= -1
+        jugada = self.historial.pop()
 
-        self.x = self.estados_anteriores.pop()
-        self.orilla = self.orillas_pasadas.pop()
+        if jugada is None:
+            self.jugador *= -1
+        else:
+            x, y = jugada
+            casilla_pasada = x + 8*y
+            if self.x[casilla_pasada] == -1*self.jugador:
+                self.jugador *= -1
+
+            self.x = self.estados_anteriores.pop()
+            self.orilla = self.orillas_pasadas.pop()
 
     def contar_puntos(self, jugador):
         """
@@ -504,16 +514,16 @@ class OthelloGUI:
 
                 self.actualizar_puntos(juego, fichas_hum)
                 self.actualizar_tablero(juego.x)
+
+                ganador = juego.terminal()
+                if ganador is not None: break
             else:
                 print('Ya valiste, no hay jugadas para ti durante este turno.')
                 juego.jugador *= -1
 
-            ganador = juego.terminal()
-            if ganador: break
-
             if juego.jugadas_legales():
                 print('La máquina está viendo que hace')
-                """
+
                 jugada = ba.minimax_t(juego, 5, utilidad = utilidad_othello, ordena_jugadas=ordenar_jugadas)
                 print('Jugada: ' + str(jugada))
                 if juego.jugador == fichas_hum:
@@ -524,6 +534,7 @@ class OthelloGUI:
                 self.actualizar_puntos(juego, fichas_hum)
                 self.actualizar_tablero(juego.x)
                 print('La máquina ha elegido.')
+
                 """
                 casilla = self.escoger_jugada(juego)
                 jugada = (casilla % 8, casilla // 8)
@@ -531,12 +542,12 @@ class OthelloGUI:
 
                 self.actualizar_puntos(juego, fichas_hum)
                 self.actualizar_tablero(juego.x)
+                """
+                ganador = juego.terminal()
+                if ganador is not None: break
             else:
                 print('Oh, no, no hay jugadas para la máquina, se supone que ibas a perder.')
                 juego.jugador *= -1
-
-            ganador = juego.terminal()
-            if ganador: break
 
         self.actualizar_puntos(juego, fichas_hum)
         self.actualizar_tablero(juego.x)
@@ -649,6 +660,10 @@ def ordenar_jugadas(juego):
     @param juego: Juego actual de Othello.
     """
     jugadas = list(juego.jugadas_legales())
+
+    if jugadas is None:
+        return None
+
     casillas = [x + 8*y for (x, y) in jugadas]
 
     return sorted(jugadas, key = lambda jugada: casillas[jugadas.index(jugada)])
