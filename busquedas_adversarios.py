@@ -78,6 +78,7 @@ def minimax(juego, dmax=100, utilidad=None, ordena_jugadas=None, transp=None):
     utilidad (para el jugador 1) definida por utilidad y un método
     de ordenación de jugadas específico
 
+    Si no hay jugadas posibles, regresa None
     """
     if ordena_jugadas is None:
         def ordena_jugadas(juego):
@@ -87,7 +88,10 @@ def minimax(juego, dmax=100, utilidad=None, ordena_jugadas=None, transp=None):
             return juego.terminal()
         dmax = int(1e10)
 
-    return max((a for a in ordena_jugadas(juego)),
+    jugadas = ordena_jugadas(juego)
+    if not jugadas:
+        return None
+    return max((a for a in jugadas),
                key=lambda a: min_val(juego, a, dmax, utilidad, ordena_jugadas,
                                      -1e10, 1e10, juego.jugador, transp))
 
@@ -162,8 +166,16 @@ def minimax_t(juego, tmax=5, utilidad=None, ordena_jugadas=None, transp=None):
     t_ini = perf_counter()
     for d in range(2, 50):
         ta = perf_counter()
-        jugada = minimax(juego, d, utilidad, ordena_jugadas, transp=None)
+        jugada_tmp = minimax(juego, d, utilidad, ordena_jugadas, transp)
         tb = perf_counter()
+        if jugada_tmp is not None:
+            jugada = jugada_tmp
+        else:
+            #si ya no hay mas jugadas, no tiene sentido seguir buscando
+            return jugada
+
         if bf * (tb - ta) > t_ini + tmax - tb:
             return jugada
+
+    return jugada #si pudo llegar a la profundiad final
 
