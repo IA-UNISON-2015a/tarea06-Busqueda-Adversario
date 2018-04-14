@@ -117,10 +117,10 @@ class Othello(ba.JuegoSumaCeros2T):
         Regresa la utilidad en base al jugador de fichas negras.
         """
         if not self.jugadas_legales():
-            self.jugador = -1 * self.jugador
+            self.jugador *= -1
 
             if not self.jugadas_legales():
-                self.jugador = -1 * self.jugador
+                self.jugador *= -1
 
                 negras = self.x.count(1)
                 blancas = self.x.count(-1)
@@ -310,6 +310,11 @@ class Othello(ba.JuegoSumaCeros2T):
 
         @param jugada: Tupla que contiene la coordenada donde se agrega una ficha.
         """
+        # Por si el jugador pasa su turno.
+        if jugada is None:
+            self.jugador *= -1
+            return
+
         # Antes de modificar, guardamos el estado actual.
         self.estados_anteriores.append(self.x)
         self.orillas_pasadas.append(deepcopy(self.orilla))
@@ -366,10 +371,13 @@ class Othello(ba.JuegoSumaCeros2T):
         Viaja en el tiempo y restaura el estado anterior del juego, mientras
         al estado actual lo manda a volar y actualiza la orilla de las fichas.
         """
-        jugada_pasada = self.historial.pop()
+        x, y = self.historial.pop()
+        casilla_pasada = x + 8*y
+        if self.x[casilla_pasada] == -1*self.jugador:
+            self.jugador *= -1
+
         self.x = self.estados_anteriores.pop()
         self.orilla = self.orillas_pasadas.pop()
-        self.jugador *= -1
 
     def contar_puntos(self, jugador):
         """
@@ -479,9 +487,7 @@ class OthelloGUI:
 
         # Cuando la computadora empieza.
         if fichas_hum == -1:
-            # FALTAN LAS FUNCIONES DE UTILIDAD  Y ORDENAMIENTO, Y
-            # LA TABLA DE TRANSPOSICIONES.
-            jugada = ba.minimax_t(juego, 5, utilidad = utilidad_othello)
+            jugada = ba.minimax_t(juego, 5, utilidad = utilidad_othello, ordena_jugadas=ordenar_jugadas)
             juego.hacer_jugada(jugada)
 
         # lmao
@@ -507,12 +513,24 @@ class OthelloGUI:
 
             if juego.jugadas_legales():
                 print('La máquina está viendo que hace')
-                jugada = ba.minimax_t(juego, 5, utilidad = utilidad_othello)
+                """
+                jugada = ba.minimax_t(juego, 5, utilidad = utilidad_othello, ordena_jugadas=ordenar_jugadas)
+                print('Jugada: ' + str(jugada))
+                if juego.jugador == fichas_hum:
+                    print('oye, no')
+                    juego.jugador *= -1
                 juego.hacer_jugada(jugada)
 
                 self.actualizar_puntos(juego, fichas_hum)
                 self.actualizar_tablero(juego.x)
                 print('La máquina ha elegido.')
+                """
+                casilla = self.escoger_jugada(juego)
+                jugada = (casilla % 8, casilla // 8)
+                juego.hacer_jugada(jugada)
+
+                self.actualizar_puntos(juego, fichas_hum)
+                self.actualizar_tablero(juego.x)
             else:
                 print('Oh, no, no hay jugadas para la máquina, se supone que ibas a perder.')
                 juego.jugador *= -1
@@ -613,9 +631,27 @@ class OthelloGUI:
 
 def utilidad_othello(estado):
     """
-    Devuelve cuantas fichas negras hay en el tablero.
+    Devuelve cuantas fichas negras hay en el tablero y cuantas esquinas
+    domina el jugador de fichas negras.
     """
-    return estado.count(1)
+    fichas = estado.count(1)
+    esquinas = sum([1 for casilla in (0, 7, 56, 63)
+                     if estado[casilla] == 1])
+    return fichas + 10*esquinas
+
+# -------------------------------------------------------------------------
+
+def ordenar_jugadas(juego):
+    """
+    Ordena las jugadas respecto a qué tan cerca están de la parte superior
+    del tablero.
+
+    @param juego: Juego actual de Othello.
+    """
+    jugadas = list(juego.jugadas_legales())
+    casillas = [x + 8*y for (x, y) in jugadas]
+
+    return sorted(jugadas, key = lambda jugada: casillas[jugadas.index(jugada)])
 
 # -------------------------------------------------------------------------
 
