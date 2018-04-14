@@ -62,3 +62,31 @@ class othello():
                     else:
                         utilidad += 1
         return utilidad
+    
+    '''
+    Asumimos que el movimiento es legal.
+    '''
+    def hacerMoviento(self, tablero, x, y, jugador): 
+        numFichasOpp = 0 # Fichas ganadas
+        tablero[y][x] = jugador
+        for d in range(8): # Son las direcciones posibles
+            fichasOpp = 0
+            for i in range(self.n):
+                dx = x + self.dirx[d] * (i + 1)
+                dy = y + self.diry[d] * (i + 1)
+                if dx < 0 or dx > self.n - 1 or dy < 0 or dy > self.n - 1:#salimos del tablero
+                    fichasOpp = 0; 
+                    break
+                elif tablero[dy][dx] == jugador:#topamos con una ficha igual
+                    break
+                elif tablero[dy][dx] == '0':#topamos con casilla vacia
+                    fichasOpp = 0; 
+                    break
+                else:
+                    fichasOpp += 1
+            for i in range(fichasOpp):#cambiamos las fichas
+                dx = x + self.dirx[d] * (i + 1)
+                dy = y + self.diry[d] * (i + 1)
+                tablero[dy][dx] = jugador
+            numFichasOpp += fichasOpp
+        return (tablero, numFichasOpp)
