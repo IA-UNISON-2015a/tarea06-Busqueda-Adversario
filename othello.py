@@ -12,6 +12,7 @@ from busquedas_adversarios import JuegoSumaCeros2T
 from busquedas_adversarios import minimax
 from busquedas_adversarios import minimax_t
 from random import shuffle
+from collections import deque
 import tkinter as tk
 
 __author__ = 'luis fernando'
@@ -48,6 +49,7 @@ class Othello(JuegoSumaCeros2T):
         board[35] = -1
 
         super().__init__(tuple(board))
+        self.historial = deque()
 
     """
     Una jugada legal es un indice del tablero (vacio) donde el jugador de
@@ -123,23 +125,16 @@ class Othello(JuegoSumaCeros2T):
     en otro caso devuelve la ganancia para el jugador 1.
     """
     def terminal(self):
-        #jugadas = [jugada for jugada in self.jugadas_legales()]
         jugadas = list(self.jugadas_legales())
         if not jugadas:
             self.jugador *= -1
-            #jugadas = [jugada for jugada in self.jugadas_legales()]
             jugadas = list(self.jugadas_legales())
             if jugadas:
                 self.jugador *= -1
             else:
                 negras = self.x.count(1)
                 blancas = self.x.count(-1)
-                if negras > blancas:
-                    return 1
-                elif blancas > negras:
-                    return -1
-                else:
-                    return 0
+                return 1 if negras > blancas else -1 if blancas > negras else 0
 
         return None
 
@@ -150,9 +145,6 @@ class Othello(JuegoSumaCeros2T):
     """
     def hacer_jugada(self, jugada):
         self.historial.append(self.x[:]) #guarda todo el estado
-
-        #print("en hacer_jugada, jugada recibida")
-        #print(jugada)
         self.x[jugada] = self.jugador
 
         direcciones = self.voltea_dir((jugada%8, int(jugada/8)))
