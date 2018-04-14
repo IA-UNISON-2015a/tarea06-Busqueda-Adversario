@@ -240,63 +240,78 @@ class OthelloTK:
 
     def jugar(self, primero):
 
-
-        """
-        Ordena las jugadas legales.
-        Ordenamiento aleatorio para hacer pruebas
-        """
-        def ordena_jugadas(juego):
-            jugadas = list(juego.jugadas_legales())
-            shuffle(jugadas)
-            return jugadas
-
-        """
-        Utilidad trivial para hacer pruebas.
-        """
-        def utilidad(x):
-            return 0
-
         juego = Othello()
 
-        if  primero == -1:
-            jugada = minimax(juego, 5, utilidad, ordena_jugadas)
-            juego.hacer_jugada(jugada)
+        #funciones de utilidad definidas aqui porque necesitan conocer el juego
+        """
+        El numero de jugadas que un jugador puede hacer entre el
+        numero de casillas vacias que quedan.
+        """
+        def movilidad_inmediata(x):
+            return len(list(juego.jugadas_legales())) / juego.x.count(0)
 
-        self.anuncio['text'] = "A ver de que cuero salen más correas"
-        for _ in range(64):
+        """
+        Recompensa poner las fichas en las esquinas y penaliza poner en
+        lugares que podrian dar las esquinas que no esten tomadas.
+        """
+        def contar_esquinas(x):
+            esquinas = [0, 7, 56, 63]
+            esquina_j1 =  sum(1 for esquina in esquinas if x[esquina] == juego.jugador)
+            esquina_j2 =  sum(-1 for esquina in esquinas if x[esquina] == -juego.jugador)
+
+            casi_esquinas = [9, 14, 49, 54]
+            casi_esquina_j1 = sum(1 for casi_esquina, esquina in zip(casi_esquinas, esquinas)
+                                  if x[casi_esquina] == juego.jugador and
+                                  x[esquina] == 0)
+            casi_esquina_j2 = sum(1 for casi_esquina, esquina in zip(casi_esquinas, esquinas)
+                                  if x[casi_esquina] == -juego.jugador and
+                                  x[esquina] == 0)
+
+            return (esquina_j1 + casi_esquina_j2 - esquina_j2 - casi_esquina_j1) / 8
+
+        """
+        Cuenta la diferencia de piezas en el tablero de los jugadores.
+        Como solamente importa el numero de piezas al final, solo cuenta cuando
+        quedan 10 o menos turnos.
+        """
+        def contar_piezas(x):
+            if x.count(0) > 10:
+                return 0
+
+            return (x.count(juego.jugador) - x.count(-juego.jugador)) / 64
+
+        """
+        Toma en cuentas las esquinas, la movilidad inmediata y el numero de piezas
+        cuando el juego esta por acabar
+        """
+        def utilidad(x):
+            return 0.6*contar_esquinas(x) + 0.3*contar_piezas(x) + 0.1*movilidad_inmediata(x)
+
+        self.anuncio['text'] = "Turno jugador {}".format(1 if juego.jugador == 1 else 2)
+
+        while juego.terminal() is None:
             self.actualiza_tablero(juego.x)
-            if juego.jugadas_legales():
+            if list(juego.jugadas_legales()):
 
-                #jugada = self.escoge_jugada(juego)
-                jugada = minimax(juego, 5, utilidad, ordena_jugadas)
+                if juego.jugador == primero:
+                    jugada = self.escoge_jugada_humano(juego)
+                    #jugada = minimax_t(juego, 30, utilidad, ordena_jugadas, {})
+                else:
+                    #jugada = self.escoge_jugada_humano(juego)
+                    jugada = minimax_t(juego, 30, utilidad, ordena_jugadas, {})
+
                 juego.hacer_jugada(jugada)
 
                 self.actualizar_puntos(juego, primero)
 
-                self.actualiza_tablero(juego.x)
-
-                ganador = juego.terminal()
-                if ganador is not None:
-                    break
             else:
                 print("No hay jugadas para ti...")
                 juego.jugador = -1*juego.jugador
 
-            if juego.jugadas_legales():
-                jugada = minimax(juego,5, utilidad, ordena_jugadas)
-                juego.hacer_jugada(jugada)
-
-                self.actualizar_puntos(juego, primero)
-
-                ganador = juego.terminal()
-                if ganador is not None:
-                    break
-            else:
-                print("No hay jugadas para la máquina...")
-                juego.jugador = -1*juego.jugador
+            self.anuncio['text'] = "Turno jugador {}".format(1 if juego.jugador == 1 else 2)
 
         self.actualiza_tablero(juego.x)
-        u = utilidad(juego.x)
+        u = juego.terminal() #regresa la utilidad del jugador 1
         if u == 0:
             fin = "UN ASQUEROSO EMPATE"
         elif (primero<0 and u>0) or (primero>0 and u<0):
@@ -308,7 +323,7 @@ class OthelloTK:
         self.anuncio['text'] = fin
         self.anuncio.update()
 
-    def escoge_jugada(self, juego):
+    def escoge_jugada_humano(self, juego):
         jugadas_posibles = list(juego.jugadas_legales())
         if len(jugadas_posibles) == 1:
             return jugadas_posibles[0]
@@ -338,6 +353,7 @@ class OthelloTK:
             self.tablero[i].unbind('<Leave>')
             self.tablero[i].unbind('<Button-1>')
         return seleccion.get()
+
 
     """
     Actualiza los puntos del tablero
