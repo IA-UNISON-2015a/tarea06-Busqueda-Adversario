@@ -11,7 +11,7 @@ El juego de Otello implementado por ustes mismos, con jugador inteligente
 from busquedas_adversarios import JuegoSumaCeros2T
 from busquedas_adversarios import minimax
 from random import shuffle
-
+import tkinter as tk
 __author__ = 'luis fernando'
 
 
@@ -176,12 +176,175 @@ class Othello(JuegoSumaCeros2T):
         self.x = self.historial.pop()
         self.jugador *= -1
 
+"""
+Implementacion bien copiada de belen.
+"""
+class OthelloTK:
+    def __init__(self, escala=2):
+
+        self.app = app = tk.Tk()
+        self.app.title("Othello")
+        self.L = L = int(escala) * 30
+
+        tmpstr = "Escoge, X siempre empiezan"
+        self.anuncio = tk.Message(app, bg='white', borderwidth=1,
+                                  justify=tk.CENTER, text=tmpstr,
+                                  width=8 * L)
+        self.anuncio.pack()
+
+        barra = tk.Frame(app)
+        barra.pack()
+
+        self.userpoints = tk.Label(barra, bg='light grey', text="J1: ")
+        self.userpoints.grid(column=0, row=0)
+
+        botonX = tk.Button(barra,
+                           command=lambda x=1: self.jugar(x),
+                           text='(re)iniciar con X')
+        botonX.grid(column=1, row=0)
+        botonO = tk.Button(barra,
+                           command=lambda x=-1: self.jugar(x),
+                           text='(re)iniciar con O')
+        botonO.grid(column=2, row=0)
+        self.Mpoints = tk.Label(barra, bg='light grey',  text="J2: ")
+        self.Mpoints.grid(column=3, row=0)
+
+        ctn = tk.Frame(app, bg='black')
+        ctn.pack()
+        self.tablero = [None for _ in range(64)]
+        self.textos = [None for _ in range(64)]
+        letra = ('Helvetica', -int(0.4 * L), 'bold')
+        for i in range(64):
+            self.tablero[i] = tk.Canvas(ctn, height=L, width=L,
+                                        bg='light grey', borderwidth=0)
+            self.tablero[i].grid(row=i // 8, column=i % 8)
+            self.textos[i] = self.tablero[i].create_text(L // 2, L // 2,
+                                                         font= letra, text=' ')
+            self.tablero[i].val = 0
+            self.tablero[i].pos = i
+
+    def jugar(self, primero):
+
+
+        """
+        Ordena las jugadas legales.
+        Ordenamiento aleatorio para hacer pruebas
+        """
+        def ordena_jugadas(juego):
+            jugadas = list(juego.jugadas_legales())
+            shuffle(jugadas)
+            return jugadas
+
+        """
+        Utilidad trivial para hacer pruebas.
+        """
+        def utilidad(x):
+            return 0
+
+        juego = Othello()
+
+        if  primero == -1:
+            jugada = minimax(juego, 5, utilidad, ordena_jugadas)
+            juego.hacer_jugada(jugada)
+
+        self.anuncio['text'] = "A ver de que cuero salen más correas"
+        for _ in range(64):
+            self.actualiza_tablero(juego.x)
+            if juego.jugadas_legales():
+
+                #jugada = self.escoge_jugada(juego)
+                jugada = minimax(juego, 5, utilidad, ordena_jugadas)
+                juego.hacer_jugada(jugada)
+
+                self.actualizar_puntos(juego, primero)
+
+                self.actualiza_tablero(juego.x)
+
+                ganador = juego.terminal()
+                if ganador is not None:
+                    break
+            else:
+                print("No hay jugadas para ti...")
+                juego.jugador = -1*juego.jugador
+
+            if juego.jugadas_legales():
+                jugada = minimax(juego,5, utilidad, ordena_jugadas)
+                juego.hacer_jugada(jugada)
+
+                self.actualizar_puntos(juego, primero)
+
+                ganador = juego.terminal()
+                if ganador is not None:
+                    break
+            else:
+                print("No hay jugadas para la máquina...")
+                juego.jugador = -1*juego.jugador
+
+        self.actualiza_tablero(juego.x)
+        u = utilidad(juego.x)
+        if u == 0:
+            fin = "UN ASQUEROSO EMPATE"
+        elif (primero<0 and u>0) or (primero>0 and u<0):
+            fin ="¡Gané! ¡Juar, juar, juar!, ¿Quieres jugar otra vez?"
+        else:
+            fin ="Ganaste, bye."
+
+        print("\n\nFin del juego")
+        self.anuncio['text'] = fin
+        self.anuncio.update()
+
+    def escoge_jugada(self, juego):
+        jugadas_posibles = list(juego.jugadas_legales())
+        if len(jugadas_posibles) == 1:
+            return jugadas_posibles[0]
+
+        seleccion = tk.IntVar(self.tablero[0].master, -1, 'seleccion')
+
+        def entrada(evento):
+            evento.widget.color_original = evento.widget['bg']
+            evento.widget['bg'] = 'blue'
+
+        def salida(evento):
+            evento.widget['bg'] = evento.widget.color_original
+
+        def presiona_raton(evento):
+            evento.widget['bg'] = evento.widget.color_original
+            seleccion.set(evento.widget.pos)
+
+        for i in jugadas_posibles:
+            self.tablero[i].bind('<Enter>', entrada)
+            self.tablero[i].bind('<Leave>', salida)
+            self.tablero[i].bind('<Button-1>', presiona_raton)
+
+        self.tablero[0].master.wait_variable('seleccion')
+
+        for i in jugadas_posibles:
+            self.tablero[i].unbind('<Enter>')
+            self.tablero[i].unbind('<Leave>')
+            self.tablero[i].unbind('<Button-1>')
+        return seleccion.get()
+
     """
-    Ordena las jugadas legales.
+    Actualiza los puntos del tablero
     """
-    def ordena_jugadas(juego):
-        #Para hacer pruebas primero ordena las jugadas al azar
-        jugadas = list(juego.jugadas_legales())
-        shuffle(jugadas)
-        return jugadas
+    def actualizar_puntos(self, juego, primero):
+        self.userpoints['text'] = "J1: {} ".format(juego.x.count(primero))
+        self.userpoints.update()
+        self.Mpoints['text'] = "J2: {} ".format(juego.x.count(-primero))
+        self.Mpoints.update()
+
+
+    def actualiza_tablero(self, x):
+        for i in range(64):
+            if self.tablero[i].val != x[i]:
+                self.tablero[i].itemconfigure(self.textos[i],
+                                              text=' xo'[x[i]])
+                self.tablero[i].val = x[i]
+                self.tablero[i].update()
+
+    def arranca(self):
+        self.app.mainloop()
+
+if __name__ == '__main__':
+    OthelloTK().arranca()
 
