@@ -121,14 +121,14 @@ def utilidad_c4(x):
             unosP=lista.count(1)
             ceros=lista.count(0)
             if ceros==1:
-                if unosP==3: utilidad += 1
+                if unosP==3: utilidad += 2
                 elif unosN==3: utilidad -= 1
     #VERTICALES checa si puede ganar el o el rival y actua
     for i in range(35,42):
         for j in range(3):
             casilla=i-7*j
             if x[casilla] == 0 :
-                if x[casilla-7] == x[casilla-14] == x[casilla-21] == 1: utilidad += 1
+                if x[casilla-7] == x[casilla-14] == x[casilla-21] == 1: utilidad += 2
                 elif x[casilla-7] == x[casilla-14] == x[casilla-21] == -1: utilidad -= 1
     #Diagonal L checa si puede ganar el o el rival y actua
     for i in range(21,25):
@@ -138,7 +138,7 @@ def utilidad_c4(x):
             unosP=lista.count(1)
             ceros=lista.count(0)
             if ceros==1:
-                if unosP==3: utilidad += 1
+                if unosP==3: utilidad += 2
                 elif unosN==3: utilidad -= 1
     #Diagonal R checa si puede ganar el o el rival y actua
     for i in range(24,28):
@@ -148,7 +148,7 @@ def utilidad_c4(x):
             unosP=lista.count(1)
             ceros=lista.count(0)
             if ceros==1:
-                if unosP==3: utilidad += 1
+                if unosP==3: utilidad += 2
                 elif unosN==3: utilidad -= 1
     return utilidad
 
