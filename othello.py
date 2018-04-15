@@ -11,6 +11,8 @@ El juego de Otello implementado por ustedess mismos, con jugador inteligente
 
 __author__ = 'Jordan Urias'
 
+import copy
+
 class othello():
     def __init__(self, _n=8):
         self.n = _n
@@ -92,7 +94,7 @@ class othello():
         return (tablero, numFichasOpp)
     
     def esLegal(self,tablero, x, y, jugador):
-        if x < 0 or x > self.n - 1 or y < 0 or y > n - 1:
+        if x < 0 or x > self.n - 1 or y < 0 or y > self.n - 1:
             return False
         if tablero[y][x] != '0':
             return False
@@ -100,3 +102,21 @@ class othello():
         if numFichasOpp == 0:
             return False
         return True
+    
+    def esJugadaTerminal(self, tablero, jugador):
+        for y in range(self.n):
+            for x in range(self.n):
+                if self.esLegal(tablero, x, y, jugador):
+                    return False
+        return True
+
+    def getJugadaOrd(self, tablero, jugador):
+        jugadasOrdenadas = []
+        for y in range(self.n):
+            for x in range(self.n):
+                if self.esLegal(tablero, x, y, jugador):
+                    (tableroTemp, numFichasOpp) = self.hacerMoviento(copy.deepcopy(tablero), x, y, jugador)
+                    jugadasOrdenadas.append((tableroTemp, self.UtilidadlTablero(tableroTemp, jugador)))
+        jugadasOrdenadas = sorted(jugadasOrdenadas, key = lambda node: node[1], reverse = True)
+        jugadasOrdenadas = [node[0] for node in jugadasOrdenadas]
+        return jugadasOrdenadas
