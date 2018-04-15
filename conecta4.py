@@ -215,12 +215,18 @@ def ordena_jugadas_2(juego):
     """
     jugadas = list(juego.jugadas_legales())
     jugadas_ordenadas = []
+    aux = []
     for jugada in jugadas:
-        if 5 > jugada > 1:
+        # centro
+        if jugada == 3:
             jugadas_ordenadas.insert(0, jugada)
+        if 5 > jugada > 1:
+            jugadas_ordenadas.append(jugada)
+        # esquinas
         else:
-            jugadas_ordenadas.append(jugada) 
-
+            aux.append(jugada) 
+    shuffle(aux) 
+    jugadas_ordenadas += aux
     return jugadas_ordenadas
 
 class Conecta4GUI:
