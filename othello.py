@@ -20,6 +20,8 @@ class othello():
         # 8 direcciones
         self.dirx = [-1,  0,  1, -1, 1, -1, 0, 1]
         self.diry = [-1, -1, -1,  0, 0,  1, 1, 1]
+        self.minUtilidadlTablero = -1 
+        self.maxUtilidadlTablero = self.n * self.n + 4 * self.n + 4 + 1 
         
         if self.n % 2 == 0: # Que sea un tablero par
             z = int((self.n - 2) / 2)
@@ -120,3 +122,25 @@ class othello():
         jugadasOrdenadas = sorted(jugadasOrdenadas, key = lambda node: node[1], reverse = True)
         jugadasOrdenadas = [node[0] for node in jugadasOrdenadas]
         return jugadasOrdenadas
+    
+    class SumaCero():
+        def Minimax(self, tablero, jugador, prof, maximizarjugador):
+            if prof == 0 or othello.esJugadaTerminal(tablero, jugador):
+                return othello.UtilidadlTablero(tablero, jugador)
+            if maximizarjugador:
+                mejorUtilidad = othello.minUtilidadlTablero
+                for y in range(othello.n):
+                    for x in range(othello.n):
+                        if othello.esLegal(tablero, x, y, jugador):
+                            (tableroTemp, numFichasOpp) = othello.hacerMoviento(copy.deepcopy(tablero), x, y, jugador)
+                            v = self.Minimax(tableroTemp, jugador, prof - 1, False)
+                            mejorUtilidad = max(mejorUtilidad, v)
+            else: # minimizargjugador
+                mejorUtilidad = othello.maxUtilidadlTablero
+                for y in range(othello.n):
+                    for x in range(othello.n):
+                        if othello.esLegal(tablero, x, y, jugador):
+                            (tableroTemp, numFichasOpp) = othello.hacerMoviento(copy.deepcopy(tablero), x, y, jugador)
+                            v = self.Minimax(tableroTemp, jugador, prof - 1, True)
+                            mejorUtilidad = min(mejorUtilidad, v)
+            return mejorUtilidad
