@@ -141,20 +141,14 @@ def utilidad_c4_2(x):
             area = x[i+j:i+j+4]
             suma = sum(area) 
             if sum in (3, -3) and 0 in area:
-                if suma == 3:
-                    return 1
-                else:
-                    utilidad = -1               
+                utilidad += 2 if suma == 3 else -1               
     # verticales
     for i in range(7):
         # checa si hay 3 de algun jugador y el siguiente no hay nada
         for j in range(3):
             indice = i+7*j
             if x[indice] != 0 and x[indice] == x[indice+7] == x[indice+14] and x[indice+21] == 0:
-                if suma == 3:
-                    return 1
-                else:
-                    utilidad = -1
+                utilidad += 2 if suma == 3 else -1
     # diagonales derechas
     for i in range(4):
         # si no hay vacios en el rango no se revisa
@@ -168,10 +162,7 @@ def utilidad_c4_2(x):
                     # si abajo de donde se puede ganar no hay nada, pues no se gana xd
                     if (indice_cero > 7 and x[indice_cero-7] == 0):
                         continue
-                    if suma == 3:
-                        return 1
-                    else:
-                        utilidad = -1
+                    utilidad += 2 if suma == 3 else -1
     # diagonales izquierdas
     for i in range(2, 7):
         # si no hay vacios en el rango no se revisa
@@ -185,10 +176,7 @@ def utilidad_c4_2(x):
                     # si abajo de donde se puede ganar no hay nada, pues no se gana xd
                     if (indice_cero > 7 and x[indice_cero-7] == 0):
                         continue
-                    if suma == 3:
-                        return 1
-                    else:
-                        utilidad = -1
+                    utilidad += 2 if suma == 3 else -1
                             
     return utilidad
 
@@ -215,18 +203,9 @@ def ordena_jugadas_2(juego):
     """
     jugadas = list(juego.jugadas_legales())
     jugadas_ordenadas = []
-    aux = []
-    for jugada in jugadas:
-        # centro
-        if jugada == 3:
-            jugadas_ordenadas.insert(0, jugada)
-        if 5 > jugada > 1:
+    for jugada in (3,2,4,1,5,0,6):
+        if jugada in jugadas:
             jugadas_ordenadas.append(jugada)
-        # esquinas
-        else:
-            aux.append(jugada) 
-    shuffle(aux) 
-    jugadas_ordenadas += aux
     return jugadas_ordenadas
 
 class Conecta4GUI:
