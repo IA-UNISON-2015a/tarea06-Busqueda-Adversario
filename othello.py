@@ -46,6 +46,45 @@ class Othello(JuegoSumaCeros2T):
             0   0   0   0   0   0   0   0
             0   0   0   0   0   0   0   0
 
+            arriba a la izquierda
+            0   0   0   0   0   0   0   0
+            0   0   0   0   0   0   0   0 
+            0   0   2   2   2   2   2   2  
+            0   0   2   3   3   3   3   3  
+            0   0   2   3   4   4   4   4    
+            0   0   2   3   4   5   5   5      
+            0   0   2   3   4   5   6   6   
+            0   0   2   3   4   5   6   7
+
+            arriba a la derecha
+            0   0   0   0   0   0   0   0
+            0   0   0   0   0   0   0   0 
+            2   2   2   2   2   2   0   0  
+            3   3   3   3   3   2   0   0  
+            4   4   4   4   3   2   0   0    
+            5   5   5   4   3   2   0   0      
+            6   6   5   4   3   2   0   0   
+            7   6   5   4   3   2   0   0   
+
+            abajo a la izquierda
+            0   0   2   3   4   5   6   7
+            0   0   2   3   4   5   6   6  
+            0   0   2   3   4   5   5   5   
+            0   0   2   3   4   4   4   4  
+            0   0   2   3   3   3   3   3    
+            0   0   2   2   2   2   2   2      
+            0   0   0   0   0   0   0   0   
+            0   0   0   0   0   0   0   0
+
+            abajo a la derecha
+            7   6   5   4   3   2   0   0
+            6   6   5   4   3   2   0   0  
+            5   5   5   4   3   2   0   0   
+            4   4   4   4   3   2   0   0  
+            3   3   3   3   3   2   0   0    
+            2   2   2   2   2   2   0   0      
+            0   0   0   0   0   0   0   0   
+            0   0   0   0   0   0   0   0
         """
         # estado inicial
         x = [0 for _ in range(64)]
@@ -187,7 +226,22 @@ class Othello(JuegoSumaCeros2T):
         return tuple(jugadas_permitidas)
 
     def terminal(self):
-        pass
+        """
+        Revisa si hay jugadas legales para ambos jugadores
+        """
+        # si no hay jugadas legales para el jugador 1
+        if len(self.jugadas_legales()) == 0:
+            self.jugador *= -1
+            # si no hay jugadas legales para el jugador -1    
+            if len(self.jugadas_legales()) == 0:
+                self.jugador *= -1
+                negras, blancas = self.x.count(1), self.x.count(-1) 
+                return ( 1 if negras > blancas else
+                        -1 if blancas > negras else
+                         0)
+            self.jugador *= -1
+            
+        return None
 
     def hacer_jugada(self, jugada):
         pass
