@@ -25,10 +25,10 @@ class Othello(JuegoSumaCeros2T):
     Estado inicial del tablero:
         0   0   0   0   0   0   0   0 
         0   0   0   0   0   0   0   0
-        0   0   1   0   1   0   0   0
-        0   0   0   -1  1   1   0   0
-        0   0   1   1  -1   0   0   0
-        0   0   0   1   0   1   0   0
+        0   0   0   0   0   0   0   0
+        0   0   0   -1  1   0   0   0
+        0   0   0   1  -1   0   0   0
+        0   0   0   0   0   0   0   0
         0   0   0   0   0   0   0   0
         0   0   0   0   0   0   0   0
     Las posiciones del tablero son :
@@ -45,9 +45,9 @@ class Othello(JuegoSumaCeros2T):
     def __init__(self):
         x = [0 for _ in range(64)]
         x[27] = x[36] =-1
-        x[28] = x[35] =x[29] =x[34]=x[20] =x[43]=x[18]=x[45]=1
+        x[28] = x[35] =1
         super().__init__(tuple(x))
-        self.turno=1
+        self.turno=-1
         #son las casillas que se descartan en las jugadas legales para cada direccion
         self.derecha=[6,7,14,15,22,23,30,31,38,39,46,47,53,55,62,63]
         self.izquierda=[0,1,8,9,16,17,24,25,32,33,40,41,48,49,56,57]
