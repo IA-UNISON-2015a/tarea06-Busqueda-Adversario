@@ -160,21 +160,12 @@ def ordena_jugadas(juego):
     Primero la columna dle centro, luego las de en medio y luego las de la orrilla
 
     """
+    jugadasOrdenadas=[]
     jugadas = list(juego.jugadas_legales())
-    jugadasOrdenadas = []
-    for jugada in jugadas:
-        if jugada == 3:
-            jugadasOrdenadas.insert(0, jugada)
-        elif 6>jugada>0:
-            jugadasOrdenadas.insert(1, jugada)
-        else:
-            jugadasOrdenadas.append(jugada)
+    for jugada in (3,2,4,5,1,0,6):
+        if jugada in jugadas: jugadasOrdenadas.append(jugada)
     return jugadasOrdenadas
-    """
-    jugadas = list(juego.jugadas_legales())
-    shuffle(jugadas)
-    return jugadas"""
-
+    
 class Conecta4GUI:
     def __init__(self, tmax=10, escala=1):
 
