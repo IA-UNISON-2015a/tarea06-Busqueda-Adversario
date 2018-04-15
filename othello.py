@@ -71,28 +71,6 @@ class Othello(ba.JuegoSumaCeros2T):
 
         self.jugador = 1
 
-    def __str__(self):
-        """
-        Imprime bonito. Temporal.
-        """
-        rep = ''.join(str(self.x[i]) + ' ' for i in range(56, 64))
-        rep += '\n'
-        rep += ''.join(str(self.x[i]) + ' ' for i in range(48, 56))
-        rep += '\n'
-        rep += ''.join(str(self.x[i]) + ' ' for i in range(40, 48))
-        rep += '\n'
-        rep += ''.join(str(self.x[i]) + ' ' for i in range(32, 40))
-        rep += '\n'
-        rep += ''.join(str(self.x[i]) + ' ' for i in range(24, 32))
-        rep += '\n'
-        rep += ''.join(str(self.x[i]) + ' ' for i in range(16, 24))
-        rep += '\n'
-        rep += ''.join(str(self.x[i]) + ' ' for i in range(8, 16))
-        rep += '\n'
-        rep += ''.join(str(self.x[i]) + ' ' for i in range(0, 8))
-        rep += '\n'
-        return rep
-
     def jugadas_legales(self):
         """
         Calcula las jugadas en las que el jugador actual obtiene fichas
@@ -117,6 +95,8 @@ class Othello(ba.JuegoSumaCeros2T):
         Revisa si ambos oponentes tendrán que pasar en el próximo turno.
         Regresa la utilidad en base al jugador de fichas negras.
         """
+        jugador_actual = self.jugador
+
         if len(self.jugadas_legales()) == 0:
             self.jugador *= -1
 
@@ -127,6 +107,8 @@ class Othello(ba.JuegoSumaCeros2T):
                 blancas = self.x.count(-1)
                 return (1 if negras > blancas else
                        -1 if blancas > negras else 0)
+            else:
+                self.jugador = jugador_actual
 
         return None
 
@@ -318,7 +300,7 @@ class Othello(ba.JuegoSumaCeros2T):
         if jugada is None:
             self.historial.append(jugada)
             self.jugador *= -1
-            return
+            return None
 
         # Antes de modificar, guardamos el estado actual.
         self.estados_anteriores.append(self.x)
@@ -370,6 +352,7 @@ class Othello(ba.JuegoSumaCeros2T):
         self.jugador *= -1
         self.orilla.remove(casilla)
         self.historial.append(jugada)
+        return None
 
     def deshacer_jugada(self):
         """
@@ -388,6 +371,7 @@ class Othello(ba.JuegoSumaCeros2T):
 
             self.x = self.estados_anteriores.pop()
             self.orilla = self.orillas_pasadas.pop()
+        return None
 
     def contar_puntos(self, jugador):
         """
@@ -510,44 +494,36 @@ class OthelloGUI:
             if juego.jugadas_legales():
                 casilla = self.escoger_jugada(juego)
                 jugada = (casilla % 8, casilla // 8)
+                print('Jugada tuya: ' + str(jugada))
                 juego.hacer_jugada(jugada)
 
                 self.actualizar_puntos(juego, fichas_hum)
                 self.actualizar_tablero(juego.x)
-
-                ganador = juego.terminal()
-                if ganador is not None: break
             else:
                 print('Ya valiste, no hay jugadas para ti durante este turno.')
-                juego.jugador *= -1
+                juego.hacer_jugada(None)
+
+            ganador = juego.terminal()
+            if ganador is not None: break
+            print('Jugador de la máquina: ' + str(juego.jugador))
 
             if juego.jugadas_legales():
                 print('La máquina está viendo que hace')
 
                 jugada = ba.minimax_t(juego, 5, utilidad = utilidad_othello, ordena_jugadas=ordenar_jugadas)
                 print('Jugada: ' + str(jugada))
-                if juego.jugador == fichas_hum:
-                    print('oye, no')
-                    juego.jugador *= -1
                 juego.hacer_jugada(jugada)
 
                 self.actualizar_puntos(juego, fichas_hum)
                 self.actualizar_tablero(juego.x)
                 print('La máquina ha elegido.')
-
-                """
-                casilla = self.escoger_jugada(juego)
-                jugada = (casilla % 8, casilla // 8)
-                juego.hacer_jugada(jugada)
-
-                self.actualizar_puntos(juego, fichas_hum)
-                self.actualizar_tablero(juego.x)
-                """
-                ganador = juego.terminal()
-                if ganador is not None: break
             else:
                 print('Oh, no, no hay jugadas para la máquina, se supone que ibas a perder.')
-                juego.jugador *= -1
+                juego.hacer_jugada(None)
+
+            ganador = juego.terminal()
+            if ganador is not None: break
+            print('Jugador de la humano: ' + str(juego.jugador))
 
         self.actualizar_puntos(juego, fichas_hum)
         self.actualizar_tablero(juego.x)

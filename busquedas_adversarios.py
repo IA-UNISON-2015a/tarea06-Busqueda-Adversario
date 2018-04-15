@@ -163,7 +163,7 @@ def minimax_t(juego, tmax=5, utilidad=None, ordena_jugadas=None, transp=None):
     for d in range(2, 50):
         ta = perf_counter()
         jugada = minimax(juego, d, utilidad, ordena_jugadas, transp=None)
-        print('Jugador después de un minimax: ' + str(juego.jugador))
         tb = perf_counter()
         if bf * (tb - ta) > t_ini + tmax - tb:
             return jugada
+    return jugada
