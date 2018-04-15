@@ -29,15 +29,17 @@ class Othello(JuegoSumaCeros2T):
         Inicializa el juego, esto es: el número de columnas y
         renglones y el estado inicial del juego. Cuyas posiciones
         estan dadas como:
-
-                        56  57  58  59  60  61  62  63
-                        48  49  50  51  52  53  54  55
-                        40  41  42  43  44  45  46  47
-                        32  33  34  35  36  37  38  39
-                        24  25  26  27  28  29  30  31
-                        16  17  18  19  20  21  22  23
-                         8   9  10  11  12  13  14  15
-                         0   1   2   3   4   5   6   7
+                                                         y
+                        56  57  58  59  60  61  62  63  |0
+                        48  49  50  51  52  53  54  55  |1
+                        40  41  42  43  44  45  46  47  |2
+                        32  33  34  35  36  37  38  39  |3
+                        24  25  26  27  28  29  30  31  |4
+                        16  17  18  19  20  21  22  23  |5
+                         8   9  10  11  12  13  14  15  |6
+                         0   1   2   3   4   5   6   7  |7
+                        ________________________________
+                      x  0   1   2   3   4   5   6   7
 
         Y las posiciones iniciales son en 35, 36, 27, 28
         """
@@ -63,6 +65,11 @@ class Othello(JuegoSumaCeros2T):
         for i in self.tablero:
             xAux.extend(i)
         self.x = xAux
+
+        # Pila para almacenar los tableros completos de cada jugada
+        # porque no se me ocurrio una manera hackerosa para regresar
+        # un estado atras cuando se deshace una jugada
+        self.historialTablero = []
 
     def imprimirTablero(self):
         """
@@ -93,6 +100,8 @@ class Othello(JuegoSumaCeros2T):
         """
         Esta funcion asume que la jugada es valida
         """
+        # Se guarda el estado actual del juego antes de mover piezas
+        self.historialTablero.append(copy.deepcopy(self.tablero))
         #piezasTomadas = 0
         x, y = jugada
         self.tablero[y][x] = self.jugador
@@ -103,7 +112,7 @@ class Othello(JuegoSumaCeros2T):
                 dx = x + self.dirx[d]*(i+1)
                 dy = y + self.diry[d]*(i+1)
                 # Si se sale del tablero entonces se sale del ciclo
-                if dx < 0 or dx > 9 or dy < 0 or dy > 9:
+                if dx < 0 or dx > 7 or dy < 0 or dy > 7:
                     ctr = 0
                     break
                 elif self.tablero[dy][dx] == self.jugador:
@@ -123,11 +132,14 @@ class Othello(JuegoSumaCeros2T):
         for y in range(8):
             for x in range(8):
                 self.x[y*8 + x] = self.tablero[y][x]
+
+        # Se actualiza el estado x0
+        self.x0 = tuple(self.x)
         self.historial.append(jugada)
         self.jugador *= -1
         return None
 
-    def deshacer_jugada(self):
+    #def deshacer_jugada2(self):
         x,y = self.historial.pop()
         self.tablero[y][x] = 0
         for d in range(8): # 8 direcciones
@@ -137,7 +149,7 @@ class Othello(JuegoSumaCeros2T):
                 dx = x + self.dirx[d]*(i+1)
                 dy = y + self.diry[d]*(i+1)
                 # Si se sale del tablero entonces se sale del ciclo
-                if dx < 0 or dx > 9 or dy < 0 or dy > 9:
+                if dx < 0 or dx > 7 or dy < 0 or dy > 7:
                     ctr = 0
                     break
                 elif self.tablero[dy][dx] == self.jugador:
@@ -150,7 +162,7 @@ class Othello(JuegoSumaCeros2T):
             for i in range(ctr):
                 dx = x + self.dirx[d]*(i+1)
                 dy = y + self.diry[d]*(i+1)
-                self.tablero[dy][dx] = -self.jugador
+                self.tablero[dy][dx] = self.jugador
 
         # Se copia los datos de self.tablero a x (para fines de compatibilidad)
         # con los otros othellos
@@ -158,8 +170,29 @@ class Othello(JuegoSumaCeros2T):
             for x in range(8):
                 self.x[y*8 + x] = self.tablero[y][x]
 
+        # Se actualiza el estado x0
         self.jugador *= -1
+        self.x0 = tuple(self.x)
         return None
+
+    def deshacer_jugada(self):
+        if self.historialTablero:
+            #_ = self.historialTablero.pop()
+            # Se saca un estado del tablero de la pila
+            self.tablero = self.historialTablero.pop()
+
+            # Se copia el nuevo tablero a la lista que representa el tablero
+            # (Para fines de compatibilidad con los juegos de los demas)
+            for y in range(8):
+                for x in range(8):
+                    self.x[y*8 + x] = self.tablero[y][x]
+            # Se actualiza la tupla
+            self.x0 = tuple(self.x)
+            # Se saca de la pila del historial el juego (Aunque no se necesite)
+            i,j = self.historial.pop()
+            self.jugador *= -1
+        return None
+
 
     def verificar_jugada(self, tablero, x, y):
         """
@@ -271,16 +304,15 @@ def ordena_jugadas(juego):
         # utilidad1 recibe una lista
         jugadasOrdenadas.append((i, utilidad1(aux)))
     jugadasOrdenadas = sorted(jugadasOrdenadas, key=lambda nodo: nodo[1], reverse = True)
-    #jugadasOrdenadas = [nodo[0] for nodo in jugadasOrdenadas]
+    jugadasOrdenadas = [nodo[0] for nodo in jugadasOrdenadas]
     return jugadasOrdenadas
 
 def jugar():
     juego = Othello()
-    entradaCorrecta = False
-
     print("El jugador son las bolas negras y el bot las blancas")
 
-    while not juego.terminal():
+    while juego.terminal() is None:
+        entradaCorrecta = False
         juego.imprimirTablero()
 
         # Mientras las entradas de x y y no sean correctas respecto al juego
@@ -302,7 +334,7 @@ def jugar():
 
         juego.imprimirTablero()
 
-        if juego.terminal():
+        if juego.terminal() != None:
             break
 
         jugada = minimax_t(juego, utilidad=utilidad1, ordena_jugadas=ordena_jugadas)
@@ -312,6 +344,3 @@ def jugar():
 
 if __name__ == '__main__':
     jugar()
-    #print(juego.tablero)
-    #juego.imprimirTablero()
-    #juego.imprimirTablero2()
