@@ -135,6 +135,7 @@ def utilidad_c4_2(x):
 
     @return: Un número con la ganancia esperada
     """
+    utilidad = 0
     # horizontales
     for i in range(0, 36, 7):
         # checa areas de 4 casillas si hay 3 de algun jugador
@@ -142,14 +143,20 @@ def utilidad_c4_2(x):
             area = x[j:j+4]
             suma = sum(area) 
             if sum in (3, -3) and 0 in area:
-                return 1 if suma == 3 else -1                  
+                if suma == 3:
+                    return 1
+                else:
+                    utilidad = -1               
     # verticales
     for i in range(7):
         # checa si hay 3 de algun jugador y el siguiente no hay nada
         for j in range(3):
             indice = i+7*j
             if x[indice] != 0 and x[indice] == x[indice+7] == x[indice+14] and x[indice+21] == 0:
-                return 1 if x[indice] == 1 else -1
+                if suma == 3:
+                    return 1
+                else:
+                    utilidad = -1
     # diagonales derechas
     for i in range(4):
         # si no hay vacios en el rango no se revisa
@@ -163,7 +170,10 @@ def utilidad_c4_2(x):
                     # si abajo de donde se puede ganar no hay nada, pues no se gana xd
                     if (indice_cero > 7 and x[indice_cero-7] == 0):
                         continue
-                    return 1 if suma == 3 else -1
+                    if suma == 3:
+                        return 1
+                    else:
+                        utilidad = -1
     # diagonales izquierdas
     for i in range(2, 7):
         # si no hay vacios en el rango no se revisa
@@ -179,7 +189,7 @@ def utilidad_c4_2(x):
                         continue
                     return 1 if suma == 3 else -1
                             
-    return 0
+    return utilidad
 
 def ordena_jugadas(juego):
     """
