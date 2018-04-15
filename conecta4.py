@@ -130,9 +130,7 @@ def utilidad_c4_2(x):
     """
     Calcula la utilidad de una posición del juego conecta 4
     para el jugador max (las fichas rojas, o el que empieza)
-
     @param x: Una lista con el estado del tablero
-
     @return: Un número con la ganancia esperada
     """
     utilidad = 0
@@ -140,7 +138,7 @@ def utilidad_c4_2(x):
     for i in range(0, 36, 7):
         # checa areas de 4 casillas si hay 3 de algun jugador
         for j in range(4):
-            area = x[j:j+4]
+            area = x[i+j:i+j+4]
             suma = sum(area) 
             if sum in (3, -3) and 0 in area:
                 if suma == 3:
