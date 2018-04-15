@@ -21,8 +21,8 @@ class othello():
         # 8 direcciones
         self.dirx = [-1,  0,  1, -1, 1, -1, 0, 1]
         self.diry = [-1, -1, -1,  0, 0,  1, 1, 1]
-        self.minUtilidadlTablero = -1 
-        self.maxUtilidadlTablero = self.n * self.n + 4 * self.n + 4 + 1 
+        self.minUtilidadTablero = -1 
+        self.maxUtilidadTablero = self.n * self.n + 4 * self.n + 4 + 1 
         
         if self.n % 2 == 0: # Que sea un tablero par
             z = int((self.n - 2) / 2)
@@ -119,7 +119,7 @@ class othello():
             for x in range(self.n):
                 if self.esLegal(tablero, x, y, jugador):
                     (tableroTemp, numFichasOpp) = self.hacerMoviento(copy.deepcopy(tablero), x, y, jugador)
-                    jugadasOrdenadas.append((tableroTemp, self.UtilidadlTablero(tableroTemp, jugador)))
+                    jugadasOrdenadas.append((tableroTemp, self.UtilidadTablero(tableroTemp, jugador)))
         jugadasOrdenadas = sorted(jugadasOrdenadas, key = lambda node: node[1], reverse = True)
         jugadasOrdenadas = [node[0] for node in jugadasOrdenadas]
         return jugadasOrdenadas
@@ -145,31 +145,65 @@ class othello():
                         v = self.Minimax(tableroTemp, jugador, prof - 1, True)
                         mejorUtilidad = min(mejorUtilidad, v)
         return mejorUtilidad
+    
+    def AlphaBeta(self, tablero, jugador, prof, alpha, beta, maximizarjugador):
+        if prof == 0 or self.esJugadaTerminal(tablero, jugador):
+            return self.UtilidadTablero(tablero, jugador)
+        jugadasOrdenadas = self.getJugadaOrd(tablero, jugador)
+        if maximizarjugador:
+            v = self.minUtilidadTablero
+            for tableroTemp in jugadasOrdenadas:
+                v = max(v, self.AlphaBeta(tableroTemp, jugador, prof - 1, alpha, beta, False))
+                alpha = max(alpha, v)
+                if beta <= alpha:
+                    break # poda de beta
+            return v
+        else: # minimizar jugador
+            v = self.maxUtilidadTablero
+            for tableroTemp in jugadasOrdenadas:
+                v = min(v, self.AlphaBeta(tableroTemp, jugador, prof - 1, alpha, beta, True))
+                beta = min(beta, v)
+                if beta <= alpha:
+                    break # poda de alpha
+            return v
 
 
     def MejorMovimientoUtilidad(self,tablero, jugador, prof):
-        maxPoints = 0
+        maxpuntos = 0
         mx = -1; my = -1
         for y in range(self.n):
             for x in range(self.n):
                 if self.esLegal(tablero, x, y, jugador):
                     (tableroTemp, numFichasOpp) = self.hacerMoviento(copy.deepcopy(tablero), x, y, jugador)
-                    points = self.UtilidadlTablero(tableroTemp, jugador) 
-                    if points > maxPoints:
-                        maxPoints = points
+                    puntos = self.UtilidadlTablero(tableroTemp, jugador) 
+                    if puntos > maxpuntos:
+                        maxpuntos = puntos
                         mx = x; my = y
         return (mx, my)
     
     def MejorMovimientoMinimax(self,tablero, jugador, prof):
-        maxPoints = 0
+        maxpuntos = 0
         mx = -1; my = -1
         for y in range(self.n):
             for x in range(self.n):
                 if self.esLegal(tablero, x, y, jugador):
                     (tableroTemp, numFichasOpp) = self.hacerMoviento(copy.deepcopy(tablero), x, y, jugador)
-                    points = self.Minimax(tableroTemp, jugador, prof, True)
-                    if points > maxPoints:
-                        maxPoints = points
+                    puntos = self.Minimax(tableroTemp, jugador, prof, True)
+                    if puntos > maxpuntos:
+                        maxpuntos = puntos
+                        mx = x; my = y
+        return (mx, my)
+    
+    def MejorMovimientoAlphaBeta(self,tablero, jugador, prof):
+        maxpuntos = 0
+        mx = -1; my = -1
+        for y in range(self.n):
+            for x in range(self.n):
+                if self.esLegal(tablero, x, y, jugador):
+                    (tableroTemp, numFichasOpp) = self.hacerMoviento(copy.deepcopy(tablero), x, y, jugador)
+                    puntos = self.AlphaBeta(tablero, jugador, prof, self.minUtilidadTablero, self.maxUtilidadTablero, True)
+                    if puntos > maxpuntos:
+                        maxpuntos = puntos
                         mx = x; my = y
         return (mx, my)
     
@@ -183,11 +217,11 @@ if __name__ == '__main__':
             jugador = str(p + 1)
             print ('jugador: ' + jugador)
             if juego.esJugadaTerminal(juego.tablero, jugador):
-                print ('jugador cannot play! Game ended!')
-                print ('puntaje User: ' + str(juego.UtilidadlTablero(juego.tablero, '1')))
+                print ('jugador no puede jugar! Game over!')
+                print ('puntaje jugador: ' + str(juego.UtilidadlTablero(juego.tablero, '1')))
                 print ('puntaje AI  : ' + str(juego.UtilidadlTablero(juego.tablero, '2')))
                 os._exit(0)            
-            if jugador == '1': # user's turn
+            if jugador == '1':
                 while True:
                     xy = input('X Y: ')
                     if xy == '': os._exit(0)
@@ -195,13 +229,13 @@ if __name__ == '__main__':
                     x = int(x); y = int(y)
                     if juego.esLegal(juego.tablero, x, y, jugador):
                         (juego.tablero, numFichasOpp) = juego.hacerMoviento(juego.tablero, x, y, jugador)
-                        print ('# of pieces taken: ' + str(numFichasOpp))
+                        print ('Piezas adquiridas: ' + str(numFichasOpp))
                         break
                     else:
-                        print ('Invalid move! Try again!')
-            else: # AI's turn
-                (x, y) = juego.MejorMovimientoMinimax(juego.tablero, jugador,prof)
+                        print ('Movimiento invalido!')
+            else: # 
+                (x, y) = juego.MejorMovimientoAlphaBeta(juego.tablero, jugador,prof)
                 if not (x == -1 and y == -1):
                     (juego.tablero, numFichasOpp) = juego.hacerMoviento(juego.tablero, x, y, jugador)
-                    print ('AI played (X Y): ' + str(x) + ' ' + str(y))
-                    print ('# of pieces taken: ' + str(numFichasOpp))
+                    print ('AI jugo (X Y): ' + str(x) + ' ' + str(y))
+                    print ('Piezas adquiridas: ' + str(numFichasOpp))
