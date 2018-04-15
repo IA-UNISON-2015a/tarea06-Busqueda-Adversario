@@ -41,7 +41,7 @@ class Othello(JuegoSumaCeros2T):
 
         Y las posiciones iniciales son en 35, 36, 27, 28
         """
-        super().__init__(tuple([0 for _ in range(8*8)]))
+        super().__init__(tuple([0 for _ in range(8*8)]), jugador=-1)
         # Yo manejare todo como una matriz pero acordamos todos usar un solo
         # vector de 8*8 que representa una matriz como el estado
         self.tablero = np.array([0 for i in range(8) for j in range(8)])
@@ -64,10 +64,35 @@ class Othello(JuegoSumaCeros2T):
             xAux.extend(i)
         self.x = xAux
 
-    def imprimirTablero2(self):
-        print(self.tablero)
+    def imprimirTablero(self):
+        """
+        función para imprimir el tablero en consola de una manera "bonita"
+        """
+        n = 8
+        m = len(str(n - 1))
+        for y in range(n):
+            renglon = ''
+            for x in range(n):
+                if len(str(self.tablero[y][x])) == 2:
+                    renglon = renglon[:-1]
+                    renglon += str(self.tablero[y][x])
+                    renglon += '  ' * m
+                else:
+                    renglon += str(self.tablero[y][x])
+                    renglon += '  ' * m
+            print(renglon + '| ' + str(y))
+        for y in range(len(renglon)):
+            print("_", end='')
+        renglon = ''
+        print()
+        for x in range(n):
+            renglon += str(x).zfill(m) + '  '
+        print(renglon + '\n')
 
     def hacer_jugada(self, jugada):
+        """
+        Esta funcion asume que la jugada es valida
+        """
         #piezasTomadas = 0
         x, y = jugada
         self.tablero[y][x] = self.jugador
@@ -89,8 +114,8 @@ class Othello(JuegoSumaCeros2T):
                 else:
                     ctr += 1
             for i in range(ctr):
-                dx = x + dirx[d]*(i+1)
-                dy = y + diry[d]*(i+1)
+                dx = x + self.dirx[d]*(i+1)
+                dy = y + self.diry[d]*(i+1)
                 self.tablero[dy][dx] = self.jugador
         self.historial.append(jugada)
         self.jugador *= -1
@@ -122,14 +147,15 @@ class Othello(JuegoSumaCeros2T):
         self.historial.append(jugada)
         self.jugador *= -1
 
-    def verificar_jugada(self, tablero, x, y, jugador):
+    def verificar_jugada(self, tablero, x, y):
         """
         Es exactamente igual que hacer_jugada pero esta no altera
         el tablero del juego y solo se usa para verificar si una jugada
         es valida
         """
+
         piezasTomadas = 0
-        tablero[y][x] = jugador
+        tablero[y][x] = self.jugador
         for d in range(8): # 8 direcciones
             ctr = 0
             for i in range(8): #El tamaño del tablero
@@ -137,10 +163,10 @@ class Othello(JuegoSumaCeros2T):
                 dx = x + self.dirx[d]*(i+1)
                 dy = y + self.diry[d]*(i+1)
                 # Si se sale del tablero entonces se sale del ciclo
-                if dx < 0 or dx > 9 or dy < 0 or dy > 9:
+                if dx < 0 or dx > 7 or dy < 0 or dy > 7:
                     ctr = 0
                     break
-                elif tablero[dy][dx] == jugador:
+                elif tablero[dy][dx] == self.jugador:
                     break
                 elif tablero[dy][dx] == 0:
                     ctr = 0
@@ -148,28 +174,38 @@ class Othello(JuegoSumaCeros2T):
                 else:
                     ctr += 1
             for i in range(ctr):
-                dx = x + dirx[d]*(i+1)
-                dy = y + diry[d]*(i+1)
-                tablero[dy][dx] = jugador
+                dx = x + self.dirx[d]*(i+1)
+                dy = y + self.diry[d]*(i+1)
+                tablero[dy][dx] = self.jugador
             piezasTomadas += ctr
+
         return (tablero, piezasTomadas)
 
-    def movimientoValido(self, x, y, jugador):
+    def movimientoValido(self, x, y):
         if x < 0 or x > 7 or y < 0 or y > 7:
             return False
         if self.tablero[y][x] != 0:
             return False
-        (_,piezasTomadas) = verificar_jugada(copy.deepcopy(self.tablero),
-                                            x, y, jugador)
+        (_,piezasTomadas) = self.verificar_jugada(copy.deepcopy(self.tablero),
+                                            x, y)
         if piezasTomadas == 0:
             return False
         return True
 
-    def jugadas_legales(self):
+    def jugadas_legales(self):)
+                    jugadasLegales.append((x,y))
+        return tuple(jugadasLegales)
 
     def terminal(self):
         for y in range(8):
             for x in range(8):
-                if movimientoValido(x, y, jugador):
+                if self.movimientoValido(x, y):
                     return False
         return True
+
+
+if __name__ == '__main__':
+    juego = Othello()
+    #print(juego.tablero)
+    juego.imprimirTablero()
+    #juego.imprimirTablero2()
