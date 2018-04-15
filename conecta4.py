@@ -185,7 +185,10 @@ def utilidad_c4_2(x):
                     # si abajo de donde se puede ganar no hay nada, pues no se gana xd
                     if (indice_cero > 7 and x[indice_cero-7] == 0):
                         continue
-                    return 1 if suma == 3 else -1
+                    if suma == 3:
+                        return 1
+                    else:
+                        utilidad = -1
                             
     return utilidad
 
