@@ -12,6 +12,7 @@ El juego de Otello implementado por ustedess mismos, con jugador inteligente
 __author__ = 'Jordan Urias'
 
 import copy
+import os
 
 class othello():
     def __init__(self, _n=8):
@@ -42,7 +43,7 @@ class othello():
         renglon = ''
         for x in range(self.n):
             renglon += str(x).zfill(m) + ' '
-            print (renglon + '\n')        
+        print (renglon + '\n')        
     
     '''
      [4, 2, 2, 2, 2, 2, 2, 4],
@@ -100,7 +101,7 @@ class othello():
             return False
         if tablero[y][x] != '0':
             return False
-        (tableroTemp, numFichasOpp) = self.hacerMoviento(self.copy.deepcopy(tablero), x, y, jugador)
+        (tableroTemp, numFichasOpp) = self.hacerMoviento(copy.deepcopy(tablero), x, y, jugador)
         if numFichasOpp == 0:
             return False
         return True
@@ -123,24 +124,84 @@ class othello():
         jugadasOrdenadas = [node[0] for node in jugadasOrdenadas]
         return jugadasOrdenadas
     
-    class SumaCero():
-        def Minimax(self, tablero, jugador, prof, maximizarjugador):
-            if prof == 0 or othello.esJugadaTerminal(tablero, jugador):
-                return othello.UtilidadlTablero(tablero, jugador)
-            if maximizarjugador:
-                mejorUtilidad = othello.minUtilidadlTablero
-                for y in range(othello.n):
-                    for x in range(othello.n):
-                        if othello.esLegal(tablero, x, y, jugador):
-                            (tableroTemp, numFichasOpp) = othello.hacerMoviento(copy.deepcopy(tablero), x, y, jugador)
-                            v = self.Minimax(tableroTemp, jugador, prof - 1, False)
-                            mejorUtilidad = max(mejorUtilidad, v)
-            else: # minimizargjugador
-                mejorUtilidad = othello.maxUtilidadlTablero
-                for y in range(othello.n):
-                    for x in range(othello.n):
-                        if othello.esLegal(tablero, x, y, jugador):
-                            (tableroTemp, numFichasOpp) = othello.hacerMoviento(copy.deepcopy(tablero), x, y, jugador)
-                            v = self.Minimax(tableroTemp, jugador, prof - 1, True)
-                            mejorUtilidad = min(mejorUtilidad, v)
-            return mejorUtilidad
+    
+    def Minimax(self, tablero, jugador, prof, maximizarjugador):
+        if prof == 0 or self.esJugadaTerminal(tablero, jugador):
+            return self.UtilidadTablero(tablero, jugador)
+        if maximizarjugador:
+            mejorUtilidad = self.minUtilidadlTablero
+            for y in range(self.n):
+                for x in range(self.n):
+                    if self.esLegal(tablero, x, y, jugador):
+                        (tableroTemp, numFichasOpp) = self.hacerMoviento(copy.deepcopy(tablero), x, y, jugador)
+                        v = self.Minimax(tableroTemp, jugador, prof - 1, False)
+                        mejorUtilidad = max(mejorUtilidad, v)
+        else: # minimizargjugador
+            mejorUtilidad = self.maxUtilidadlTablero
+            for y in range(self.n):
+                for x in range(self.n):
+                    if self.esLegal(tablero, x, y, jugador):
+                        (tableroTemp, numFichasOpp) = self.hacerMoviento(copy.deepcopy(tablero), x, y, jugador)
+                        v = self.Minimax(tableroTemp, jugador, prof - 1, True)
+                        mejorUtilidad = min(mejorUtilidad, v)
+        return mejorUtilidad
+
+
+    def MejorMovimientoUtilidad(self,tablero, jugador, prof):
+        maxPoints = 0
+        mx = -1; my = -1
+        for y in range(self.n):
+            for x in range(self.n):
+                if self.esLegal(tablero, x, y, jugador):
+                    (tableroTemp, numFichasOpp) = self.hacerMoviento(copy.deepcopy(tablero), x, y, jugador)
+                    points = self.UtilidadlTablero(tableroTemp, jugador) 
+                    if points > maxPoints:
+                        maxPoints = points
+                        mx = x; my = y
+        return (mx, my)
+    
+    def MejorMovimientoMinimax(self,tablero, jugador, prof):
+        maxPoints = 0
+        mx = -1; my = -1
+        for y in range(self.n):
+            for x in range(self.n):
+                if self.esLegal(tablero, x, y, jugador):
+                    (tableroTemp, numFichasOpp) = self.hacerMoviento(copy.deepcopy(tablero), x, y, jugador)
+                    points = self.Minimax(tableroTemp, jugador, prof, True)
+                    if points > maxPoints:
+                        maxPoints = points
+                        mx = x; my = y
+        return (mx, my)
+    
+if __name__ == '__main__':
+    juego=othello()
+    prof = 4
+    while True:
+        for p in range(2):
+            print
+            juego.PrintTablero()
+            jugador = str(p + 1)
+            print ('jugador: ' + jugador)
+            if juego.esJugadaTerminal(juego.tablero, jugador):
+                print ('jugador cannot play! Game ended!')
+                print ('puntaje User: ' + str(juego.UtilidadlTablero(juego.tablero, '1')))
+                print ('puntaje AI  : ' + str(juego.UtilidadlTablero(juego.tablero, '2')))
+                os._exit(0)            
+            if jugador == '1': # user's turn
+                while True:
+                    xy = input('X Y: ')
+                    if xy == '': os._exit(0)
+                    (x, y) = xy.split()
+                    x = int(x); y = int(y)
+                    if juego.esLegal(juego.tablero, x, y, jugador):
+                        (juego.tablero, numFichasOpp) = juego.hacerMoviento(juego.tablero, x, y, jugador)
+                        print ('# of pieces taken: ' + str(numFichasOpp))
+                        break
+                    else:
+                        print ('Invalid move! Try again!')
+            else: # AI's turn
+                (x, y) = juego.MejorMovimientoMinimax(juego.tablero, jugador,prof)
+                if not (x == -1 and y == -1):
+                    (juego.tablero, numFichasOpp) = juego.hacerMoviento(juego.tablero, x, y, jugador)
+                    print ('AI played (X Y): ' + str(x) + ' ' + str(y))
+                    print ('# of pieces taken: ' + str(numFichasOpp))
