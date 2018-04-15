@@ -117,8 +117,15 @@ class Othello(JuegoSumaCeros2T):
                 dx = x + self.dirx[d]*(i+1)
                 dy = y + self.diry[d]*(i+1)
                 self.tablero[dy][dx] = self.jugador
+
+        # Se copia los datos de self.tablero a x (para fines de compatibilidad)
+        # con los otros othellos
+        for y in range(8):
+            for x in range(8):
+                self.x[y*8 + x] = self.tablero[y][x]
         self.historial.append(jugada)
         self.jugador *= -1
+        return None
 
     def deshacer_jugada(self):
         x,y = self.historial.pop()
@@ -141,11 +148,18 @@ class Othello(JuegoSumaCeros2T):
                 else:
                     ctr += 1
             for i in range(ctr):
-                dx = x + dirx[d]*(i+1)
-                dy = y + diry[d]*(i+1)
+                dx = x + self.dirx[d]*(i+1)
+                dy = y + self.diry[d]*(i+1)
                 self.tablero[dy][dx] = -self.jugador
-        self.historial.append(jugada)
+
+        # Se copia los datos de self.tablero a x (para fines de compatibilidad)
+        # con los otros othellos
+        for y in range(8):
+            for x in range(8):
+                self.x[y*8 + x] = self.tablero[y][x]
+
         self.jugador *= -1
+        return None
 
     def verificar_jugada(self, tablero, x, y):
         """
@@ -192,7 +206,11 @@ class Othello(JuegoSumaCeros2T):
             return False
         return True
 
-    def jugadas_legales(self):)
+    def jugadas_legales(self):
+        jugadasLegales=[]
+        for y in range(8):
+            for x in range(8):
+                if self.movimientoValido(x,y):
                     jugadasLegales.append((x,y))
         return tuple(jugadasLegales)
 
@@ -200,12 +218,100 @@ class Othello(JuegoSumaCeros2T):
         for y in range(8):
             for x in range(8):
                 if self.movimientoValido(x, y):
-                    return False
-        return True
+                    return None
+        return self.contarQuienGano()
+
+    def contarQuienGano(self):
+        negro = blanco = 0
+        for y in range(8):
+            for x in range(8):
+                if self.tablero[y][x] == 1:
+                    blanco += 1
+                elif self.tablero[y][x] == -1:
+                    negro += 1
+        if negro > blanco:
+            return -1
+        elif negro < blanco:
+            return 1
+        else:
+            return 0
+
+def utilidad1(tablero):
+    """
+    Calcula la utilidad de una posición del juego othello para el jugador
+    blanco
+
+    @param x: un arreglo de numpy en forma de matriz
+    """
+    jugador = 1
+    total = 0
+    for y in range(8):
+        for x in range(8):
+            if tablero[y*8 + x] == 1:
+                if (x == 0 or x == 7) and (y == 0 or y == 7):
+                    total += 4 # Esquina
+                elif (x == 0 or x == 7) or (y == 0 or y == 7):
+                    total += 2 # orilla
+                else:
+                    total += 1
+    return total
+
+def ordena_jugadas(juego):
+    jugadasOrdenadas = []
+    for i in juego.jugadas_legales():
+        #verificar_jugada regresa una matriz y puntos
+        (tableroTemp, puntos) = juego.verificar_jugada(copy.deepcopy(juego.tablero),
+                                                        i[0], i[1])
+
+        # pasar de matriz a vector
+        aux = juego.x
+        for y in range(8):
+            for x in range(8):
+                aux[y*8 + x] = tableroTemp[y][x]
+        # utilidad1 recibe una lista
+        jugadasOrdenadas.append((i, utilidad1(aux)))
+    jugadasOrdenadas = sorted(jugadasOrdenadas, key=lambda nodo: nodo[1], reverse = True)
+    #jugadasOrdenadas = [nodo[0] for nodo in jugadasOrdenadas]
+    return jugadasOrdenadas
+
+def jugar():
+    juego = Othello()
+    entradaCorrecta = False
+
+    print("El jugador son las bolas negras y el bot las blancas")
+
+    while not juego.terminal():
+        juego.imprimirTablero()
+
+        # Mientras las entradas de x y y no sean correctas respecto al juego
+        # se pediran otra vez las coordenadas
+        while not entradaCorrecta:
+            jugadasDisponibles = juego.jugadas_legales()
+            print("Jugadas legales:")
+            print(jugadasDisponibles, end="\n\n")
+            x = int(input("Ingresa coordenada de x: "))
+            y = int(input("Ingresa coordenada de y: "))
+
+            if juego.movimientoValido(x,y):
+                entradaCorrecta = True
+            else:
+                print("Ingresa una jugada valida\n")
+
+        #El jugador hace su jugada
+        juego.hacer_jugada((x,y))
+
+        juego.imprimirTablero()
+
+        if juego.terminal():
+            break
+
+        jugada = minimax_t(juego, utilidad=utilidad1, ordena_jugadas=ordena_jugadas)
+        juego.hacer_jugada(jugada)
+
 
 
 if __name__ == '__main__':
-    juego = Othello()
+    jugar()
     #print(juego.tablero)
-    juego.imprimirTablero()
+    #juego.imprimirTablero()
     #juego.imprimirTablero2()
