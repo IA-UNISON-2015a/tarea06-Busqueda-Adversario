@@ -16,6 +16,7 @@ Se ilustra con el juego del gato
 """
 
 from time import perf_counter
+from copy import deepcopy
 
 
 class JuegoSumaCeros2T:
@@ -103,7 +104,7 @@ def min_val(juego, jugada, d, utilidad, ordena_jugadas,
         return primero * ganancia
 
     if d == 0:
-        u = utilidad(juego.x)
+        u = utilidad(juego)
         juego.deshacer_jugada()
         return primero * u
 
@@ -135,7 +136,7 @@ def max_val(juego, jugada, d, utilidad, ordena_jugadas,
         return primero * ganancia
 
     if d == 0:
-        u = utilidad(juego.x)
+        u = utilidad(juego)
         juego.deshacer_jugada()
         return primero * u
 
@@ -157,7 +158,6 @@ def max_val(juego, jugada, d, utilidad, ordena_jugadas,
 
 
 def minimax_t(juego, tmax=5, utilidad=None, ordena_jugadas=None, transp=None):
-
     bf = len(list(juego.jugadas_legales()))
     t_ini = perf_counter()
     for d in range(2, 50):
