@@ -97,7 +97,7 @@ class Othello(JuegoSumaCeros2T):
         n = 8
         m = len(str(n - 1))
         for y in range(n):
-            renglon = ''
+            renglon = '  '
             for x in range(n):
                 if len(str(self.tablero[y][x])) == 2:
                     renglon = renglon[:-1]
@@ -109,7 +109,7 @@ class Othello(JuegoSumaCeros2T):
             print(renglon + '| ' + str(y))
         for y in range(len(renglon)):
             print("_", end='')
-        renglon = ''
+        renglon = '  '
         print()
         for x in range(n):
             renglon += str(x).zfill(m) + '  '
