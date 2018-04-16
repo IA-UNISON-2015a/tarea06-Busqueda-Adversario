@@ -16,6 +16,7 @@ Se ilustra con el juego del gato
 """
 
 from time import perf_counter
+from copy import deepcopy
 
 
 class JuegoSumaCeros2T:
