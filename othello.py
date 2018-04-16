@@ -15,6 +15,7 @@ __author__ = 'Ivan Moreno'
 from collections import deque
 from copy import deepcopy
 import tkinter as tk
+import numpy as np
 
 import busquedas_adversarios as ba
 
@@ -70,6 +71,7 @@ class Othello(ba.JuegoSumaCeros2T):
             self.orilla.add(casilla)
 
         self.jugador = 1
+        self.x = np.array(x0)
 
     def jugadas_legales(self):
         """
@@ -103,8 +105,10 @@ class Othello(ba.JuegoSumaCeros2T):
             if len(self.jugadas_legales()) == 0:
                 self.jugador *= -1
 
-                negras = self.x.count(1)
-                blancas = self.x.count(-1)
+                tablero = self.x.tolist()
+
+                negras = tablero.count(1)
+                blancas = tablero.count(-1)
                 return (1 if negras > blancas else
                        -1 if blancas > negras else 0)
             else:
@@ -305,7 +309,7 @@ class Othello(ba.JuegoSumaCeros2T):
         # Antes de modificar, guardamos el estado actual.
         self.estados_anteriores.append(self.x)
         self.orillas_pasadas.append(deepcopy(self.orilla))
-        estado = list(self.x)
+        estado = self.x.copy()
 
         x, y = jugada
         casilla = x + 8*y
@@ -348,7 +352,7 @@ class Othello(ba.JuegoSumaCeros2T):
                 self.orilla.add(casilla+vecino)
 
         # Formalizamos los cambios.
-        self.x = tuple(estado)
+        self.x = estado
         self.jugador *= -1
         self.orilla.remove(casilla)
         self.historial.append(jugada)
@@ -616,15 +620,36 @@ class OthelloGUI:
 
 # -------------------------------------------------------------------------
 
-def utilidad_othello(estado):
+def utilidad_othello(juego):
     """
-    Devuelve cuantas fichas negras hay en el tablero y cuantas esquinas
-    domina el jugador de fichas negras.
+    Devuelve una utilidad basada en las posibles jugadas del jugador 1,
+    las fichas en las orillas y en las esquinas.
+
+    @param juego: Objeto Othello.
     """
-    fichas = estado.count(1)
+    estado = juego.x
+
+    fichas = 0
+    orilla = [0, 1, 2, 3, 4, 5, 6, 7,
+              8, 16, 24, 32, 40, 48,
+              15, 23, 31, 39, 47, 55,
+              56, 57, 58, 59, 60, 61, 62, 63]
+
+    for casilla in orilla:
+        if estado[casilla] == 1:
+            fichas += 1
+
+    if juego.jugador == 1:
+        jugadas_sig_turno = len(juego.jugadas_legales())
+    else:
+        juego.jugador *= -1
+        jugadas_sig_turno = len(juego.jugadas_legales())
+        juego.jugador *= -1
+
     esquinas = sum([1 for casilla in (0, 7, 56, 63)
                      if estado[casilla] == 1])
-    return fichas + 10*esquinas
+
+    return fichas + 10*jugadas_sig_turno + 10*esquinas
 
 # -------------------------------------------------------------------------
 
