@@ -71,6 +71,25 @@ class Othello(JuegoSumaCeros2T):
         # un estado atras cuando se deshace una jugada
         self.historialTablero = []
 
+        # Tabla de transposición
+        self.tablaTrans = {}
+
+    def contarBlancas(self):
+        val = 0
+        for y in range(8):
+            for x in range(8):
+                if self.tablero[y][x] == 1:
+                    val += 1
+        return val
+
+    def contarNegras(self):
+        val = 0
+        for y in range(8):
+            for x in range(8):
+                if self.tablero[y][x] == -1:
+                    val += 1
+        return val
+
     def imprimirTablero(self):
         """
         función para imprimir el tablero en consola de una manera "bonita"
@@ -95,6 +114,8 @@ class Othello(JuegoSumaCeros2T):
         for x in range(n):
             renglon += str(x).zfill(m) + '  '
         print(renglon + '\n')
+        print("Blancas = " + str(self.contarBlancas()))
+        print("Negras = " + str(self.contarNegras()))
 
     def hacer_jugada(self, jugada):
         """
@@ -282,10 +303,15 @@ def utilidad1(tablero):
         for x in range(8):
             if tablero[y*8 + x] == 1:
                 if (x == 0 or x == 7) and (y == 0 or y == 7):
-                    total += 4 # Esquina
+                    # Esquina. Que se tenga una posicion de esquina hace imposible
+                    # que te quiten ese lugar, por lo que es mejor tener ese lugar
+                    total += 4
                 elif (x == 0 or x == 7) or (y == 0 or y == 7):
-                    total += 2 # orilla
+                    # Orilla. Que se tenga una posicion de esquina hace dificil
+                    # que te quiten ese lugar, por lo que es mejor tener ese lugar
+                    total += 2
                 else:
+                    # Cuando se tiene una ficha en cualquier otro lado
                     total += 1
     return total
 
@@ -306,6 +332,7 @@ def ordena_jugadas(juego):
     jugadasOrdenadas = sorted(jugadasOrdenadas, key=lambda nodo: nodo[1], reverse = True)
     jugadasOrdenadas = [nodo[0] for nodo in jugadasOrdenadas]
     return jugadasOrdenadas
+
 
 def jugar():
     juego = Othello()
@@ -337,9 +364,15 @@ def jugar():
         if juego.terminal() != None:
             break
 
-        jugada = minimax_t(juego, utilidad=utilidad1, ordena_jugadas=ordena_jugadas)
+        jugada = minimax_t(juego, utilidad=utilidad1, ordena_jugadas=ordena_jugadas, transp=juego.tablaTrans)
         juego.hacer_jugada(jugada)
 
+    if juego.contarNegras() > juego.contarBlancas():
+        print("\nEl ganado es el jugador (negras)")
+    elif juego.contarNegras() < juego.contarBlancas():
+        print("\nEl ganado es el bot (blancas)")
+    else:
+        print("\nEs un empate lmao que maletas son los dos.")
 
 
 if __name__ == '__main__':
