@@ -156,11 +156,7 @@ def utilidad_c4_chila(x):
                 bonus += 1
             else:
                 bonus = 0
-                jugador=ficha
-    
-    #por diagonal
-    
-        
+                jugador=ficha        
     return utilidad   
 
 def ordena_jugadas(juego):
@@ -176,7 +172,7 @@ def ordena_jugadas(juego):
     shuffle(jugadas)
     return jugadas
 
-def ordena_jugadas_chila(juego):
+def ordena_jugadas_chila2(juego):
     """
     Las mejores jugasdas estan en el centro
     Fuente: https://es.wikihow.com/ganar-en-Conecta-4#_note-7
@@ -186,6 +182,22 @@ def ordena_jugadas_chila(juego):
     for i in (3,2,4,1,5,0,6):
         if i in jugadas: mejores.append(i) 
     return mejores
+
+def ordena_jugadas_chila(juego):
+    """
+    La primera no identificaba si el juego terminaba, no me dejaba
+    ganar, pero no ganaba
+    """
+    def OrdenaJugada(jugada):
+        juego.hacer_jugada(jugada)
+        terminal = juego.terminal()
+        terminal = terminal if terminal else 0
+        juego.deshacer_jugada()
+        return juego.jugador * terminal
+
+    jugadas = list(juego.jugadas_legales())
+    jugadas.sort(key=OrdenaJugada)
+    return jugadas
 
 
 class Conecta4GUI:
