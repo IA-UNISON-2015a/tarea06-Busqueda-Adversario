@@ -318,14 +318,9 @@ def utilidad(juego):
         if estado[borde] == jugador:
             utilidades[1] += jugador * 2
     # calcula la utilidad por la cantidad de fichas del jugador
-    # en el centro del tablero
-    for casilla in range(64):
-        fila, columna = casilla//8, casilla%8
-        if fila not in (0, 7) and columna not in (0, 7) and estado[casilla] == jugador:
-            utilidades[2] += 1
-    # lo multiplica por una constante dependiendo de cuantos
+    # y lo multiplica por una constante dependiendo de cuantos
     # turnos falten para terminar
-    utilidades[2] *= (1 + 20//turnos_faltantes)
+    utilidades[2] = (1 + 20//turnos_faltantes) * estado.count(jugador)
 
     return sum(utilidades)
 
