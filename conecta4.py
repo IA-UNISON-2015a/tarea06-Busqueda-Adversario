@@ -126,13 +126,14 @@ def utilidad_c4(x):
 
     return cum / 42
 
-def utilidad_c4_2(x):
+def utilidad_c4_2(juego):
     """
     Calcula la utilidad de una posición del juego conecta 4
     para el jugador max (las fichas rojas, o el que empieza)
     @param x: Una lista con el estado del tablero
     @return: Un número con la ganancia esperada
     """
+    x = juego.x[:]
     utilidad = 0
     # horizontales
     for i in range(0, 36, 7):
