@@ -269,7 +269,6 @@ class Othello(JuegoSumaCeros2T):
         self.estados_anteriores.append(self.x[:])
         # Proceso para voltear las fichas del oponente 
         jugador, oponente = self.jugador, -1*self.jugador
-        fila, columna = jugada//8, jugada%8
         estado = list(self.x[:])
         # coloca la ficha del jugador en la jugada
         estado[jugada] = jugador
@@ -299,10 +298,41 @@ class Othello(JuegoSumaCeros2T):
             self.x = self.estados_anteriores.pop()
         self.jugador *= -1
 
-def utilidad(x):
-    return x.count(1) + x.count(-1)
+def utilidad(juego):
+    """
+    Regresa la utilidad del estado para el jugador
+    """
+    jugador = juego.jugador
+    estado = juego.x[:]
+    utilidades = [0] * 3
+    turnos_faltantes = estado.count(0)
+    esquinas = [0, 7, 56, 63]
+    bordes = ([i for i in range(1,7)] + [j for j in range(57, 63)] + 
+        [k for k in range(8, 56, 8)] + [l for l in range(15, 63, 8)])
+    # calcula la utilidad de las esquinas
+    for esquina in esquinas:
+        if estado[esquina] == jugador:
+            utilidades[0] += jugador * 10
+    # calcula la utilidad de los bordes
+    for borde in bordes:
+        if estado[borde] == jugador:
+            utilidades[1] += jugador * 2
+    # calcula la utilidad por la cantidad de fichas del jugador
+    # en el centro del tablero
+    for casilla in range(64):
+        fila, columna = casilla//8, casilla%8
+        if fila not in (0, 7) and columna not in (0, 7) and estado[casilla] == jugador:
+            utilidades[2] += 1
+    # lo multiplica por una constante dependiendo de cuantos
+    # turnos falten para terminar
+    utilidades[2] *= (1 + 20//turnos_faltantes)
+
+    return sum(utilidades)
 
 def ordena_jugadas(juego):
+    """
+    Regresa aleatoriamente las jugadas legales
+    """
     jugadas = list(juego.jugadas_legales())
     shuffle(jugadas)
     return jugadas
@@ -357,7 +387,6 @@ def pintar_othello(juego):
     print("+------\t+------\t+------\t+------\t+------\t+------\t+------\t+------\t+------\t+".center(60))
     print("\n\n")
 
-
 class OthelloTK:
     def __init__(self, escala=2):
         self.app = app = tk.Tk()
@@ -410,23 +439,22 @@ class OthelloTK:
     def jugar(self, primero):
         juego = Othello()
 
+        self.actualiza_tablero(juego.x)
         self.anuncio['text'] = "Turno del jugador {}".format('X' if juego.jugador == 1 else 'O')
         
         while juego.terminal() is None:
-            self.actualiza_tablero(juego.x)
-            pintar_othello(juego)
             if len(juego.jugadas_legales()) > 0:
                 jugada = (self.escoge_jugada(juego) if juego.jugador == primero else 
                     minimax_t(juego, 10, utilidad, ordena_jugadas))
-                
             else:
+                print("No hay jugadas")
                 jugada = None
         
             juego.hacer_jugada(jugada)
-            self.actualizar_puntaje(juego.x, primero)
             self.anuncio['text'] = "Turno del jugador {}".format('X' if juego.jugador == 1 else 'O')
-                
-        self.actualiza_tablero(juego.x)
+            self.actualiza_tablero(juego.x)
+            self.actualizar_puntaje(juego.x, primero)
+            
         resultado = juego.terminal()
         fin = ["Empate lo que falta...",
                "¡Gané! ¡Juar, juar, juar!, ¿Quieres perder otra vez?",
