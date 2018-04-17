@@ -46,10 +46,10 @@ class Othello(JuegoSumaCeros2T):
     """
     def __init__(self):
         x = [0 for _ in range(64)]
-        #x[27] = x[36] =-1
-        #x[28] = x[35] =1
+        x[27] = x[36] =-1
+        x[28] = x[35] =1
         #x=[1,-1,0,-1,1,1,-1,1,1,1,1,1,1,1,1,1,1,1,1,-1,-1,1,1,1,1,1,1,1,-1,-1,1,-1,1,-1,1,1,1,1,1,-1,1,1,1,1,1,1,-1,-1,0,0,1,1,1,-1,-1,-1,1,1,1,1,0,-1,-1,-1]
-        x=[1,-1,0,-1,-1,-1,-1,1,1,1,1,-1,-1,1,1,1,1,1,1,-1,-1,-1,1,1,1,1,1,1,-1,-1,-1,-1,1,-1,1,1,1,1,1,-1,1,1,1,1,1,1,-1,-1,0,0,1,1,1,-1,-1,-1,1,1,1,1,0,-1,-1,-1]
+        #x=[1,-1,0,-1,-1,-1,-1,1,1,1,1,-1,-1,1,1,1,1,1,1,-1,-1,-1,1,1,1,1,1,1,-1,-1,-1,-1,1,-1,1,1,1,1,1,-1,1,1,1,1,1,1,-1,-1,0,0,1,1,1,-1,-1,-1,1,1,1,1,0,-1,-1,-1]
         super().__init__(tuple(x))
         self.historial = deque()
         self.x_anterior = deque()
@@ -187,29 +187,34 @@ class Othello(JuegoSumaCeros2T):
     def jugadas_legales(self):
         legales=[]
         for casilla in range(64):
-            if self.x[casilla]==0: 
+            if self.x[casilla]==0:
                 if True in self.esValida(casilla): legales.append(casilla)
-        print("\n\nJUGADAS LEGALES PARA :",self.jugador," :",legales,"\n\n")            
-        return tuple(legales)
+        #print("\n\nJUGADAS LEGALES PARA :",self.jugador," :",legales,"\n\n")            
+        return legales
     def terminal(self):
+        asteriscos = self.x.count(-1)
+        os = self.x.count(1)
         jugadas1=len(self.jugadas_legales())
         self.jugador*=-1
         jugadas2=len(self.jugadas_legales())
         self.jugador*=-1
-        if jugadas1 == 0:
-            if jugadas2 == 0:
-                blancas = self.x.count(-1)
-                negras = self.x.count(1)
-                return 1 if blancas < negras else -1 if negras < blancas else 0
+        if asteriscos == 0 or os == 0:
+            return 1 if asteriscos < os else -1
+
+        #si ningun jugador tiene movimientos
+        if jugadas1==0 and jugadas2==0:
+            return 1 if os > asteriscos else -1 if asteriscos > os else 0
+
         return None
 
     def hacer_jugada(self, jugada):
-        self.x_anterior.append(self.x[:])
+        """self.x_anterior.append(self.x[:])
         jugador, rival = self.jugador, -1*self.jugador
         #guarda quein es cada quien
         #obtener la fila y columna
         #si el jugador paso turno por no tener jugada disp
         if jugada is None:
+            print("la jugada es none")
             self.historial.append(jugada)
             self.jugador *= -1
             return None
@@ -218,7 +223,21 @@ class Othello(JuegoSumaCeros2T):
         estado = list(self.x[:])
         #pone ficha
         self.historial.append(jugada)
-        estado[jugada]=jugador
+        estado[jugada]=jugador"""
+        # si el jugador paso de turno
+        if jugada is None:
+            self.historial.append(jugada)
+            self.jugador *= -1
+            return None
+        # guardamos los estados actuales y la jugada
+        self.historial.append(jugada)
+        self.x_anterior.append(self.x[:])
+        # Proceso para voltear las fichas del oponente 
+        jugador, rival = self.jugador, -1*self.jugador
+        fila, columna = jugada//8, jugada%8
+        estado = list(self.x[:])
+        # coloca la ficha del jugador en la jugada
+        estado[jugada] = jugador
         #obtiene para donde volteara
         voltear=self.esValida(jugada)
         #VOLTEA LAS FICHAS
@@ -346,7 +365,7 @@ class OthelloTK:
         self.userpoints.update()
         self.Mpoints['text'] = "Agente: {} ".format(x.count(-1*primero))
         self.Mpoints.update()
-
+    
     def jugar(self, primero):
         juego = Othello()
 
@@ -357,7 +376,6 @@ class OthelloTK:
             if len(juego.jugadas_legales()) > 0:
                 jugada = (self.escoge_jugada(juego) if juego.jugador == primero else 
                     minimax_t(juego, 10, utilidad, ordena_jugadas))
-                
             else:
                 jugada = None
         
@@ -367,16 +385,16 @@ class OthelloTK:
                 
         self.actualiza_tablero(juego.x)
         resultado = juego.terminal()
-        fin = ["Empate ¯\_(ツ)_/¯",
-               "Gané ( ͡° ͜ʖ ͡°)",
-               "Ganaste ( 　ﾟ,_ゝﾟ)" ]
+        fin = ["Empate °_°",
+               "Gané :v",
+               "Ganaste -_-" ]
         
         print("\n\nFin del juego")
         self.anuncio['text'] = (fin[0] if resultado == 0 else
                                 fin[1] if (primero == -1 and resultado>0) or (primero == 1 and resultado<0) else
                                 fin[2])
         self.anuncio.update()
-
+    
     def escoge_jugada(self, juego):
         jugadas_posibles = list(juego.jugadas_legales())
         if len(jugadas_posibles) == 1:
@@ -389,7 +407,7 @@ class OthelloTK:
             evento.widget['bg'] = 'black'
 
         def salida(evento):
-            evento.widget['bg'] = '#614646'
+            evento.widget['bg'] = evento.widget.color_original
 
         def presiona_raton(evento):
             evento.widget['bg'] = evento.widget.color_original
@@ -420,9 +438,12 @@ class OthelloTK:
         self.app.mainloop()
 
 if __name__ == '__main__':
-    #OthelloTK().arranca()
     juego=Othello()
     juego.imprimirTablero()
-    if 49 in juego.jugadas_legales():
-        juego.hacer_jugada(49)
-        juego.imprimirTablero()
+    print(juego.jugadas_legales())
+    print(juego.terminal())
+    OthelloTK().arranca()
+    #juego=Othello()
+    #juego.imprimirTablero()
+    #juego.jugadas_legales()
+    
