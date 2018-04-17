@@ -48,8 +48,7 @@ class Othello(JuegoSumaCeros2T):
         x = [0 for _ in range(64)]
         x[27] = x[36] =-1
         x[28] = x[35] =1
-        #x=[1,-1,0,-1,1,1,-1,1,1,1,1,1,1,1,1,1,1,1,1,-1,-1,1,1,1,1,1,1,1,-1,-1,1,-1,1,-1,1,1,1,1,1,-1,1,1,1,1,1,1,-1,-1,0,0,1,1,1,-1,-1,-1,1,1,1,1,0,-1,-1,-1]
-        #x=[1,-1,0,-1,-1,-1,-1,1,1,1,1,-1,-1,1,1,1,1,1,1,-1,-1,-1,1,1,1,1,1,1,-1,-1,-1,-1,1,-1,1,1,1,1,1,-1,1,1,1,1,1,1,-1,-1,0,0,1,1,1,-1,-1,-1,1,1,1,1,0,-1,-1,-1]
+        x=[1,-1,0,-1,-1,-1,-1,1,1,1,1,-1,-1,1,1,1,1,1,1,-1,-1,-1,1,1,1,1,1,-1,-1,-1,-1,-1,1,-1,1,1,1,1,1,-1,1,1,1,1,1,1,-1,-1,-1,0,1,1,1,-1,-1,-1,1,1,1,1,0,-1,-1,-1]
         super().__init__(tuple(x))
         self.historial = deque()
         self.x_anterior = deque()
@@ -155,7 +154,7 @@ class Othello(JuegoSumaCeros2T):
         #diagonal hacia abajo-izquierda
         if casilla not in self.dIAbajo: 
             if self.x[casilla+8-1] == rival:
-                for i in range(fila+1,8-fila):
+                for i in range(2,8-fila):
                     if self.x[casilla+(8*i)-i]==jugador: 
                         dIAbajo= True
                         break 
@@ -190,7 +189,7 @@ class Othello(JuegoSumaCeros2T):
             if self.x[casilla]==0:
                 if True in self.esValida(casilla): legales.append(casilla)
         #print("\n\nJUGADAS LEGALES PARA :",self.jugador," :",legales,"\n\n")            
-        return legales
+        return tuple(legales)
     def terminal(self):
         asteriscos = self.x.count(-1)
         os = self.x.count(1)
@@ -233,7 +232,8 @@ class Othello(JuegoSumaCeros2T):
         self.historial.append(jugada)
         self.x_anterior.append(self.x[:])
         # Proceso para voltear las fichas del oponente 
-        jugador, rival = self.jugador, -1*self.jugador
+        jugador=self.jugador
+        rival = -1*self.jugador
         fila, columna = jugada//8, jugada%8
         estado = list(self.x[:])
         # coloca la ficha del jugador en la jugada
@@ -291,14 +291,23 @@ class Othello(JuegoSumaCeros2T):
         self.jugador *= -1
 
 def utilidad(x):
-    #uno=x.count(x.)
-    #dos=x.count(1)
-    return 1
+    #cuenta las esquinas ocupadas
+    contador = 0
+    for i in (0,7,56,63):
+        if x[i] != 0:
+            contador+=1  
+    return contador
 
 def ordena_jugadas(juego):
+    jugadasOrdenadas=[]
     jugadas = list(juego.jugadas_legales())
+    for jugada in (0,7,56,63):
+        if jugada in jugadas: 
+            jugadasOrdenadas.append(jugada)
+            jugadas.remove(jugada)
     shuffle(jugadas)
-    return jugadas
+    
+    return combinarListas(jugadasOrdenadas,jugadas)
     
 #para combinar las listas d eno posibles en la diagonal
 def combinarListas(lista1,lista2):
@@ -373,7 +382,7 @@ class OthelloTK:
         
         while juego.terminal() is None:
             self.actualiza_tablero(juego.x)
-            if len(juego.jugadas_legales()) > 0:
+            if len(juego.jugadas_legales()) >= 0:
                 jugada = (self.escoge_jugada(juego) if juego.jugador == primero else 
                     minimax_t(juego, 10, utilidad, ordena_jugadas))
             else:
