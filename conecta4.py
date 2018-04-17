@@ -107,41 +107,65 @@ def utilidad_c4(x):
 
     @return: Un número entre -1 y 1 con la ganancia esperada
 
-    Para probar solo busque el número de conecciones de las
-    bolitas de mas arriba con su alrededor
+    
     """
-    cum = 0
-    for i in range(7):
-        for j in (35, 28, 21, 14, 7, 0):
-            if x[i] != 0:
-                if 0 < i < 6:
-                    biases = (-6, -7, -8, -1, 1, 6, 8)
-                elif i == 0:
-                    biases = (-7, -8, 1, 8)
-                else:
-                    biases = (-6, -7, -1, 6)
-                con = sum(x[i] for bias in biases
-                          if i + bias >= 0 and x[i] == x[i + bias])
-                cum += con / len(biases)
-                break
-
-    return cum / 42
-
+    #Si hay 3 de un jugador
+    #HORIZONTALES checa si puede ganar el o el rival y actua
+    utilidad=0
+    for i in range(0,36,7):
+        for j in range(4):
+            #una lista con los 4 elementos a checar
+            lista=[x[i+j],x[i+j+1],x[i+j+2],x[i+j+3]]
+            #cuenta los unos, -unos y ceros
+            unosN=lista.count(-1)
+            unosP=lista.count(1)
+            ceros=lista.count(0)
+            if ceros==1:
+                if unosP==3: utilidad += 2
+                elif unosN==3: utilidad -= 1
+    #VERTICALES checa si puede ganar el o el rival y actua
+    for i in range(35,42):
+        for j in range(3):
+            casilla=i-7*j
+            if x[casilla] == 0 :
+                if x[casilla-7] == x[casilla-14] == x[casilla-21] == 1: utilidad += 2
+                elif x[casilla-7] == x[casilla-14] == x[casilla-21] == -1: utilidad -= 1
+    #Diagonal L checa si puede ganar el o el rival y actua
+    for i in range(21,25):
+        for j in (0,1,2):
+            lista=[x[i+7*j],x[(i+7*j)-6*1],x[(i+7*j)-6*2],x[(i+7*j)-6*3]]
+            unosN=lista.count(-1)
+            unosP=lista.count(1)
+            ceros=lista.count(0)
+            if ceros==1:
+                if unosP==3: utilidad += 2
+                elif unosN==3: utilidad -= 1
+    #Diagonal R checa si puede ganar el o el rival y actua
+    for i in range(24,28):
+        for j in (0,1,2):
+            lista=[x[i+7*j],x[(i+7*j)-8*1],x[(i+7*j)-8*2],x[(i+7*j)-8*3]]
+            unosN=lista.count(-1)
+            unosP=lista.count(1)
+            ceros=lista.count(0)
+            if ceros==1:
+                if unosP==3: utilidad += 2
+                elif unosN==3: utilidad -= 1
+    return utilidad
 
 def ordena_jugadas(juego):
     """
     Ordena las jugadas de acuerdo al jugador actual, en función
     de las más prometedoras.
 
-    Para que funcione le puse simplemente las jugadas aleatorias
-    pero es un criterio bastante inaceptable
+    Primero la columna dle centro, luego las de en medio y luego las de la orrilla
 
     """
+    jugadasOrdenadas=[]
     jugadas = list(juego.jugadas_legales())
-    shuffle(jugadas)
-    return jugadas
-
-
+    for jugada in (3,2,4,5,1,0,6):
+        if jugada in jugadas: jugadasOrdenadas.append(jugada)
+    return jugadasOrdenadas
+    
 class Conecta4GUI:
     def __init__(self, tmax=10, escala=1):
 
