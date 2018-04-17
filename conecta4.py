@@ -15,6 +15,7 @@ from busquedas_adversarios import minimax_t
 from busquedas_adversarios import minimax
 from random import shuffle
 import tkinter as tk
+import copy
 
 __author__ = 'juliowaissman'
 
@@ -167,6 +168,9 @@ def utilidad_c4(x):
     puntos -= revisarColumnas(x, -1) + revisarRenglones(x, -1)
     return puntos
 
+def fingeJugada(juego, jugada):
+    juego.hacer_jugada(jugada)
+    return utilidad_c4(juego.x)
 
 def ordena_jugadas(juego):
     """
@@ -178,8 +182,8 @@ def ordena_jugadas(juego):
     """
     jugadas = list(juego.jugadas_legales())
     #print(jugadas)
-    #sorted(jugadas, key=lambda x: utilidad_c4(x))
-    shuffle(jugadas)
+    sorted(jugadas, key=lambda x: fingeJugada(copy.deepcopy(juego), x))
+    #shuffle(jugadas)
     return jugadas
 
 
