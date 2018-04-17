@@ -13,10 +13,11 @@ es la implementación desde 0 del juego de Otello.
 from busquedas_adversarios import JuegoSumaCeros2T
 from busquedas_adversarios import minimax_t
 from busquedas_adversarios import minimax
+#import time
 from random import shuffle
 import tkinter as tk
 
-__author__ = 'juliowaissman'
+__author__ = 'Adrian Emilio Vazquez Icedo'
 
 
 class ConectaCuatro(JuegoSumaCeros2T):
@@ -127,6 +128,128 @@ def utilidad_c4(x):
 
     return cum / 42
 
+def utilidad_c4_2(x):
+    """
+    Calcula la utilidad de una posición del juego conecta 4
+    para el jugador max (las fichas rojas, o el que empieza)
+
+    @param x: Una lista con el estado del tablero
+
+    @return: Un número entre -1 y 1 con la ganancia esperada
+
+    Suma puntos por cada ficha o conjunto de fichas que podria llegar a completar las 4
+    """
+    cum = 0
+    ficha=0
+    sum1=0
+    sum_1=0
+    for i in (0,7,14,21,28,35):
+        vacia=0
+
+        for i2 in range(i,i+7):
+            if x[i2]!=0:
+                ficha=x[i2]
+                if i2+3*7<42:#Revisar hacia arriba
+                    for l in range(1,4):
+                        if x[i2+l*7]==ficha:
+                            if l==3: return 10000*ficha
+                        else:
+                            if x[i2+l*7]==0:
+                                if x[i2+1*7]!=ficha*-1 and x[i2+2*7]!=ficha*-1 and x[i2+3*7]!=ficha*-1:
+                                    if ficha==1:
+                                        sum1+=l
+                                    else: sum_1+=l
+                            break
+                    if i2%7+3<7:#Revisar hacia arriba-derecha
+                        for l in range(1,4):
+                            if x[i2+l*7+l]==ficha:
+                                if l==3: return 10000*ficha
+                            else:
+                                if x[i2+l*7+l]==0:
+                                    if x[i2+1*7+1]!=ficha*-1 and x[i2+2*7+2]!=ficha*-1 and x[i2+3*7+3]!=ficha*-1:
+                                        if ficha==1:
+                                            sum1+=l
+                                        else: sum_1+=l
+                                break
+                    if i2%7-3>=0:#Revisar hacia arriba-izquierda
+                        for l in range(1,4):
+                            if x[i2+l*7-l]==ficha:
+                                if l==3: return 10000*ficha
+                            else:
+                                if x[i2+l*7-l]==0:
+                                    if x[i2+1*7-1]!=ficha*-1 and x[i2+2*7-2]!=ficha*-1 and x[i2+3*7-3]!=ficha*-1:
+                                        if ficha==1:
+                                            sum1+=l
+                                        else: sum_1+=l
+                                break
+
+
+                if i2-3*7>=0:#Revisar hacia abajo
+                    for l in range(1,4):
+                        if x[i2-l*7]==ficha:
+                            if l==3: return 10000*ficha
+                        else:
+                            if x[i2-l*7]==0:
+                                if x[i2-1*7]!=ficha*-1 and x[i2-2*7]!=ficha*-1 and x[i2-3*7]!=ficha*-1:
+                                    if ficha==1: sum1+=l
+                                    else: sum_1+=l
+                            break
+                    if i2%7+3<7:#Revisar hacia abajo-derecha
+                        for l in range(1,4):
+                            if x[i2-l*7+l]==ficha:
+                                if l==3: return 10000*ficha
+                            else:
+                                if x[i2-l*7+l]==0:
+                                     if x[i2-1*7+1]!=ficha*-1 and x[i2-2*7+2]!=ficha*-1 and x[i2-3*7+3]!=ficha*-1:
+                                        if ficha==1:
+                                            sum1+=l
+                                        else: sum_1+=l
+                                break
+                    if i2%7-3>=0:#Revisar hacia izquierda
+                        for l in range(1,4):
+                            if x[i2-l*7-l]==ficha:
+                                if l==3: return 10000*ficha
+                            else:
+                                if x[i2-l*7-l]==0:
+                                     if x[i2-1*7-1]!=ficha*-1 and x[i2-2*7-2]!=ficha*-1 and x[i2-3*7-3]!=ficha*-1:
+                                        if ficha==1:
+                                            sum1+=l
+                                        else: sum_1+=l
+                                break
+
+
+                if i2%7+3<7:#Revisar hacia derecha
+                    for l in range(1,4):
+                        if x[i2+l]==ficha:
+                            if l==3: return 10000*ficha
+                        else:
+                            if x[i2+l]==0:
+                                 if x[i2+1]!=ficha*-1 and x[i2+2]!=ficha*-1 and x[i2+3]!=ficha*-1:
+                                    if ficha==1:
+                                        sum1+=l
+                                    else: sum_1+=l
+                            break
+                if i2%7-3>=0:#Revisar hacia izquierda
+                    for l in range(1,4):
+                        if x[i2-l]==ficha:
+                            if l==3: return 10000*ficha
+                        else:
+                            if x[i2-l]==0:
+                                 if x[i2-1]!=ficha*-1 and x[i2-2]!=ficha*-1 and x[i-3]!=ficha*-1:
+                                    if ficha==1:
+                                        sum1+=l
+                                    else: sum_1+=l
+                            break
+            #print(i)
+
+            else:
+                vacia+=1
+        if vacia==7: break
+
+    cum=(sum1-sum_1)#/(sum1+sum_1)
+    #print(cum)
+    #time.sleep(10)
+    return cum #/ 42
 
 def ordena_jugadas(juego):
     """
@@ -139,8 +262,27 @@ def ordena_jugadas(juego):
     """
     jugadas = list(juego.jugadas_legales())
     shuffle(jugadas)
+    #jugadas_ord=[]
+    #for i in (3,4,2,5,1,6,0):
+     #   if i in jugadas: jugadas_ord.append(i)
+
     return jugadas
 
+def ordena_jugadas2(juego):
+    """
+    Ordena las jugadas de acuerdo al jugador actual, en función
+    de las más prometedoras.
+
+    Entre mas cercanas al centro mejor ya que tienen mas formas de unirse con otras fichas
+
+    """
+    jugadas = list(juego.jugadas_legales())
+    #shuffle(jugadas)
+    jugadas_ord=[]
+    for i in (3,4,2,5,1,6,0):
+        if i in jugadas: jugadas_ord.append(i)
+
+    return jugadas
 
 class Conecta4GUI:
     def __init__(self, tmax=10, escala=1):
@@ -214,8 +356,8 @@ class Conecta4GUI:
             for i in range(7):
                 self.botones[i]['state'] = tk.DISABLED
 
-            jugada = minimax(juego, dmax=6, utilidad=utilidad_c4,
-                             ordena_jugadas=ordena_jugadas,
+            jugada = minimax(juego, dmax=6, utilidad=utilidad_c4_2,
+                             ordena_jugadas=ordena_jugadas2,
                              transp=self.tr_ta)
             juego.hacer_jugada(jugada)
             self.actualiza_tablero(jugada, color_p)
@@ -241,8 +383,8 @@ class Conecta4GUI:
                 self.botones[i]['state'] = tk.DISABLED
                 self.botones[i].update()
 
-            jugada = minimax(juego, dmax=6, utilidad=utilidad_c4,
-                             ordena_jugadas=ordena_jugadas,
+            jugada = minimax(juego, dmax=6, utilidad=utilidad_c4_2,
+                             ordena_jugadas=ordena_jugadas2,
                              transp=self.tr_ta)
             juego.hacer_jugada(jugada)
             self.actualiza_tablero(jugada, color_p)
