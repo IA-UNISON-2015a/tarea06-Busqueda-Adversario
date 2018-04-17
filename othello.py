@@ -11,7 +11,7 @@ El juego de Otello implementado por ustedes mismos, con jugador inteligente
 from busquedas_adversarios import JuegoSumaCeros2T
 from busquedas_adversarios import minimax
 from busquedas_adversarios import minimax_t
-from random import shuffle
+from random import shuffle, choice
 from collections import deque
 import tkinter as tk
 
@@ -184,6 +184,55 @@ def ordena_jugadas(juego):
                   reverse=True)
 
 """
+El numero de jugadas que un jugador puede hacer entre el
+numero de casillas vacias que quedan.
+"""
+def movilidad_inmediata(juego):
+    jugador_actual = juego.jugador
+    juego.jugador = 1
+    jugadas_j1 = len(list(juego.jugadas_legales())) 
+    juego.jugador = -1
+    jugadas_j2 = len(list(juego.jugadas_legales())) 
+    juego.jugador = jugador_actual
+    
+    return (jugadas_j1 - jugadas_j2) / juego.x.count(0)
+
+"""
+Recompensa poner las fichas en las esquinas y penaliza poner en
+lugares que podrian dar las esquinas que no esten tomadas.
+"""
+def contar_esquinas(juego):
+    esquinas = [0, 7, 56, 63]
+    return  sum(juego.x[esquina] for esquina in esquinas) / 4
+
+def contar_casi_esquinas(juego):
+    casi_esquinas = [9, 14, 49, 54]
+    casi_esquina_j1 = sum(-1 for casi_esquina in casi_esquinas
+                          if juego.x[casi_esquina] == 1)
+
+    return casi_esquina_j1 / 4
+
+"""
+Cuenta la diferencia de piezas en el tablero de los jugadores.
+Como solamente importa el numero de piezas al final, solo cuenta cuando
+quedan 10 o menos turnos.
+"""
+def contar_piezas(juego):
+    if juego.x.count(0) > 10:
+        return 0
+
+    return (juego.x.count(1) - juego.x.count(-1)) / 64
+
+    """
+    Toma en cuentas las esquinas, la movilidad inmediata y el numero de piezas
+    cuando el juego esta por acabar
+    """
+def utilidad(juego):
+    #return 0.8*contar_esquinas(juego) + 0.05*contar_piezas(juego) + 0.1*movilidad_inmediata(juego) + 0.05*contar_casi_esquinas(juego)
+    return (contar_esquinas(juego) + contar_piezas(juego) + movilidad_inmediata(juego) + contar_casi_esquinas(juego)) / 4
+
+
+"""
 Implementacion copiada de belen y ligeramente cambiada.
 """
 class OthelloTK:
@@ -202,7 +251,7 @@ class OthelloTK:
         barra = tk.Frame(app)
         barra.pack()
 
-        self.userpoints = tk.Label(barra, bg='light grey', text="J1: ")
+        self.userpoints = tk.Label(barra, bg='light grey', text="X: ")
         self.userpoints.grid(column=0, row=0)
 
         botonX = tk.Button(barra,
@@ -213,7 +262,7 @@ class OthelloTK:
                            command=lambda x=-1: self.jugar(x),
                            text='(re)iniciar con O')
         botonO.grid(column=2, row=0)
-        self.Mpoints = tk.Label(barra, bg='light grey',  text="J2: ")
+        self.Mpoints = tk.Label(barra, bg='light grey',  text="O: ")
         self.Mpoints.grid(column=3, row=0)
 
         ctn = tk.Frame(app, bg='black')
@@ -234,51 +283,6 @@ class OthelloTK:
 
         juego = Othello()
 
-        #funciones de utilidad definidas aqui porque necesitan conocer el juego
-        """
-        El numero de jugadas que un jugador puede hacer entre el
-        numero de casillas vacias que quedan.
-        """
-        def movilidad_inmediata(x):
-            return len(list(juego.jugadas_legales())) / juego.x.count(0)
-
-        """
-        Recompensa poner las fichas en las esquinas y penaliza poner en
-        lugares que podrian dar las esquinas que no esten tomadas.
-        """
-        def contar_esquinas(x):
-            esquinas = [0, 7, 56, 63]
-            esquina_j1 =  sum(1 for esquina in esquinas if x[esquina] == juego.jugador)
-            esquina_j2 =  sum(-1 for esquina in esquinas if x[esquina] == -juego.jugador)
-
-            casi_esquinas = [9, 14, 49, 54]
-            casi_esquina_j1 = sum(1 for casi_esquina, esquina in zip(casi_esquinas, esquinas)
-                                  if x[casi_esquina] == juego.jugador and
-                                  x[esquina] == 0)
-            casi_esquina_j2 = sum(1 for casi_esquina, esquina in zip(casi_esquinas, esquinas)
-                                  if x[casi_esquina] == -juego.jugador and
-                                  x[esquina] == 0)
-
-            return (esquina_j1 + casi_esquina_j2 - esquina_j2 - casi_esquina_j1) / 8
-
-        """
-        Cuenta la diferencia de piezas en el tablero de los jugadores.
-        Como solamente importa el numero de piezas al final, solo cuenta cuando
-        quedan 10 o menos turnos.
-        """
-        def contar_piezas(x):
-            if x.count(0) > 10:
-                return 0
-
-            return (x.count(juego.jugador) - x.count(-juego.jugador)) / 64
-
-        """
-        Toma en cuentas las esquinas, la movilidad inmediata y el numero de piezas
-        cuando el juego esta por acabar
-        """
-        def utilidad(x):
-            return 0.6*contar_esquinas(x) + 0.3*contar_piezas(x) + 0.1*movilidad_inmediata(x)
-
         self.anuncio['text'] = "Turno jugador {}".format(1 if juego.jugador == 1 else 2)
 
         while juego.terminal() is None:
@@ -288,6 +292,7 @@ class OthelloTK:
                 if juego.jugador == primero:
                     jugada = self.escoge_jugada_humano(juego)
                     #jugada = minimax_t(juego, 30, utilidad, ordena_jugadas, {})
+                    #jugada = choice(list(juego.jugadas_legales()))
                 else:
                     #jugada = self.escoge_jugada_humano(juego)
                     jugada = minimax_t(juego, 30, utilidad, ordena_jugadas, {})
@@ -351,9 +356,9 @@ class OthelloTK:
     Actualiza los puntos del tablero
     """
     def actualizar_puntos(self, juego, primero):
-        self.userpoints['text'] = "J1: {} ".format(juego.x.count(primero))
+        self.userpoints['text'] = "X: {} ".format(juego.x.count(primero))
         self.userpoints.update()
-        self.Mpoints['text'] = "J2: {} ".format(juego.x.count(-primero))
+        self.Mpoints['text'] = "O: {} ".format(juego.x.count(-primero))
         self.Mpoints.update()
 
 
