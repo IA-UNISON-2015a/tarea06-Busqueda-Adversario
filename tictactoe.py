@@ -6,6 +6,15 @@ from busquedas_adversarios import JuegoSumaCeros2T
 from busquedas_adversarios import minimax
 import tkinter as tk
 
+#LEFT_UP        = 0
+#CENTER_UP      = 1
+#RIGHT_UP       = 2
+#LEFT_CENTER    = 3
+#CENTER         = 4
+#RIGHT_CENTER   = 5
+#LEFT_DOWN      = 6
+#CENTER_DOWN    = 7
+#RIGHT_DOWN     = 8
 
 class Gato(JuegoSumaCeros2T):
     """
@@ -27,11 +36,14 @@ class Gato(JuegoSumaCeros2T):
 
     def terminal(self):
         x = self.x
+        #gana por diagonal?
         if x[4] != 0 and (x[0] == x[4] == x[8] or x[2] == x[4] == x[6]):
             return x[4]
         for i in range(3):
+            #gana por renglon?
             if x[3 * i] != 0 and x[3 * i] == x[3 * i + 1] == x[3 * i + 2]:
                 return x[3 * i]
+            #gana por columna?
             if x[i] != 0 and x[i] == x[i + 3] == x[i + 6]:
                 return x[i]
         if 0 not in self.x:
@@ -223,3 +235,4 @@ class GatoTK:
 if __name__ == '__main__':
     # juega_gato('X')
     GatoTK().arranca()
+

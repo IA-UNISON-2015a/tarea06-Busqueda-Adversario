@@ -16,7 +16,7 @@ from busquedas_adversarios import minimax
 from random import shuffle
 import tkinter as tk
 
-__author__ = 'juliowaissman'
+__author__ = 'luis fernando'
 
 
 class ConectaCuatro(JuegoSumaCeros2T):
@@ -87,6 +87,7 @@ class ConectaCuatro(JuegoSumaCeros2T):
                 self.x[i + jugada] = self.jugador
                 self.historial.append(jugada)
                 self.jugador *= -1
+
                 return None
 
     def deshacer_jugada(self):
@@ -97,6 +98,60 @@ class ConectaCuatro(JuegoSumaCeros2T):
                 self.jugador *= -1
                 return None
 
+"""
+    Para estas funciones tomare los lugares de la siguiente manera:
+     0   1   2   3   4   5   6
+     7   8   9  10  11  12  13
+    14  15  16  17  18  19  20
+    21  22  23  24  25  26  27
+    28  29  30  31  32  33  34
+    35  36  37  38  39  40  41
+"""
+"""
+    Indica cuantos bloques de 4 en 4 todavia pueden ser ganados por
+    el jugador en horizontal.
+
+    @param x: Estado del juego
+    @param jugador: Jugador de turno, 1 o -1
+"""
+def contarHorizontal(x, jugador):
+    renglones = [i for i in range(6)]
+    return sum(1 for renglon in renglones for i in range(4)
+               if all(x[7*renglon + i + j] != -jugador for j in range(4)))
+
+"""
+    Indica cuantos bloques de 4 en 4 todavia pueden ser ganados por
+    el jugador en vertical.
+
+    @param x: Estado del juego
+    @param jugador: Jugador de turno, 1 o -1
+"""
+def contarVertical(x, jugador):
+    columnas = [i for i in range(7)]
+    return sum(1 for columna in columnas for i in range(2)
+               if all(x[columna + 7*(i + j)] != -jugador for j in range(4)))
+
+"""
+    Indica cuantos bloques de 4 en 4 todavia pueden ser ganados por
+    el jugador en diagonal.
+
+    @param x: Estado del juego
+    @param jugador: Jugador de turno, 1 o -1
+"""
+def contarDiagonal(x, jugador):
+    #diagonales \
+    inicial_ren = [0, 1, 2]
+    inicial_col = [0, 1, 2, 3]
+    cont1 = sum(1 for ren in inicial_ren for col in inicial_col
+               if all(x[col + ren*7 + i + i*7] for i in range(4)))
+
+    #diagonales /
+    inicial_ren = [0, 1, 2]
+    inicial_col = [3, 4, 5, 6]
+    cont2 = sum(1 for ren in inicial_ren for col in inicial_col
+               if all(x[col + ren*7 - i + i*7] for i in range(4)))
+
+    return cont1 + cont2
 
 def utilidad_c4(x):
     """
@@ -110,23 +165,16 @@ def utilidad_c4(x):
     Para probar solo busque el número de conecciones de las
     bolitas de mas arriba con su alrededor
     """
-    cum = 0
-    for i in range(7):
-        for j in (35, 28, 21, 14, 7, 0):
-            if x[i] != 0:
-                if 0 < i < 6:
-                    biases = (-6, -7, -8, -1, 1, 6, 8)
-                elif i == 0:
-                    biases = (-7, -8, 1, 8)
-                else:
-                    biases = (-6, -7, -1, 6)
-                con = sum(x[i] for bias in biases
-                          if i + bias >= 0 and x[i] == x[i + bias])
-                cum += con / len(biases)
-                break
 
-    return cum / 42
+    jugadas1 = [contarHorizontal(x, 1),
+                contarVertical(x, 1),
+                contarDiagonal(x, 1)]
 
+    jugadas2 = [contarHorizontal(x, -1),
+                contarVertical(x, -1),
+                contarDiagonal(x, -1)]
+
+    return sum(lineaj1 - lineaj2 for lineaj1, lineaj2 in zip(jugadas1, jugadas2)) / 3
 
 def ordena_jugadas(juego):
     """
@@ -274,3 +322,4 @@ class Conecta4GUI:
 
 if __name__ == '__main__':
     Conecta4GUI(tmax=10).arranca()
+
