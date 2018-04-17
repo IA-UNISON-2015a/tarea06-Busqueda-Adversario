@@ -23,15 +23,22 @@ class Gato(JuegoSumaCeros2T):
         self.jugador = 1
 
     def jugadas_legales(self):
+        # Regresar todas aquellas que sean 0
         return (posicion for posicion in range(9) if self.x[posicion] == 0)
 
     def terminal(self):
         x = self.x
+
+        # Ganar en diagonal
         if x[4] != 0 and (x[0] == x[4] == x[8] or x[2] == x[4] == x[6]):
             return x[4]
         for i in range(3):
+
+            # Ganar en horizontal
             if x[3 * i] != 0 and x[3 * i] == x[3 * i + 1] == x[3 * i + 2]:
                 return x[3 * i]
+
+            # Ganar en vertical
             if x[i] != 0 and x[i] == x[i + 3] == x[i + 6]:
                 return x[i]
         if 0 not in self.x:
@@ -39,13 +46,23 @@ class Gato(JuegoSumaCeros2T):
         return None
 
     def hacer_jugada(self, jugada):
+        # Meter el numero ingresado
         self.historial.append(jugada)
+
+        # La posicion 'jugada' cambia por el numero del jugador
         self.x[jugada] = self.jugador
+
+        # Cambio de turno
         self.jugador *= -1
 
     def deshacer_jugada(self):
+        # Tomar la ultima jugada
         jugada = self.historial.pop()
+
+        # Regresar la posicion afectada a 0
         self.x[jugada] = 0
+
+        # Regresar el turno del jugador
         self.jugador *= -1
 
 
@@ -221,5 +238,5 @@ class GatoTK:
 
 
 if __name__ == '__main__':
-    # juega_gato('X')
+    # juega_gato('O')
     GatoTK().arranca()

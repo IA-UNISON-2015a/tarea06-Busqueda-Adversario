@@ -87,7 +87,8 @@ def minimax(juego, dmax=100, utilidad=None, ordena_jugadas=None, transp=None):
             return juego.terminal()
         dmax = int(1e10)
 
-    return max((a for a in ordena_jugadas(juego)),
+    jugadas_tupla = tuple(ordena_jugadas(juego))
+    return max(jugadas_tupla,
                key=lambda a: min_val(juego, a, dmax, utilidad, ordena_jugadas,
                                      -1e10, 1e10, juego.jugador, transp))
 
@@ -108,7 +109,8 @@ def min_val(juego, jugada, d, utilidad, ordena_jugadas,
         return primero * u
 
     if transp is not None and tuple(juego.x) in transp:
-        val_tt, d_tt, tipo_tt = transp[tuple(juego.x)]
+        d_tt, val_tt, tipo_tt = transp[tuple(juego.x)]
+        # val_tt, d_tt, tipo_tt = transp[tuple(juego.x)]
         if d_tt >= d and tipo_tt is 'beta':
             beta = min(alfa, val_tt)
 
@@ -140,7 +142,8 @@ def max_val(juego, jugada, d, utilidad, ordena_jugadas,
         return primero * u
 
     if transp is not None and tuple(juego.x) in transp:
-        val_tt, d_tt, tipo_tt = transp[tuple(juego.x)]
+        d_tt, val_tt, tipo_tt = transp[tuple(juego.x)]
+        # val_tt, d_tt, tipo_tt = transp[tuple(juego.x)]
         if d_tt >= d and tipo_tt is 'alfa':
             alfa = max(alfa, val_tt)
 
@@ -162,7 +165,7 @@ def minimax_t(juego, tmax=5, utilidad=None, ordena_jugadas=None, transp=None):
     t_ini = perf_counter()
     for d in range(2, 50):
         ta = perf_counter()
-        jugada = minimax(juego, d, utilidad, ordena_jugadas, transp=None)
+        jugada = minimax(juego, d, utilidad, ordena_jugadas, transp)
         tb = perf_counter()
         if bf * (tb - ta) > t_ini + tmax - tb:
             return jugada

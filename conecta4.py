@@ -13,7 +13,6 @@ es la implementación desde 0 del juego de Otello.
 from busquedas_adversarios import JuegoSumaCeros2T
 from busquedas_adversarios import minimax_t
 from busquedas_adversarios import minimax
-from random import shuffle
 import tkinter as tk
 
 __author__ = 'juliowaissman'
@@ -26,12 +25,12 @@ class ConectaCuatro(JuegoSumaCeros2T):
         renglones y el estado inicial del juego. Cuyas posiciones
         estan dadas como:
 
-                        35  36  37  38  39  40  41
-                        28  29  30  31  32  33  34
-                        21  22  23  24  25  26  27
-                        14  15  16  17  18  19  20
-                         7   8   9  10  11  12  13
-                         0   1   2   3   4   5   6
+        35  36  37  38  39  40  41
+        28  29  30  31  32  33  34
+        21  22  23  24  25  26  27
+        14  15  16  17  18  19  20
+         7   8   9  10  11  12  13
+         0   1   2   3   4   5   6
         """
         super().__init__(tuple([0 for _ in range(6 * 7)]))
 
@@ -110,22 +109,87 @@ def utilidad_c4(x):
     Para probar solo busque el número de conecciones de las
     bolitas de mas arriba con su alrededor
     """
-    cum = 0
-    for i in range(7):
-        for j in (35, 28, 21, 14, 7, 0):
-            if x[i] != 0:
-                if 0 < i < 6:
-                    biases = (-6, -7, -8, -1, 1, 6, 8)
-                elif i == 0:
-                    biases = (-7, -8, 1, 8)
-                else:
-                    biases = (-6, -7, -1, 6)
-                con = sum(x[i] for bias in biases
-                          if i + bias >= 0 and x[i] == x[i + bias])
-                cum += con / len(biases)
-                break
 
-    return cum / 42
+    # Calcula las lineas de 2, 3 y 4 tanto de un jugador como
+    # de otro y obtiene una utilidad basada en ellas.
+
+    # Funcion de utilidad: max4 * 10 + max3 * 5 + max2 * 2 -
+    # (min4 * 10 + min3 * 5 + min2 * 2)
+
+    def dentro_tablero(i, j):
+        # Ver si una posicion esta dentro del tablero
+        return 0 <= i <= 5 and 0 <= j <= 6
+
+    tot = [0, 0, 0, 0, 0, 0]
+
+    for i in range(6):
+        for j in range(7):
+            if x[i * 7 + j] == 0 or not dentro_tablero(i, j):
+                continue
+
+            for (k, l) in ((-1, -1), (0, -1), (1, -1), (-1, 0),
+                           (1, 0), (-1, 1), (0, 1), (1, 1)):
+                aux_i = i + k
+                aux_j = j + l
+
+                if (dentro_tablero(aux_i, aux_j) and
+                    x[aux_i * 7 + aux_j] == 1 and
+                    x[i * 7 + j] == 1):
+                    tot[0] += 1
+                    aux_i += k
+                    aux_j += l
+
+                    if (dentro_tablero(aux_i, aux_j) and
+                        x[aux_i * 7 + aux_j] == 1 and
+                        x[i * 7 + j] == 1):
+                        tot[1] += 1
+                        aux_i += k
+                        aux_j += l
+
+                        if (dentro_tablero(aux_i, aux_j) and
+                            x[aux_i * 7 + aux_j] == 1 and
+                            x[i * 7 + j] == 1):
+                            tot[2] += 1
+                            aux_i += k
+                            aux_j += l
+
+                elif (dentro_tablero(aux_i, aux_j) and
+                      x[aux_i * 7 + aux_j] == -1 and
+                      x[i * 7 + j] == -1):
+                    tot[3] += 1
+                    aux_i += k
+                    aux_j += l
+
+                    if (dentro_tablero(aux_i, aux_j) and
+                        x[aux_i * 7 + aux_j] == -1 and
+                        x[i * 7 + j] == -1):
+                        tot[4] += 1
+                        aux_i += k
+                        aux_j += l
+
+                        if (dentro_tablero(aux_i, aux_j) and
+                            x[aux_i * 7 + aux_j] == -1 and
+                            x[i * 7 + j] == -1):
+                            tot[5] += 1
+                            aux_i += k
+                            aux_j += l
+
+    # Ajustando las veces que se cuetan las lineas.
+    # Podria haberlas ajustado dentro de los ciclos correspondientes
+    # pero no.
+    tot[0] = tot[0] / 2
+    tot[1] = tot[1] / 2
+    tot[2] = tot[2] / 2
+    tot[3] = tot[3] / 2
+    tot[4] = tot[4] / 2
+    tot[5] = tot[5] / 2
+    tot[2] -= tot[3]
+    tot[0] -= (tot[1] - tot[2])
+    tot[4] -= tot[5]
+    tot[3] -= (tot[4] - tot[5])
+
+    return (tot[0] * 2 + tot[1] * 5 + tot[2] * 10 -
+            (tot[3] * 2 + tot[4] * 5 + tot[5] * 10))
 
 
 def ordena_jugadas(juego):
@@ -137,9 +201,15 @@ def ordena_jugadas(juego):
     pero es un criterio bastante inaceptable
 
     """
+    # Acomoda las jugadas de acuerdo a su utilidad
     jugadas = list(juego.jugadas_legales())
-    shuffle(jugadas)
-    return jugadas
+    utilidades = []
+    for jugada in jugadas:
+        juego.hacer_jugada(jugada)
+        utilidades.append(utilidad_c4(juego.x))
+        juego.deshacer_jugada()
+
+    return [x for (_, x) in sorted(zip(utilidades, jugadas))]
 
 
 class Conecta4GUI:
@@ -214,9 +284,9 @@ class Conecta4GUI:
             for i in range(7):
                 self.botones[i]['state'] = tk.DISABLED
 
-            jugada = minimax(juego, dmax=6, utilidad=utilidad_c4,
-                             ordena_jugadas=ordena_jugadas,
-                             transp=self.tr_ta)
+            jugada = minimax_t(juego, tmax=8, utilidad=utilidad_c4,
+                               ordena_jugadas=ordena_jugadas,
+                               transp=self.tr_ta)
             juego.hacer_jugada(jugada)
             self.actualiza_tablero(jugada, color_p)
 
@@ -241,9 +311,9 @@ class Conecta4GUI:
                 self.botones[i]['state'] = tk.DISABLED
                 self.botones[i].update()
 
-            jugada = minimax(juego, dmax=6, utilidad=utilidad_c4,
-                             ordena_jugadas=ordena_jugadas,
-                             transp=self.tr_ta)
+            jugada = minimax_t(juego, tmax=8, utilidad=utilidad_c4,
+                               ordena_jugadas=ordena_jugadas,
+                               transp=self.tr_ta)
             juego.hacer_jugada(jugada)
             self.actualiza_tablero(jugada, color_p)
 
