@@ -15,6 +15,7 @@ from busquedas_adversarios import minimax_t
 from busquedas_adversarios import minimax
 from random import shuffle
 import tkinter as tk
+import copy
 
 __author__ = 'juliowaissman'
 
@@ -110,35 +111,79 @@ def utilidad_c4(x):
     Para probar solo busque el número de conecciones de las
     bolitas de mas arriba con su alrededor
     """
-    cum = 0
-    for i in range(7):
-        for j in (35, 28, 21, 14, 7, 0):
-            if x[i] != 0:
-                if 0 < i < 6:
-                    biases = (-6, -7, -8, -1, 1, 6, 8)
-                elif i == 0:
-                    biases = (-7, -8, 1, 8)
+    def revisarRenglones(x, jugador):
+        """
+        Revisa los renglones para ver si hay fichas consecutivas
+
+        @param x: una lista con el estado del tablero
+        @param jugador: Jugador al que se va a trata de encontra fichas en los
+                        renglones
+
+        @return: Un número que es el total veces que se encontraron fichas o
+                espacios consecutivos
+        """
+        puntosPorFichasConsecutivas = 0
+        # Itera por cada renglon
+        for i in range(6):
+            # 7*i+4 porque 4 fichas seguidas se pueden acomodar hasta 4 veces
+            # en un renglon
+            for j in range(7*i, 7*i+4):
+                for k in range(4):
+                    # Si encuentra una ficha que no es del jugador y no es un
+                    # espacio vacio entonces se rompe el for
+                    if x[j + k] != jugador and x[j + k] != 0:
+                        break
                 else:
-                    biases = (-6, -7, -1, 6)
-                con = sum(x[i] for bias in biases
-                          if i + bias >= 0 and x[i] == x[i + bias])
-                cum += con / len(biases)
-                break
+                    # Si el for termino exitosamente significa que no encontro
+                    # una ficha del otro jugador
+                    puntosPorFichasConsecutivas +=1
+        return puntosPorFichasConsecutivas
 
-    return cum / 42
+    def revisarColumnas(x, jugador):
+        """
+        Revisa las columnas para ver si hay fichas consecutivas
 
+        @param x: una lista con el estado del tablero
+        @param jugador: Jugador al que se va a trata de encontra fichas en las
+                        columnas
+
+        @return: Un número que es el total veces que se encontraron fichas o
+                espacios consecutivos
+        """
+        puntosPorFichasConsecutivas = 0
+        # para iterar por cada columna
+        for i in range(7):
+            # itera con cada elemento de una columna
+            for j in range(i, i+21, 7):
+                # itera en 4 de los lugares del tablero de la columna y el lugar
+                # i donde esta
+                for k in range(0, 28, 7):
+                    if x[j + k] != jugador and x[j+k] != 0:
+                        break
+                else:
+                    puntosPorFichasConsecutivas += 1
+        return puntosPorFichasConsecutivas
+
+    puntos = revisarColumnas(x, 1) + revisarRenglones(x, 1)
+    puntos -= revisarColumnas(x, -1) + revisarRenglones(x, -1)
+    return puntos
+
+def fingeJugada(juego, jugada):
+    juego.hacer_jugada(jugada)
+    return utilidad_c4(juego.x)
 
 def ordena_jugadas(juego):
     """
     Ordena las jugadas de acuerdo al jugador actual, en función
     de las más prometedoras.
 
-    Para que funcione le puse simplemente las jugadas aleatorias
-    pero es un criterio bastante inaceptable
+    Ordena las jugadas que tengan una mayor utilidad primero
 
     """
     jugadas = list(juego.jugadas_legales())
-    shuffle(jugadas)
+    #print(jugadas)
+    sorted(jugadas, key=lambda x: fingeJugada(copy.deepcopy(juego), x))
+    #shuffle(jugadas)
     return jugadas
 
 
@@ -258,6 +303,15 @@ class Conecta4GUI:
                    "Ganaron las negars" if ganancia < 0 else
                    "Un asqueroso empate")
         self.anuncio['text'] = str_fin
+
+    def jugar2(self, primero):
+        juego = ConectaCuatro()
+
+        if not primero:
+            jugada = minimax(juego, dmax=6, utilidad=utilidad_c4,
+                             ordena_jugadas=ordena_jugadas,
+                             transp=self.tr_ta)
+            juego.hacer_jugada(jugada)
 
     def actualiza_tablero(self, fila, color):
         for i in range(0, 41, 7):
