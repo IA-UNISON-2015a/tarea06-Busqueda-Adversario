@@ -127,6 +127,37 @@ def utilidad_c4(x):
 
     return cum / 42
 
+def utilidad_c4_chila(x):
+
+    utilidad=0
+    
+    #por columna
+    for i in range(7):
+        jugador = x[i]
+        bonus = 0
+        for j in range(i+7,42,7):
+            ficha=x[j]
+            if ficha==jugador:
+                utilidad+=ficha+(ficha*bonus)
+                bonus += 1
+            else:
+                bonus = 0
+                jugador=ficha
+            
+    
+    #por renglon
+    for i in (35, 28, 21, 14, 7, 0):
+        jugador = x[i]
+        bonus = 0
+        for j in range(7):
+            ficha=x[j]
+            if ficha==jugador:
+                utilidad+=ficha+(ficha*bonus)
+                bonus += 1
+            else:
+                bonus = 0
+                jugador=ficha        
+    return utilidad   
 
 def ordena_jugadas(juego):
     """
@@ -139,6 +170,33 @@ def ordena_jugadas(juego):
     """
     jugadas = list(juego.jugadas_legales())
     shuffle(jugadas)
+    return jugadas
+
+def ordena_jugadas_chila2(juego):
+    """
+    Las mejores jugasdas estan en el centro
+    Fuente: https://es.wikihow.com/ganar-en-Conecta-4#_note-7
+    """
+    jugadas = list(juego.jugadas_legales())
+    mejores = []
+    for i in (3,2,4,1,5,0,6):
+        if i in jugadas: mejores.append(i) 
+    return mejores
+
+def ordena_jugadas_chila(juego):
+    """
+    La primera no identificaba si el juego terminaba, no me dejaba
+    ganar, pero no ganaba
+    """
+    def OrdenaJugada(jugada):
+        juego.hacer_jugada(jugada)
+        terminal = juego.terminal()
+        terminal = terminal if terminal else 0
+        juego.deshacer_jugada()
+        return juego.jugador * terminal
+
+    jugadas = list(juego.jugadas_legales())
+    jugadas.sort(key=OrdenaJugada)
     return jugadas
 
 
@@ -214,8 +272,8 @@ class Conecta4GUI:
             for i in range(7):
                 self.botones[i]['state'] = tk.DISABLED
 
-            jugada = minimax(juego, dmax=6, utilidad=utilidad_c4,
-                             ordena_jugadas=ordena_jugadas,
+            jugada = minimax(juego, dmax=6, utilidad=utilidad_c4_chila,
+                             ordena_jugadas=ordena_jugadas_chila,
                              transp=self.tr_ta)
             juego.hacer_jugada(jugada)
             self.actualiza_tablero(jugada, color_p)
@@ -241,8 +299,8 @@ class Conecta4GUI:
                 self.botones[i]['state'] = tk.DISABLED
                 self.botones[i].update()
 
-            jugada = minimax(juego, dmax=6, utilidad=utilidad_c4,
-                             ordena_jugadas=ordena_jugadas,
+            jugada = minimax(juego, dmax=6, utilidad=utilidad_c4_chila,
+                             ordena_jugadas=ordena_jugadas_chila,
                              transp=self.tr_ta)
             juego.hacer_jugada(jugada)
             self.actualiza_tablero(jugada, color_p)
