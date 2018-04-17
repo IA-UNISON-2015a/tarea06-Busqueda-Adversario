@@ -137,8 +137,7 @@ def utilidad_c4_2(x):
 
     @return: Un número entre -1 y 1 con la ganancia esperada
 
-    Para probar solo busque el número de conecciones de las
-    bolitas de mas arriba con su alrededor
+    Suma puntos por cada ficha o conjunto de fichas que podria llegar a completar las 4
     """
     cum = 0
     ficha=0
@@ -154,7 +153,7 @@ def utilidad_c4_2(x):
                     for l in range(1,4):
                         if x[i2+l*7]==ficha:
                             if l==3: return 10000*ficha
-                        else: 
+                        else:
                             if x[i2+l*7]==0:
                                 if x[i2+1*7]!=ficha*-1 and x[i2+2*7]!=ficha*-1 and x[i2+3*7]!=ficha*-1:
                                     if ficha==1:
@@ -165,7 +164,7 @@ def utilidad_c4_2(x):
                         for l in range(1,4):
                             if x[i2+l*7+l]==ficha:
                                 if l==3: return 10000*ficha
-                            else: 
+                            else:
                                 if x[i2+l*7+l]==0:
                                     if x[i2+1*7+1]!=ficha*-1 and x[i2+2*7+2]!=ficha*-1 and x[i2+3*7+3]!=ficha*-1:
                                         if ficha==1:
@@ -176,20 +175,20 @@ def utilidad_c4_2(x):
                         for l in range(1,4):
                             if x[i2+l*7-l]==ficha:
                                 if l==3: return 10000*ficha
-                            else: 
+                            else:
                                 if x[i2+l*7-l]==0:
                                     if x[i2+1*7-1]!=ficha*-1 and x[i2+2*7-2]!=ficha*-1 and x[i2+3*7-3]!=ficha*-1:
                                         if ficha==1:
                                             sum1+=l
                                         else: sum_1+=l
                                 break
-                            
-                            
+
+
                 if i2-3*7>=0:#Revisar hacia abajo
                     for l in range(1,4):
                         if x[i2-l*7]==ficha:
                             if l==3: return 10000*ficha
-                        else: 
+                        else:
                             if x[i2-l*7]==0:
                                 if x[i2-1*7]!=ficha*-1 and x[i2-2*7]!=ficha*-1 and x[i2-3*7]!=ficha*-1:
                                     if ficha==1: sum1+=l
@@ -199,7 +198,7 @@ def utilidad_c4_2(x):
                         for l in range(1,4):
                             if x[i2-l*7+l]==ficha:
                                 if l==3: return 10000*ficha
-                            else: 
+                            else:
                                 if x[i2-l*7+l]==0:
                                      if x[i2-1*7+1]!=ficha*-1 and x[i2-2*7+2]!=ficha*-1 and x[i2-3*7+3]!=ficha*-1:
                                         if ficha==1:
@@ -210,20 +209,20 @@ def utilidad_c4_2(x):
                         for l in range(1,4):
                             if x[i2-l*7-l]==ficha:
                                 if l==3: return 10000*ficha
-                            else: 
+                            else:
                                 if x[i2-l*7-l]==0:
                                      if x[i2-1*7-1]!=ficha*-1 and x[i2-2*7-2]!=ficha*-1 and x[i2-3*7-3]!=ficha*-1:
                                         if ficha==1:
                                             sum1+=l
                                         else: sum_1+=l
                                 break
-                        
-                        
+
+
                 if i2%7+3<7:#Revisar hacia derecha
                     for l in range(1,4):
                         if x[i2+l]==ficha:
                             if l==3: return 10000*ficha
-                        else: 
+                        else:
                             if x[i2+l]==0:
                                  if x[i2+1]!=ficha*-1 and x[i2+2]!=ficha*-1 and x[i2+3]!=ficha*-1:
                                     if ficha==1:
@@ -234,7 +233,7 @@ def utilidad_c4_2(x):
                     for l in range(1,4):
                         if x[i2-l]==ficha:
                             if l==3: return 10000*ficha
-                        else: 
+                        else:
                             if x[i2-l]==0:
                                  if x[i2-1]!=ficha*-1 and x[i2-2]!=ficha*-1 and x[i-3]!=ficha*-1:
                                     if ficha==1:
@@ -242,12 +241,12 @@ def utilidad_c4_2(x):
                                     else: sum_1+=l
                             break
             #print(i)
-                     
+
             else:
                 vacia+=1
         if vacia==7: break
-    
-    cum=(sum1-sum_1)#/(sum1+sum_1)   
+
+    cum=(sum1-sum_1)#/(sum1+sum_1)
     #print(cum)
     #time.sleep(10)
     return cum #/ 42
@@ -274,8 +273,7 @@ def ordena_jugadas2(juego):
     Ordena las jugadas de acuerdo al jugador actual, en función
     de las más prometedoras.
 
-    Para que funcione le puse simplemente las jugadas aleatorias
-    pero es un criterio bastante inaceptable
+    Entre mas cercanas al centro mejor ya que tienen mas formas de unirse con otras fichas
 
     """
     jugadas = list(juego.jugadas_legales())
