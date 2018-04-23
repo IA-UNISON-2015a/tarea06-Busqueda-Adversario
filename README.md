@@ -1,4 +1,4 @@
-# Tarea 6: Búsquedas con adversarios
+# Tarea 5: Búsquedas con adversarios
 
 ## Objetivos
 
