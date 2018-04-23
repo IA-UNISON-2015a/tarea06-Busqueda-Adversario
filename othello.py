@@ -514,7 +514,7 @@ class OthelloGUI:
             if juego.jugadas_legales():
                 print('La máquina está viendo que hace')
 
-                jugada = ba.minimax_t(juego, 5, utilidad = utilidad_othello, ordena_jugadas=ordenar_jugadas)
+                jugada = ba.minimax_t(juego, 15, utilidad = utilidad_othello, ordena_jugadas=ordenar_jugadas)
                 print('Jugada: ' + str(jugada))
                 juego.hacer_jugada(jugada)
 
