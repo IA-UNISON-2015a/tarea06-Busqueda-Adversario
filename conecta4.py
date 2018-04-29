@@ -99,47 +99,41 @@ class ConectaCuatro(JuegoSumaCeros2T):
 
 
 def utilidad_c4(x):
-    """
-    Calcula la utilidad de una posición del juego conecta 4
-    para el jugador max (las fichas rojas, o el que empieza)
 
-    @param x: Una lista con el estado del tablero
-
-    @return: Un número entre -1 y 1 con la ganancia esperada
-
-    Para probar solo busque el número de conecciones de las
-    bolitas de mas arriba con su alrededor
-    """
-    cum = 0
+    #Por columnas
+    ut = 0
     for i in range(7):
-        for j in (35, 28, 21, 14, 7, 0):
-            if x[i] != 0:
-                if 0 < i < 6:
-                    biases = (-6, -7, -8, -1, 1, 6, 8)
-                elif i == 0:
-                    biases = (-7, -8, 1, 8)
-                else:
-                    biases = (-6, -7, -1, 6)
-                con = sum(x[i] for bias in biases
-                          if i + bias >= 0 and x[i] == x[i + bias])
-                cum += con / len(biases)
-                break
+        cont = sum(x[j] for j in range(0+i,42,7))
+        if cont > 0:
+            ut += 1
+        elif cont < 0:
+            ut -= 1
+        else:
+            continue
 
-    return cum / 42
+    #Por filas
+    for i in (0,7,14,21,28,35):
+        s = sum(x[j] for j in range(i,i+7))
+        if cont > 0:
+            ut += 1
+        elif cont < 0:
+            ut -= 1
+        else:
+            continue
+ 
+    return ut
 
 
 def ordena_jugadas(juego):
-    """
-    Ordena las jugadas de acuerdo al jugador actual, en función
-    de las más prometedoras.
 
-    Para que funcione le puse simplemente las jugadas aleatorias
-    pero es un criterio bastante inaceptable
-
-    """
     jugadas = list(juego.jugadas_legales())
-    shuffle(jugadas)
-    return jugadas
+    jugadas_buenas = []
+    for jugada in jugadas:
+        juego.hacer_jugada(jugada)
+        jugadas_buenas.append((utilidad_c4(juego.x), jugada))
+        juego.deshacer_jugada()
+    jugadas_buenas.sort()
+    return [jugadas_final for _, jugadas_final in jugadas_buenas]
 
 
 class Conecta4GUI:
