@@ -98,6 +98,91 @@ class MetaGato(JuegoSumaCeros2T):
         self.x[-1] = gato
         self.jugador *= -1
 
+    def amenaza(self, l, amenaza, jug, x):
+        #Vamos a checar las amenazas primero
+        #Primer caso: el otro jugador tiene la de en medio y otra mas
+
+        #IMPORTANTE: jug es el jugador enemigo que crea la amenaza contra la
+        #computadora
+        if jug in l:
+            for i,a in enumerate(l):
+                if l[4] == jug and a == l[4] and l[8-i] == 0:
+                    amenaza.append(8)
+            for i in [0,2]:
+                #Segundo caso: tiene dos que no son la de enmedio, y que para ganar
+                #no ocupa la de enmedio
+                #Pienso que es mas amenazante no ocupar la de en medio e ir ganando,
+                #ya que el otro jugador desde el principio trata de no cederla
+                if l[3 * i] == jug and ((l[3 * i] == l[3 * i + 1] and l[3 * i +2] == 0)
+                    or (l[3 * i] == l[3 * i +2] and l[3 * i +1] == 0)) :
+                    amenaza.append(7)
+                elif l[3 * i + 1] == jug and l[3 * i + 1] == l[3 * i + 2] and l[3 * i] == 0:
+                    amenaza.append(7)
+                if l[i] == jug and ((l[i] == l[i + 3] and l[i+6] == 0)
+                    or (l[i] == l[i + 6] and l[i+3] == 0)):
+                    amenaza.append(7)
+                elif l[i + 3] == jug and l[i + 3] == l[i + 6] and l[i] == 0:
+                    amenaza.append(7)
+            #Tercer caso: tiene dos que no son la de en medio y para ganar ocupa
+            # la de enmedio
+            for i in range(4):
+                if l[i] == jug and l[8-i] == l[i] and l[4] == 0:
+                    amenaza.append(6)
+            #Cuarto caso: no tiene dos que hagan juego entre ellas
+            if len(amenaza) == 0:
+                #Si mi otro jugador tiene una ganada...
+                if l[4] == jug:
+                    #Tener la de en medio es una gran amenaza, evidentemente
+                    amenaza.append(5)
+                else:
+                    for j in range(3):
+                        if l[3 * j] == jug and (l[3 * j + 1] == 0 or
+                            l[3 * j + 2] == 0):
+                            amenaza.append(4)
+                        elif l[3 * j + 1] == jug and (l[3 * j] == 0 or
+                            l[3 * j + 2] == 0):
+                            amenaza.append(4)
+                        elif l[3 * j + 2] == jug and (l[3 * j] == 0 or
+                            l[3 * j + 1] == 0):
+                            amenaza.append(4)
+                        if l[j] == jug and (l[j + 1] == 0 or l[j + 2] == 0):
+                            amenaza.append(4)
+                        elif l[j + 1] == jug and (l[j] == 0 or l[j + 2] == 0):
+                            amenaza.append(4)
+                        elif l[j + 2] == jug and (l[j + 1] == 0 or l[j] == 0):
+                            amenaza.append(4)
+                    # Cuando tienes una de las esquinas y el otro no tiene la
+                    # contraesquina es amenazante tambien
+                    if (l[0] == jug and l[8] == 0) or (l[8] == jug and l[0] == 0) or
+                        (l[2] == jug and l[6] == 0) or (l[6] == jug and l[2] == 0):
+                        amenaza.append(4)
+
+
+    def utilidad_uttt(self):
+        """
+        Calcula la utilidad de un estado de manera medio-simple
+
+        Se dice que es bastante complejo agregar una funcion de evaluacion
+        heuristica simple para el tic tac toe 81, o que por lo menos
+        aun no existe una asi. Voy a tratar de hacer una medio simplona
+        pero no tanto, que podra carecer de una gran velocidad pero que pienso
+        daria buenos resultados y es admisible, basandome en mi experiencia.
+
+        @param x: un estado
+        @return: un valor entre -8 y 8
+
+        Utilidad: si en este estado hay dos metagatos que pueden formar
+        una manera de ganar, y el metagato restante no esta ganado aun, y este
+        ultimo tiende a estar principalmente ganado por el otro, entonces
+        regresa la peor utilidad posible despues de la de perder.
+        """
+        l = self.metagato
+        amenaza = []
+        jug = self.jugador
+        x = self.x
+
+    def ordenamiento_utt(self, estado):
+
 
 class MetaGatoTK:
     def __init__(self, escala=1):
@@ -151,8 +236,8 @@ class MetaGatoTK:
         juego = MetaGato()
 
         if not primero:
-            jugada = self.escoge_jugada(juego)
-            # jugada = minimax(juego)
+            #jugada = self.escoge_jugada(juego)
+            jugada = minimax(juego)
             juego.hacer_jugada(jugada)
             self.actualiza_tablero(juego.x)
 
@@ -164,8 +249,8 @@ class MetaGatoTK:
             ganador = juego.terminal()
             if ganador is not None:
                 break
-            # jugada = minimax(juego)
-            jugada = self.escoge_jugada(juego)
+            jugada = minimax(juego)
+            #jugada = self.escoge_jugada(juego)
             juego.hacer_jugada(jugada)
             self.actualiza_tablero(juego.x)
             ganador = juego.terminal()
