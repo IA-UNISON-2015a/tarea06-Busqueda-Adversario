@@ -58,7 +58,6 @@ class MetaGato(JuegoSumaCeros2T):
         return ([i for i in range(81) if self.x[i] == 0 and
                     self.metagato[i//9] == 0])
 
-    # Error: self.historial[-1][1] me da ciertos errores
     def terminal(self):
         if 0 not in self.x:
             return 0
@@ -85,8 +84,6 @@ class MetaGato(JuegoSumaCeros2T):
     def hacer_jugada(self, jugada):
         if self.x[-1] is None:
             self.x[-1] = jugada // 9
-        # Error fatal: hay que considerar los casos en los que no vas a jugar
-        # donde deberias jugar
         self.historial.append((jugada, jugada//9))
         self.x[jugada] = self.jugador
         self.x[-1] = jugada % 9
