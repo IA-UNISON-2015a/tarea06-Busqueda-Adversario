@@ -138,6 +138,12 @@ def ordena_jugadas(juego):
 
     """
     jugadas = list(juego.jugadas_legales())
+    if 3 in juego.jugadas_legales():
+        ind = jugadas.index(3)
+        temp = jugadas[0]
+        jugadas[0] = 3
+        jugadas[ind] = temp
+        return jugadas
     shuffle(jugadas)
     return jugadas
 

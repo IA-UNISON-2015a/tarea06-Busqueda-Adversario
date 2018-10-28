@@ -10,6 +10,9 @@ El juego de Otello implementado por ustes mismos, con jugador inteligente
 
 __author__ = 'nombre del alumno'
 import tkinter as tk
+from busquedas_adversarios import JuegoSumaCeros2T
+from busquedas_adversarios import minimax_t
+from busquedas_adversarios import minimax
 
 
 # -------------------------------------------------------------------------
@@ -17,11 +20,111 @@ import tkinter as tk
 #          INSERTE AQUI SU CÓDIGO
 # -------------------------------------------------------------------------
 
+
 class Othello:
     def __init__(self):
-        self.x = [0 for i in range(64)]
+        self.x = [0 for _ in range(64)]
         self.historial = []
         self.jugador = 1
+        self.x[27], self.x[36] = -1, -1
+        self.x[28], self.x[35] = 1, 1
+
+    #Busco si hay adyacente enemigo en una posicion pos para el jugador j.
+    #Pienso que esto hara las cosas mucho mas rapidas en los primeros turnos.
+    @staticmethod
+    def adyacentes(x, pos, j):
+        # El jugador de interes es el adversario
+        j = -1 * j
+        orilla_izq = [8 * x for x in range(8)]
+        orilla_der = [8 * x -1 for x in range(1,9)]
+        orilla_sup = [i for i in range(8)]
+        orilla_inf = [i for i in range(56,64)]
+        direcciones = []
+        if pos not in orilla_izq:
+            if x[pos - 1] == j:
+                direcciones.append(- 1)
+        if pos not in orilla_der:
+            if x[pos + 1] == j:
+                direcciones.append(1)
+        if pos not in orilla_sup:
+            if x[pos - 8] == j:
+                direcciones.append(-8)
+        if pos not in orilla_inf:
+            if x[pos + 8] == j:
+                direcciones.append(8)
+        if pos not in (orilla_inf + orilla_der):
+            if x[pos + 9] == j:
+                direcciones.append(9)
+        if pos not in (orilla_inf + orilla_izq):
+            if x[pos + 7] == j:
+                direcciones.append(7)
+        if pos not in (orilla_sup + orilla_der):
+            if x[pos - 7] == j:
+                direcciones.append(-7)
+        if pos not in (orilla_sup + orilla_izq):
+            if x[pos - 9] == j:
+                direcciones.append(-9)
+        return direcciones
+
+    def jugadas_legales(self):
+        jugadas = []
+        for i in range(64):
+            ady = self.adyacentes(self.x, i, self.jugador)
+            if (len(ady) != 0 and self.x[i] == 0):
+                if len(self.buscar_lugar(i, ady)) != 0:
+                    jugadas.append(i)
+
+        return jugadas
+
+    def hacer_jugada(self, jugada):
+        self.historial.append(jugada)
+        for x in self.buscar_lugar(jugada, self.adyacentes(self.x, jugada, self.jugador)):
+            aux = x
+            while self.x[jugada + aux] == -1 * self.jugador:
+                self.x[jugada + aux] = self.jugador
+                aux+=x
+        self.x[jugada] = self.jugador
+        self.jugador *= -1
+
+    """
+    Buscar lugar es un metodo que apartir de cierta jugada regresara
+    las direcciones en las que se encuentran fichas capturables
+    @param jugada: la jugada de interes. es un entero
+    @param direcciones: lista con las direcciones en las que se encuentran
+    fichas adyacentes del enemigo. en funcion a estas buscamos si podemos
+    capturar en esa direccion
+    @return captura: una lista con todas las direcciones en las que si se puede
+    hacer la captura.
+    """
+    # direcciones posibles = [-9, -8, -7, -1, 1, 7, 8, 9]
+    def buscar_lugar(self, jugada, direcciones):
+        captura = []
+        orilla_izq = [8 * x for x in range(8)]
+        orilla_der = [8 * x -1 for x in range(1,9)]
+        orilla_sup = [i for i in range(8)]
+        orilla_inf = [i for i in range(56,64)]
+        for x in direcciones:
+            aux = jugada + x
+            while aux < 64 and self.x[aux] == -1 * self.jugador:
+                if x in [-9, -1, 7] and aux not in orilla_izq:
+                    aux+= x
+                elif x in [9, 1, -7] and aux not in orilla_der:
+                    aux+= x
+                elif x in [8, -8]:
+                    aux+=x
+                else:
+                    break
+            if aux < 64 and self.x[aux] == self.jugador:
+                captura.append(x)
+        return captura
+
+
+    def terminal(self):
+        if len(self.jugadas_legales()) == 0:
+            self.jugador = self.jugador * -1
+            if len(self.jugadas_legales()) == 0:
+                return True
+            self.jugador = -1 * self.jugador
 
 class OthelloTK:
     def __init__(self, escala=1):
@@ -80,14 +183,11 @@ class OthelloTK:
 
     def jugar(self, primero):
         juego = Othello()
-
+        self.actualiza_tablero(juego.x)
         if not primero:
-            #jugada = self.escoge_jugada(juego)
-            jugada = minimax(juego, dmax = 100, utilidad=utilidad_uttt)
+            jugada = self.escoge_jugada(juego)
+            #jugada = minimax(juego, dmax = 100, utilidad=utilidad_uttt)
             juego.hacer_jugada(jugada)
-            #el siguiente metodo tiene que actualizar los metagatos
-            #ya que deshacer jugadas no lo hace
-            juego.deshacer_meta()
             self.actualiza_tablero(juego.x)
 
         self.anuncio['text'] = "A ver de que cuero salen más correas"
@@ -98,10 +198,9 @@ class OthelloTK:
             ganador = juego.terminal()
             if ganador is not None:
                 break
-            jugada = minimax(juego, dmax=500, utilidad=utilidad_uttt)
-            #jugada = self.escoge_jugada(juego)
+            #jugada = minimax(juego, dmax=500, utilidad=utilidad_uttt)
+            jugada = self.escoge_jugada(juego)
             juego.hacer_jugada(jugada)
-            juego.deshacer_meta()
             self.actualiza_tablero(juego.x)
             ganador = juego.terminal()
             if ganador is not None:
@@ -146,10 +245,15 @@ class OthelloTK:
         return seleccion.get()
 
     def actualiza_tablero(self, x):
-        for i in range(81):
-            if self.tablero[i].val != x[i]:
+        for i in range(64):
+            if self.tablero[i].val != x[i] and x[i] == -1:
                 self.tablero[i].itemconfigure(self.textos[i],
-                                              text=' xo'[x[i]])
+                                              text='\u26AB', fill = "white")
+                self.tablero[i].val = x[i]
+                self.tablero[i].update()
+            elif self.tablero[i].val != x[i] and x[i] == 1:
+                self.tablero[i].itemconfigure(self.textos[i],
+                                              text='\u26AB', fill = "black")
                 self.tablero[i].val = x[i]
                 self.tablero[i].update()
 
