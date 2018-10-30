@@ -8,13 +8,12 @@ El juego de Otello implementado por ustes mismos, con jugador inteligente
 
 """
 
-__author__ = 'nombre del alumno'
+__author__ = 'Victor Noriega'
 import tkinter as tk
 from busquedas_adversarios import JuegoSumaCeros2T
 from busquedas_adversarios import minimax_t
 from busquedas_adversarios import minimax
 from collections import deque
-from copy import deepcopy
 
 
 # -------------------------------------------------------------------------

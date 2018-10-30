@@ -127,6 +127,10 @@ def utilidad_uttt(x):
     pero no tanto, que podra carecer de una gran velocidad pero que pienso
     daria buenos resultados, basandome en mi experiencia.
 
+    EDIT: el ultimo movimiento y el jugador en turno son cosas
+    muy importantes para conocer la utilidad verdadera de un estado
+    pero fue muy complicado poder implementarlo, al parecer...
+
     @param x: un estado
     @return: un valor entre -1 y 1
     """
@@ -197,7 +201,7 @@ class MetaGatoTK:
         juego = MetaGato()
 
         if not primero:
-            jugada = minimax(juego, dmax=1, utilidad=utilidad_uttt)
+            jugada = minimax(juego, dmax=0, utilidad=utilidad_uttt)
             juego.deshacer_meta()
             juego.hacer_jugada(jugada)
             self.actualiza_tablero(juego.x)
@@ -210,7 +214,7 @@ class MetaGatoTK:
             ganador = juego.terminal()
             if ganador is not None:
                 break
-            jugada = minimax(juego, dmax=6, utilidad=utilidad_uttt)
+            jugada = minimax(juego, dmax=4, utilidad=utilidad_uttt)
             juego.deshacer_meta()
             juego.hacer_jugada(jugada)
 
