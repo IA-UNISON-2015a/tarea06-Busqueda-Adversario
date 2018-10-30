@@ -97,7 +97,54 @@ class ConectaCuatro(JuegoSumaCeros2T):
                 self.jugador *= -1
                 return None
 
+def buscar_hor(x):
+    """
+    verifica que haya 3 en linea horizontalmente
+    """
+    orilla_izq = [7 * h for h in range(6)]
+    segunda_columna = [7 * h + 1 for h in range(6)]
+    tercer_columna = [7 * h + 2 for h in range(6)]
+    cuarta_columna = [7 * h + 3 for h in range(6)]
+    #orilla_der = [7 * h -1 for h in range(1,7)] +
+    #sexta_columna = [7 * h - 2 for h in range(1,7)]
+    #orilla_sup = [i for i in range(35,42)] + [i for i in range(28,35)]
+    #orilla_inf = [i for i in range(7)] + [i for i in range(7,14)]
+    for i in range(39):
+        if x[i] != 0 and x[i] == x[i + 1] and x[i] == x[i + 2]:
+            if i in orilla_izq and x[i + 3] == 0:
+                return x[i]
+            elif (i in segunda_columna or i in tercer_columna or i in
+                cuarta_columna) and (x[i + 3] == 0 or x[i -1] == 0):
+                return x[i]
+    return 0
+def buscar_ver(x):
+    orilla_inf = [i for i in range(7)]
+    segundo_renglon = [i for i in range (7,14)]
+    tercer_renglon = [i for i in range(14,21)]
+    for i in range(21):
+        if x[i] != 0 and x[i] == x[i + 7] and x[i] == x[i + 14]:
+            if i in orilla_inf and x[i + 21] == 0:
+                return x[i]
+            elif ((i in segundo_renglon or i in tercer_renglon) and
+            x[i + 21] == 0 or x[i - 7] == 0):
+                return x[i]
+    return 0
+def buscar_diagonal(x):
+    """
+    Busca esta diagonal /
+    """
+    for i in [0,1,2,3,7,8,9,10,14,15,16,17]:
+        if x[i] != 0 and x[i] == x[i + 8] and x[i] == x[i + 16] and x[i+24]== 0:
+            # Esto es el area de interseccion para poder ganar
+            return x[i]
+    return 0
+def buscar_diagonal_inv(x):
+    #Busca esta diagonal \
+    for i in [3,4,5,6,10,11,12,13,17,18,19,20]:
+        if x[i] != 0 and x[i] == x[i + 6] and x[i] == x[i + 12] and x[i+18]== 0:
+            return x[i]
 
+    return 0
 def utilidad_c4(x):
     """
     Calcula la utilidad de una posición del juego conecta 4
@@ -106,26 +153,8 @@ def utilidad_c4(x):
     @param x: Una lista con el estado del tablero
 
     @return: Un número entre -1 y 1 con la ganancia esperada
-
-    Para probar solo busque el número de conecciones de las
-    bolitas de mas arriba con su alrededor
     """
-    cum = 0
-    for i in range(7):
-        for j in (35, 28, 21, 14, 7, 0):
-            if x[i] != 0:
-                if 0 < i < 6:
-                    biases = (-6, -7, -8, -1, 1, 6, 8)
-                elif i == 0:
-                    biases = (-7, -8, 1, 8)
-                else:
-                    biases = (-6, -7, -1, 6)
-                con = sum(x[i] for bias in biases
-                          if i + bias >= 0 and x[i] == x[i + bias])
-                cum += con / len(biases)
-                break
-
-    return cum / 42
+    return buscar_hor(x) + buscar_ver(x) + buscar_diagonal(x) + buscar_diagonal_inv(x)
 
 
 def ordena_jugadas(juego):
@@ -220,6 +249,14 @@ class Conecta4GUI:
             for i in range(7):
                 self.botones[i]['state'] = tk.DISABLED
 
+            # Con esa profundidad a lo mas llega a tardar 2 segundos en casos
+            # que considero muy pocas veces ocurren.
+            # Nunca le pude ganar, pero me considero un macana de los juegos
+            # por eso busque gente ociosa que pudiera hacer el paro.
+            # tampoco pudieron ganar pero pienso yo que es porque
+            # casi nadie juega ya conecta4. hace falta practicar mas.
+            # ordenar jugadas no lo implemente porque me senti bien
+            # con lo que ya tengo
             jugada = minimax(juego, dmax=6, utilidad=utilidad_c4,
                              ordena_jugadas=ordena_jugadas,
                              transp=self.tr_ta)

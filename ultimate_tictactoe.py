@@ -211,7 +211,6 @@ class MetaGatoTK:
             if ganador is not None:
                 break
             jugada = minimax(juego, dmax=6, utilidad=utilidad_uttt)
-            print(utilidad_uttt(juego.x))
             juego.deshacer_meta()
             juego.hacer_jugada(jugada)
 
