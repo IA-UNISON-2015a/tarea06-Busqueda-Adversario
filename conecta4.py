@@ -138,8 +138,15 @@ def ordena_jugadas(juego):
 
     """
     jugadas = list(juego.jugadas_legales())
-    shuffle(jugadas)
-    return jugadas
+
+    utilidades = []
+
+    for jugada in jugadas:
+        juego.hacer_jugada(jugada)
+        utilidades.append(utilidad_c4(juego.x))
+        juego.deshacer_jugada()
+
+    return [x for (_, x) in sorted(zip(utilidades, jugadas))]
 
 
 class Conecta4GUI:
