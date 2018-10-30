@@ -45,7 +45,7 @@ class MetaGato(JuegoSumaCeros2T):
 
         """
         self.x0 = 81 * [0] + [None]
-        self.x = 81 * [0] + [None]
+        self.x = 81 * [0] + [0] + [None]
         self.metagato = 9 * [0]
         self.historial = []
         self.jugador = 1
@@ -88,6 +88,7 @@ class MetaGato(JuegoSumaCeros2T):
         self.historial.append((jugada, jugada//9))
         self.x[jugada] = self.jugador
         self.x[-1] = jugada % 9
+        self.x[-2] = self.jugador
         self.jugador *= -1
 
     def deshacer_jugada(self):
@@ -95,7 +96,7 @@ class MetaGato(JuegoSumaCeros2T):
         self.x[jugada] = 0
         self.x[-1] = gato
         self.jugador *= -1
-        #self.deshacer_meta()
+        self.x[-2] = self.jugador
     def deshacer_meta(self):
         l = []
         for i in range(9):
@@ -130,16 +131,20 @@ def utilidad_uttt(x):
     @return: un valor entre -1 y 1
     """
     #sf es semi finales
-    sf = 0
+    sf = []
     metagatos = []
+    mal_mov = 0
+    if x[-1] is None:
+        return 0
     for i in range(9):
         metagatos.append(MetaGato.final_gato(x[i*9:i*9+9]))
-        sf+= MetaGato.semifinal_gato(x[i*9:i*9+9])
+        sf.append(MetaGato.semifinal_gato(x[i*9:i*9+9]))
     semiterminal = MetaGato.semifinal_gato(metagatos)
 
-    return (sum(metagatos) + 2*sf + 3*semiterminal)/100
-
-
+    if metagatos[x[-1]] != 0 or sf[x[-1]] != 0:
+        mal_mov+=x[-2]
+    return (sum(metagatos) + 2*sum(sf) + 3*semiterminal + x[40] + 4*mal_mov)
+    #return -mal_mov
 class MetaGatoTK:
     def __init__(self, escala=1):
 
@@ -192,8 +197,7 @@ class MetaGatoTK:
         juego = MetaGato()
 
         if not primero:
-            #jugada = self.escoge_jugada(juego)
-            jugada = minimax(juego, dmax=5, utilidad=utilidad_uttt)
+            jugada = minimax(juego, dmax=1, utilidad=utilidad_uttt)
             juego.deshacer_meta()
             juego.hacer_jugada(jugada)
             self.actualiza_tablero(juego.x)
@@ -206,10 +210,11 @@ class MetaGatoTK:
             ganador = juego.terminal()
             if ganador is not None:
                 break
-            jugada = minimax(juego, dmax=5, utilidad=utilidad_uttt)
+            jugada = minimax(juego, dmax=6, utilidad=utilidad_uttt)
+            print(utilidad_uttt(juego.x))
             juego.deshacer_meta()
-            jugada = self.escoge_jugada(juego)
             juego.hacer_jugada(jugada)
+
             self.actualiza_tablero(juego.x)
             ganador = juego.terminal()
             if ganador is not None:

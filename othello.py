@@ -13,6 +13,8 @@ import tkinter as tk
 from busquedas_adversarios import JuegoSumaCeros2T
 from busquedas_adversarios import minimax_t
 from busquedas_adversarios import minimax
+from collections import deque
+from copy import deepcopy
 
 
 # -------------------------------------------------------------------------
@@ -24,10 +26,10 @@ from busquedas_adversarios import minimax
 class Othello:
     def __init__(self):
         self.x = [0 for _ in range(64)]
-        self.historial = []
         self.jugador = 1
         self.x[27], self.x[36] = -1, -1
         self.x[28], self.x[35] = 1, 1
+        self.historial = deque()
 
     #Busco si hay adyacente enemigo en una posicion pos para el jugador j.
     #Pienso que esto hara las cosas mucho mas rapidas en los primeros turnos.
@@ -77,13 +79,19 @@ class Othello:
         return jugadas
 
     def hacer_jugada(self, jugada):
-        self.historial.append(jugada)
+        self.historial.append(self.x[:])
         for x in self.buscar_lugar(jugada, self.adyacentes(self.x, jugada, self.jugador)):
-            aux = x
-            while self.x[jugada + aux] == -1 * self.jugador:
-                self.x[jugada + aux] = self.jugador
+            aux = x + jugada
+            while self.x[aux] == -1 * self.jugador:
+                self.x[aux] = self.jugador
                 aux+=x
         self.x[jugada] = self.jugador
+        self.jugador *= -1
+
+    # Este deshacer jugada fue gracias al sanlf; dios lo bendiga donde
+    # quiera que este <3
+    def deshacer_jugada(self):
+        self.x = self.historial.pop()
         self.jugador *= -1
 
     """
@@ -105,7 +113,7 @@ class Othello:
         orilla_inf = [i for i in range(56,64)]
         for x in direcciones:
             aux = jugada + x
-            while aux < 64 and self.x[aux] == -1 * self.jugador:
+            while aux < 64 and aux >= 0 and self.x[aux] == -1 * self.jugador:
                 if x in [-9, -1, 7] and aux not in orilla_izq:
                     aux+= x
                 elif x in [9, 1, -7] and aux not in orilla_der:
@@ -123,14 +131,54 @@ class Othello:
         if len(self.jugadas_legales()) == 0:
             self.jugador = self.jugador * -1
             if len(self.jugadas_legales()) == 0:
-                return True
+                if sum(1 for i in self.x if i==1) > sum(1 for i in self.x if i == -1):
+                    return 1
+                else:
+                    return -1
             self.jugador = -1 * self.jugador
+
+# Las orillas no estan tan chilas porque se pueden cambiar, a menos que
+# TU tengas esa esquina. es lo que he aprendido de jugar mas tiempo del que
+# pase programando durante estos ultimos 4 dias.
+def orillas(x):
+    or_sup = 0
+    or_inf = 0
+    or_iz = 0
+    or_der = 0
+    for i in range(1,7):
+        or_iz += x[8*i]
+        or_sup += x[i]
+    for i in range(2,8):
+        or_der += x[8 * i -1]
+    for i in range(57,63):
+        or_inf += x[i]
+
+    if x[0] != 0:
+        or_sup += 2*x[0]
+        or_iz += 2*x[0]
+    if x[7] != 0:
+        or_sup += 2*x[7]
+        or_der += 2*x[7]
+    if x[56] != 0:
+        or_inf += 2*x[56]
+        or_iz += 2*x[56]
+    if x[63] != 0:
+        or_inf += 2*x[64]
+        or_der += 2*x[64]
+
+    return or_der + or_iz + or_sup + or_inf
+
+def utilidad_ot(x):
+    #quien tiene mas fichas?
+    p1 = sum(1 for i in x if x[i] == 1) + sum(-1 for i in x if x[i] == -1)
+    p2 = orillas(x)
+    return p1 + p2
 
 class OthelloTK:
     def __init__(self, escala=1):
 
         self.app = app = tk.Tk()
-        self.app.title("Reversi")
+        self.app.title("Othello")
         self.L = L = int(escala) * 50
 
         tmpstr = "Escoge, negras empiezan."
@@ -142,11 +190,11 @@ class OthelloTK:
         barra = tk.Frame(app)
         barra.pack()
         botonX = tk.Button(barra,
-                           command=lambda x=True: self.jugar(x),
+                           command=lambda x=1: self.jugar(x),
                            text='(re)iniciar con Negras')
         botonX.grid(column=0, row=0)
         botonO = tk.Button(barra,
-                           command=lambda x=False: self.jugar(x),
+                           command=lambda x=-1: self.jugar(x),
                            text='(re)iniciar con Blancas')
         botonO.grid(column=1, row=0)
 
@@ -184,33 +232,32 @@ class OthelloTK:
     def jugar(self, primero):
         juego = Othello()
         self.actualiza_tablero(juego.x)
-        if not primero:
-            jugada = self.escoge_jugada(juego)
-            #jugada = minimax(juego, dmax = 100, utilidad=utilidad_uttt)
-            juego.hacer_jugada(jugada)
-            self.actualiza_tablero(juego.x)
-
         self.anuncio['text'] = "A ver de que cuero salen más correas"
-        for _ in range(81):
-            jugada = self.escoge_jugada(juego)
-            juego.hacer_jugada(jugada)
+        while juego.terminal() is None:
             self.actualiza_tablero(juego.x)
-            ganador = juego.terminal()
-            if ganador is not None:
-                break
-            #jugada = minimax(juego, dmax=500, utilidad=utilidad_uttt)
-            jugada = self.escoge_jugada(juego)
-            juego.hacer_jugada(jugada)
-            self.actualiza_tablero(juego.x)
-            ganador = juego.terminal()
-            if ganador is not None:
-                break
+            if len(juego.jugadas_legales()) != 0:
+                if juego.jugador == primero:
+                    jugada = self.escoge_jugada(juego)
+                else:
+                    #Con dmax = 2 me metio una putiza a mi y a la ia
+                    # de othelloonline.org, lo dejo 49-0 lol
+                    # pero si te consideras pro y te gustan los retos, subele
+                    # a dmax 3 o 4.
+                    jugada = minimax(juego, dmax=2, utilidad=utilidad_ot)
 
-        finstr = ("UN ASQUEROSO EMPATE, aggggg" if ganador == 0 else
-                  "Ganaste, bye"
-                  if (ganador > 0 and primero) or (ganador < 0 and not primero)
-                  else "¡Gané¡  Juar, juar, juar.")
-        self.anuncio['text'] = finstr
+                juego.hacer_jugada(jugada)
+            else:
+                juego.jugador *= -1
+        self.actualiza_tablero(juego.x)
+        u = juego.terminal()
+        if u == 0:
+            fin = "UN ASQUEROSO EMPATE"
+        elif (primero < 0 and u > 0) or (primero > 0 and u < 0):
+            fin ="¡Gané! ¡Juar, juar, juar!, ¿Quieres jugar otra vez?"
+        else:
+            fin ="Ganaste, bye."
+
+        self.anuncio['text'] = fin
         self.anuncio.update()
 
     def escoge_jugada(self, juego):

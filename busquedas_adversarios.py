@@ -86,7 +86,7 @@ def minimax(juego, dmax=100, utilidad=None, ordena_jugadas=None, transp=None):
         def utilidad(juego):
             return juego.terminal()
         dmax = int(1e10)
-
+        
     return max((a for a in ordena_jugadas(juego)),
                key=lambda a: min_val(juego, a, dmax, utilidad, ordena_jugadas,
                                      -1e10, 1e10, juego.jugador, transp))
