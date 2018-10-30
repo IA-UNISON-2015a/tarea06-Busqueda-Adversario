@@ -97,6 +97,29 @@ class ConectaCuatro(JuegoSumaCeros2T):
                 self.jugador *= -1
                 return None
 
+def contarHorizontal(x, jugador):
+    renglones = [i for i in range(6)]
+    return sum(1 for renglon in renglones for i in range(4)
+               if all(x[7*renglon + i + j] != -jugador for j in range(4)))
+
+def contarVertical(x, jugador):
+    columnas = [i for i in range(7)]
+    return sum(1 for columna in columnas for i in range(2)
+               if all(x[columna + 7*(i + j)] != -jugador for j in range(4)))
+
+def contarDiagonal(x, jugador):
+    #diagonales \
+    inicial_ren = [0, 1, 2]
+    inicial_col = [0, 1, 2, 3]
+    cont1 = sum(1 for ren in inicial_ren for col in inicial_col
+               if all(x[col + ren*7 + i + i*7] for i in range(4)))
+    #diagonales /
+    inicial_ren = [0, 1, 2]
+    inicial_col = [3, 4, 5, 6]
+    cont2 = sum(1 for ren in inicial_ren for col in inicial_col
+               if all(x[col + ren*7 - i + i*7] for i in range(4)))
+    return cont1 + cont2
+
 
 def utilidad_c4(x):
     """
@@ -110,23 +133,14 @@ def utilidad_c4(x):
     Para probar solo busque el número de conecciones de las
     bolitas de mas arriba con su alrededor
     """
-    cum = 0
-    for i in range(7):
-        for j in (35, 28, 21, 14, 7, 0):
-            if x[i] != 0:
-                if 0 < i < 6:
-                    biases = (-6, -7, -8, -1, 1, 6, 8)
-                elif i == 0:
-                    biases = (-7, -8, 1, 8)
-                else:
-                    biases = (-6, -7, -1, 6)
-                con = sum(x[i] for bias in biases
-                          if i + bias >= 0 and x[i] == x[i + bias])
-                cum += con / len(biases)
-                break
+    jugadas1 = [contarHorizontal(x, 1),
+                contarVertical(x, 1),
+                contarDiagonal(x, 1)]
+    jugadas2 = [contarHorizontal(x, -1),
+                contarVertical(x, -1),
+                contarDiagonal(x, -1)]
 
-    return cum / 42
-
+    return sum(lineaj1 - lineaj2 for lineaj1, lineaj2 in zip(jugadas1, jugadas2)) / 3
 
 def ordena_jugadas(juego):
     """
