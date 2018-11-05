@@ -145,7 +145,7 @@ def buscar_diagonal_inv(x):
             return x[i]
 
     return 0
-def utilidad_c4(x):
+def utilidad_c4(juego):
     """
     Calcula la utilidad de una posición del juego conecta 4
     para el jugador max (las fichas rojas, o el que empieza)
@@ -154,6 +154,7 @@ def utilidad_c4(x):
 
     @return: Un número entre -1 y 1 con la ganancia esperada
     """
+    x = juego.x
     return buscar_hor(x) + buscar_ver(x) + buscar_diagonal(x) + buscar_diagonal_inv(x)
 
 

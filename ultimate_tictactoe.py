@@ -45,7 +45,7 @@ class MetaGato(JuegoSumaCeros2T):
 
         """
         self.x0 = 81 * [0] + [None]
-        self.x = 81 * [0] + [0] + [None]
+        self.x = 81 * [0] + [None]
         self.metagato = 9 * [0]
         self.historial = []
         self.jugador = 1
@@ -71,6 +71,7 @@ class MetaGato(JuegoSumaCeros2T):
         return None if res == 0 else res
 
     # Supongo que final_gato dictamina si hay metagato
+    # Si hay empate, regresa 2. Es lo que se conoce como "lo gano el gato"
     @staticmethod
     def final_gato(x):
         if x[4] != 0 and (x[0] == x[4] == x[8] or x[2] == x[4] == x[6]):
@@ -80,6 +81,8 @@ class MetaGato(JuegoSumaCeros2T):
                 return x[3 * i]
             if x[i] != 0 and x[i] == x[i + 3] == x[i + 6]:
                 return x[i]
+        if all(a != 0 for a in x):
+            return 2
         return 0
 
     def hacer_jugada(self, jugada):
@@ -88,36 +91,47 @@ class MetaGato(JuegoSumaCeros2T):
         self.historial.append((jugada, jugada//9))
         self.x[jugada] = self.jugador
         self.x[-1] = jugada % 9
-        self.x[-2] = self.jugador
         self.jugador *= -1
+
 
     def deshacer_jugada(self):
         jugada, gato = self.historial.pop()
         self.x[jugada] = 0
         self.x[-1] = gato
         self.jugador *= -1
-        self.x[-2] = self.jugador
+        self.deshacer_meta()
+
     def deshacer_meta(self):
         l = []
         for i in range(9):
             l.append(self.final_gato(self.x[i*9:i*9+9]))
             if l[i] != self.metagato[i]:
                 self.metagato[i] = l[i]
-    @staticmethod
-    def semifinal_gato(x):
+
+    def semifinal_gato(self, x, j):
         for i in range(9):
             #manera medio bonita de checar si hay semifinal con la de en medio
-            if x[4] != 0 and x[8 - i] == x[4] and i != 4 and x[i] == 0:
+            if x[4] == j and x[8 - i] == x[4] and i != 4 and x[i] == 0:
                 return x[4]
-            if x[i] != 0 and ((x[(i + 3) % 9] == x[i] or x[(i + 6) % 9] == x[i])
+
+            # Checa verticalmente
+            if x[i] == j and ((x[(i + 3) % 9] == x[i] or x[(i + 6) % 9] == x[i])
                 and (x[(i + 3) % 9] == 0 or x[(i + 6) % 9] == 0)):
                 return x[i]
-            if x[i] != 0 and ((x[(i + 1) % 9] == x[i] or x[(i + 2) % 9] == x[i])
-                and (x[(i + 1) % 9] == 0 or x[(i + 2) % 9] == 0)):
+        #Checo horizontalmente
+        for i in [0,3,6]:
+            if x[i] == j and ((x[i + 1] == x[i] or x[i + 2] == x[i])
+                and (x[i + 1] == 0 or x[i + 2] == 0)):
+                return x[i]
+            if x[i + 1] == j and ((x[i + 1] == x[i] or x[i + 1] == x[i + 2])
+                and (x[i] == 0 or x[i + 2] == 0)):
+                return x[i]
+            if x[i + 2] == j and ((x[i + 2] == x[i + 1] or x[i + 2] == x[i])
+                and (x[i + 1] == 0 or x[i] == 0)):
                 return x[i]
         return 0
 
-def utilidad_uttt(x):
+def utilidad_uttt(juego):
     """
     Calcula la utilidad de un estado de manera medio-simple
 
@@ -135,20 +149,18 @@ def utilidad_uttt(x):
     @return: un valor entre -1 y 1
     """
     #sf es semi finales
-    sf = []
-    metagatos = []
     mal_mov = 0
-    if x[-1] is None:
-        return 0
-    for i in range(9):
-        metagatos.append(MetaGato.final_gato(x[i*9:i*9+9]))
-        sf.append(MetaGato.semifinal_gato(x[i*9:i*9+9]))
-    semiterminal = MetaGato.semifinal_gato(metagatos)
+    if juego.metagato[juego.x[-1]] != 0:
+        mal_mov = -1 * juego.jugador
 
-    if metagatos[x[-1]] != 0 or sf[x[-1]] != 0:
-        mal_mov+=x[-2]
-    return (sum(metagatos) + 2*sum(sf) + 3*semiterminal + x[40] + 4*mal_mov)
-    #return -mal_mov
+    sf_circ = [0 for _ in range(9)]
+    sf_equis = sf_circ[:]
+    for i in range(9):
+        sf_equis[i] = juego.semifinal_gato(juego.x[9 * i: 9 * i + 9], 1)
+        sf_circ[i] = juego.semifinal_gato(juego.x[9 * i: 9 * i + 9], -1)
+    st_equis = juego.semifinal_gato(juego.metagato, 1)
+    st_circ = juego.semifinal_gato(juego.metagato, -1)
+    return 5 * sum(juego.metagato) + mal_mov + sum(sf_circ) + sum(sf_equis) + 3 * st_circ + 3 * st_equis + juego.x[40]
 class MetaGatoTK:
     def __init__(self, escala=1):
 
@@ -199,6 +211,7 @@ class MetaGatoTK:
 
     def jugar(self, primero):
         juego = MetaGato()
+        self.actualiza_tablero(juego.x)
 
         if not primero:
             jugada = minimax(juego, dmax=0, utilidad=utilidad_uttt)
@@ -217,7 +230,6 @@ class MetaGatoTK:
             jugada = minimax(juego, dmax=4, utilidad=utilidad_uttt)
             juego.deshacer_meta()
             juego.hacer_jugada(jugada)
-
             self.actualiza_tablero(juego.x)
             ganador = juego.terminal()
             if ganador is not None:

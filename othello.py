@@ -24,6 +24,19 @@ from collections import deque
 
 class Othello:
     def __init__(self):
+        """
+
+        00 01 02 03 04 05 06 07
+        08 09 10 11 12 13 14 15
+        16 17 18 19 20 21 22 23
+        24 25 26 27 28 29 30 31
+        32 33 34 35 36 37 38 39
+        40 41 42 43 44 45 46 47
+        48 49 50 51 52 53 54 55
+        56 57 58 59 60 61 62 63
+
+
+        """
         self.x = [0 for _ in range(64)]
         self.jugador = 1
         self.x[27], self.x[36] = -1, -1
@@ -41,6 +54,16 @@ class Othello:
         orilla_sup = [i for i in range(8)]
         orilla_inf = [i for i in range(56,64)]
         direcciones = []
+
+        #Este primer if lo agregue porque cuando no esta en las orillas
+        #(que es la mayoria de los casos) no busque uno por uno las demas
+        # orillas
+        if pos not in (orilla_der + orilla_inf + orilla_izq + orilla_sup):
+            for i in [-9, -8, -7, -1, 1, 7, 8, 9]:
+                if x[pos + i] == j:
+                    direcciones.append(i)
+            return direcciones
+
         if pos not in orilla_izq:
             if x[pos - 1] == j:
                 direcciones.append(- 1)
@@ -71,10 +94,9 @@ class Othello:
         jugadas = []
         for i in range(64):
             ady = self.adyacentes(self.x, i, self.jugador)
-            if (len(ady) != 0 and self.x[i] == 0):
+            if (self.x[i] == 0 and len(ady) != 0):
                 if len(self.buscar_lugar(i, ady)) != 0:
                     jugadas.append(i)
-
         return jugadas
 
     def hacer_jugada(self, jugada):
@@ -87,8 +109,6 @@ class Othello:
         self.x[jugada] = self.jugador
         self.jugador *= -1
 
-    # Este deshacer jugada fue gracias al sanlf; dios lo bendiga donde
-    # quiera que este <3
     def deshacer_jugada(self):
         self.x = self.historial.pop()
         self.jugador *= -1
@@ -121,7 +141,7 @@ class Othello:
                     aux+=x
                 else:
                     break
-            if aux < 64 and self.x[aux] == self.jugador:
+            if aux < 64 and aux >= 0 and self.x[aux] == self.jugador:
                 captura.append(x)
         return captura
 
@@ -162,13 +182,14 @@ def orillas(x):
         or_inf += 2*x[56]
         or_iz += 2*x[56]
     if x[63] != 0:
-        or_inf += 2*x[64]
-        or_der += 2*x[64]
+        or_inf += 2*x[63]
+        or_der += 2*x[63]
 
     return or_der + or_iz + or_sup + or_inf
 
-def utilidad_ot(x):
+def utilidad_ot(juego):
     #quien tiene mas fichas?
+    x = juego.x
     p1 = sum(1 for i in x if x[i] == 1) + sum(-1 for i in x if x[i] == -1)
     p2 = orillas(x)
     return p1 + p2
@@ -242,7 +263,7 @@ class OthelloTK:
                     # de othelloonline.org, lo dejo 49-0 lol
                     # pero si te consideras pro y te gustan los retos, subele
                     # a dmax 3 o 4.
-                    jugada = minimax(juego, dmax=2, utilidad=utilidad_ot)
+                    jugada = minimax(juego, dmax=3, utilidad=utilidad_ot)
 
                 juego.hacer_jugada(jugada)
             else:
@@ -260,9 +281,9 @@ class OthelloTK:
         self.anuncio.update()
 
     def escoge_jugada(self, juego):
-        jugadas_posibles = list(juego.jugadas_legales())
-        if len(jugadas_posibles) == 1:
-            return jugadas_posibles[0]
+        jugadas_posibles = juego.jugadas_legales()
+        #if len(jugadas_posibles) == 1:
+        #    return jugadas_posibles[0]
 
         seleccion = tk.IntVar(self.tablero[0].master, -1, 'seleccion')
 
@@ -295,12 +316,17 @@ class OthelloTK:
             if self.tablero[i].val != x[i] and x[i] == -1:
                 self.tablero[i].itemconfigure(self.textos[i],
                                               text='\u26AB', fill = "white")
-                self.tablero[i].val = x[i]
+                self.tablero[i].val = -1
                 self.tablero[i].update()
             elif self.tablero[i].val != x[i] and x[i] == 1:
                 self.tablero[i].itemconfigure(self.textos[i],
                                               text='\u26AB', fill = "black")
-                self.tablero[i].val = x[i]
+                self.tablero[i].val = 1
+                self.tablero[i].update()
+
+            elif self.tablero[i].val != x[i] and x[i] == 0:
+                self.tablero[i].itemconfigure(self.textos[i], text=' ')
+                self.tablero[i].val = 0
                 self.tablero[i].update()
 
     def arranca(self):

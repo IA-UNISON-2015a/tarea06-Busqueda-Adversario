@@ -86,7 +86,7 @@ def minimax(juego, dmax=100, utilidad=None, ordena_jugadas=None, transp=None):
         def utilidad(juego):
             return juego.terminal()
         dmax = int(1e10)
-        
+    print("Nuevo turno.")
     return max((a for a in ordena_jugadas(juego)),
                key=lambda a: min_val(juego, a, dmax, utilidad, ordena_jugadas,
                                      -1e10, 1e10, juego.jugador, transp))
@@ -103,7 +103,7 @@ def min_val(juego, jugada, d, utilidad, ordena_jugadas,
         return primero * ganancia
 
     if d == 0:
-        u = utilidad(juego.x)
+        u = utilidad(juego)
         juego.deshacer_jugada()
         return primero * u
 
@@ -111,7 +111,7 @@ def min_val(juego, jugada, d, utilidad, ordena_jugadas,
         val_tt, d_tt, tipo_tt = transp[tuple(juego.x)]
         if d_tt >= d and tipo_tt is 'beta':
             beta = min(alfa, val_tt)
-
+    #print("La jugada que hizo ", -1 * juego.jugador, " es: ", jugada)
     for jugada_nueva in ordena_jugadas(juego):
         beta = min(beta, max_val(juego, jugada_nueva, d - 1, utilidad,
                                  ordena_jugadas, alfa, beta, primero, transp))
@@ -135,7 +135,8 @@ def max_val(juego, jugada, d, utilidad, ordena_jugadas,
         return primero * ganancia
 
     if d == 0:
-        u = utilidad(juego.x)
+        u = utilidad(juego)
+        #print("jugada es ", jugada, " y su utilidad es ", -1 * u, "para el jugador ", -1 * juego.jugador)
         juego.deshacer_jugada()
         return primero * u
 
