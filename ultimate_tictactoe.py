@@ -133,20 +133,26 @@ class MetaGato(JuegoSumaCeros2T):
 
 def utilidad_uttt(juego):
     """
-    Calcula la utilidad de un estado de manera medio-simple
+    Resultados y comentarios generales de esta funcion de utilidad:
 
-    Se dice que es bastante complejo agregar una funcion de evaluacion
-    heuristica simple para el tic tac toe 81, o que por lo menos
-    aun no existe una asi. Voy a tratar de hacer una medio simplona
-    pero no tanto, que podra carecer de una gran velocidad pero que pienso
-    daria buenos resultados, basandome en mi experiencia.
+    Con una profundidad igual a 4 y dando el primer turno a la IA, no vimos
+    que perdiera ni una sola vez. Probe esta madre en el centro de computo
+    con alrededor de 10 personas y dos lograron empatarla. En el caso de que
+    no empiece ella, yo logre ganarle 1 vez, y las demas veces perdi.
 
-    EDIT: el ultimo movimiento y el jugador en turno son cosas
-    muy importantes para conocer la utilidad verdadera de un estado
-    pero fue muy complicado poder implementarlo, al parecer...
+    Es bastante curioso hacer este juego con minimax, ya que los malos movim-
+    ientos no afectan bastante al arbol que se hace en minimax.
 
-    @param x: un estado
-    @return: un valor entre -1 y 1
+    Con profundidad igual a 3 tambien nos gana, pero es mucho mas rapida.
+    Si se llegara a optimizar aun mas, podriamos dejarla en 4 para que sea el
+    nivel mas complicado. Por eso recomiendo dejarla en 3.
+
+    @param juego: objeto juego del gato. Es necesario ya que necesitamos informa
+    cion del juego, como el jugador en turno, los metagatos, etc. Si yo
+    la optimizara, haria que los semifinal_gato sean atributos del objeto
+    juego, para no tener que calcularlos.
+
+    @return: una utilidad entre 0 y 1
     """
     #sf es semi finales
     mal_mov = 0
@@ -160,7 +166,9 @@ def utilidad_uttt(juego):
         sf_circ[i] = juego.semifinal_gato(juego.x[9 * i: 9 * i + 9], -1)
     st_equis = juego.semifinal_gato(juego.metagato, 1)
     st_circ = juego.semifinal_gato(juego.metagato, -1)
-    return 5 * sum(juego.metagato) + mal_mov + sum(sf_circ) + sum(sf_equis) + 3 * st_circ + 3 * st_equis + juego.x[40]
+
+    return ((3 * sum(juego.metagato) + mal_mov + sum(sf_circ) + sum(sf_equis) +
+        5 * st_circ + 5 * st_equis + juego.x[40])/100)
 class MetaGatoTK:
     def __init__(self, escala=1):
 
@@ -227,7 +235,11 @@ class MetaGatoTK:
             ganador = juego.terminal()
             if ganador is not None:
                 break
-            jugada = minimax(juego, dmax=4, utilidad=utilidad_uttt)
+            # Profundidad 3: tiempos muy buenos en todos los escenarios
+            # Profundidad 4: tiempos buenos en la mayoria de los escenarios.
+            # cuando hay muchos gatos ganados, y muchas jugadas legales
+            # puede tardarse hasta 5 seg en una computadora "estandar"
+            jugada = minimax(juego, dmax=3, utilidad=utilidad_uttt)
             juego.deshacer_meta()
             juego.hacer_jugada(jugada)
             self.actualiza_tablero(juego.x)
@@ -235,9 +247,9 @@ class MetaGatoTK:
             if ganador is not None:
                 break
 
-        finstr = ("UN ASQUEROSO EMPATE, aggggg" if ganador == 0 else
+        finstr = ("UN ASQUEROSO EMPATE, aggggg" if ganador == 2 else
                   "Ganaste, bye"
-                  if (ganador > 0 and primero) or (ganador < 0 and not primero)
+                  if (ganador == 1 and primero) or (ganador < 0 and not primero)
                   else "¡Gané¡  Juar, juar, juar.")
         self.anuncio['text'] = finstr
         self.anuncio.update()

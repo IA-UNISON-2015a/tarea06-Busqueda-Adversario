@@ -191,6 +191,7 @@ def utilidad_ot(juego):
     #quien tiene mas fichas?
     x = juego.x
     p1 = sum(1 for i in x if x[i] == 1) + sum(-1 for i in x if x[i] == -1)
+    #quien tiene mas en las orillas?
     p2 = orillas(x)
     return p1 + p2
 
@@ -262,8 +263,8 @@ class OthelloTK:
                     #Con dmax = 2 me metio una putiza a mi y a la ia
                     # de othelloonline.org, lo dejo 49-0 lol
                     # pero si te consideras pro y te gustan los retos, subele
-                    # a dmax 3 o 4.
-                    jugada = minimax(juego, dmax=3, utilidad=utilidad_ot)
+                    # a dmax 3
+                    jugada = minimax(juego, dmax=2, utilidad=utilidad_ot)
 
                 juego.hacer_jugada(jugada)
             else:
@@ -282,8 +283,8 @@ class OthelloTK:
 
     def escoge_jugada(self, juego):
         jugadas_posibles = juego.jugadas_legales()
-        #if len(jugadas_posibles) == 1:
-        #    return jugadas_posibles[0]
+        if len(jugadas_posibles) == 1:
+            return jugadas_posibles[0]
 
         seleccion = tk.IntVar(self.tablero[0].master, -1, 'seleccion')
 
