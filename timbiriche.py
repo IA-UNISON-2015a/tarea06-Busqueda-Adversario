@@ -56,7 +56,7 @@ class Gato(JuegoSumaCeros2T):
         
     def hacer_jugada(self, jugada):
         self.historial.append(jugada)
-        self.x[jugada] = self.jugador
+        self.y[jugada] = self.jugador
         self.jugador *= -1
 
     def deshacer_jugada(self):
@@ -70,25 +70,25 @@ def juega_gato(jugador='X', ancho=2, altura=2):
     if jugador not in ['X', 'O']:
         raise ValueError("El jugador solo puede tener los valores 'X' o 'O'")
     juego = Gato(1,altura, ancho)
-    pprint_gato(juego.x, juego.y, altura, ancho)
     '''
     if jugador is 'O':
         jugada = minimax(juego)
         juego.hacer_jugada(jugada)
-
+    '''
     acabado = False
 
     while not acabado:
         pprint_gato(juego.x, juego.y, altura, ancho)
-        print("Escoge tu jugada (uno de los números que quedan en el gato)")
+        print("Escoge una linea: ")
 
         try:
             jugada = int(input("Jugador {}: ".format(jugador)))
             print(jugada)
+            print()
         except:
             print("¡No seas macana y pon un número!")
             continue
-        if jugada < 0 or jugada > 8 or juego.x[jugada] != 0:
+        if jugada < 0 or jugada >= len(juego.y) or juego.x[jugada] != 0:
             print("¡No seas macana, pon un número válido!")
             continue
 
@@ -96,7 +96,7 @@ def juega_gato(jugador='X', ancho=2, altura=2):
 
         if juego.terminal() is not None:
             acabado = True
-        else:
+        '''else:
             jugada = minimax(juego)
             juego.hacer_jugada(jugada)
             if juego.terminal() is not None:
