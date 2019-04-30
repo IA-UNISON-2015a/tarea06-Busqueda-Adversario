@@ -33,7 +33,7 @@ class Gato(JuegoSumaCeros2T):
         self.historial = []
         self.jugador = 1
 
-    def jugadas_legales(self):
+    def jugadas_legales(self): #PENDIENTE-----------------------------------------------------
         return (posicion for posicion in range(len(self.y0)) if self.y[posicion] == 0)
 
     def terminal(self):
@@ -43,13 +43,13 @@ class Gato(JuegoSumaCeros2T):
         for box in range(len(x)):
             if x[box] == 1:
                 jugadorX += 1
-            if x[box] == 0:
+            if x[box] == -1:
                 jugadorO += 1
         if (jugadorX + jugadorO) < len(x):
             return None
         if jugadorX > jugadorO:
             return 1
-        if jugadorO < jugadorX:
+        if jugadorO > jugadorX:
             return -1
         if jugadorX == jugadorO:
             return 0
@@ -57,53 +57,62 @@ class Gato(JuegoSumaCeros2T):
     def hacer_jugada(self, jugada):
         self.historial.append(jugada)
         self.y[jugada] = self.jugador
-        self.jugador *= -1
+        c = 0
+        aux = 0
+        for i in range(altura - 1):
+            for j in range(ancho - 1):
+                if(self.x[c] == 0):
+                    if (self.y[c + ancho * i] != 0 and 
+                        self.y[c + i * ancho + ancho - 1] != 0 and 
+                        self.y[c + i * ancho + ancho] != 0 and 
+                        self.y[c + i * ancho + 2 * ancho - 1] != 0):
+                        self.x[c] = self.jugador
+                        aux = 1
+                c += 1       
+        if aux == 0: 
+            self.jugador *= -1
 
-    def deshacer_jugada(self):
+    def deshacer_jugada(self): #PENDIENTE-----------------------------------------------------
         jugada = self.historial.pop()
-        self.x[jugada] = 0
+        self.y[jugada] = 0
         self.jugador *= -1
 
 
-def juega_gato(jugador='X', ancho=2, altura=2):
+def juega_gato(jugador='X', altura=2, ancho=2):
     
     if jugador not in ['X', 'O']:
         raise ValueError("El jugador solo puede tener los valores 'X' o 'O'")
     juego = Gato(1,altura, ancho)
-    '''
+    
     if jugador is 'O':
         jugada = minimax(juego)
         juego.hacer_jugada(jugada)
-    '''
+    
     acabado = False
 
     while not acabado:
         pprint_gato(juego.x, juego.y, altura, ancho)
-        print("Escoge una linea: ")
+        print("\nEscoge una linea: ")
 
         try:
-            jugada = int(input("Jugador {}: ".format(jugador)))
-            print(jugada)
+            if (juego.jugador == 1):
+                jugada = int(input("Jugador X: ".format()))
+            else:
+                jugada = int(input("Jugador O: ".format()))
             print()
         except:
             print("¡No seas macana y pon un número!")
             continue
-        if jugada < 0 or jugada >= len(juego.y) or juego.x[jugada] != 0:
+        if jugada < 0 or jugada >= len(juego.y) or juego.y[jugada] != 0:
             print("¡No seas macana, pon un número válido!")
             continue
 
         juego.hacer_jugada(jugada)
-
+        
+        
         if juego.terminal() is not None:
             acabado = True
-        '''else:
-            jugada = minimax(juego)
-            juego.hacer_jugada(jugada)
-            if juego.terminal() is not None:
-                acabado = True
-    
     pprint_gato(juego.x, juego.y, altura, ancho)
-    
     ganador = juego.terminal()
     if ganador == 0:
         print("UN ASQUEROSO EMPATE".center(60))
@@ -112,7 +121,7 @@ def juega_gato(jugador='X', ancho=2, altura=2):
     else:
         print("Ganaste, bye.")
     print("\n\nFin del juego")
-    '''
+    
 
 def pprint_gato(x, y, altura, ancho):
     #y = [('X' if x[i] > 0 else 'O' if x[i] < 0 else str(i)) for i in range(9)]
