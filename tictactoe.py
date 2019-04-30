@@ -6,7 +6,6 @@ from busquedas_adversarios import JuegoSumaCeros2T
 from busquedas_adversarios import minimax
 import tkinter as tk
 
-
 class Gato(JuegoSumaCeros2T):
     """
     El juego del gato para ilustrar los modelos de juegos
@@ -221,5 +220,5 @@ class GatoTK:
 
 
 if __name__ == '__main__':
-    # juega_gato('X')
-    GatoTK().arranca()
+    juega_gato('X')
+    #GatoTK().arranca()

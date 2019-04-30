@@ -15,6 +15,8 @@ Se ilustra con el juego del gato
 
 """
 
+# Lo ultimo que hise es que me da error de recursion
+
 from time import perf_counter
 
 
@@ -80,12 +82,9 @@ def minimax(juego, dmax=100, utilidad=None, ordena_jugadas=None, transp=None):
 
     """
     if ordena_jugadas is None:
-        def ordena_jugadas(juego):
-            return juego.jugadas_legales()
+        ordena_jugadas = lambda juego : juego.jugadas_legales()
     if utilidad is None:
-        def utilidad(juego):
-            return juego.terminal()
-        dmax = int(1e10)
+        utilidad = lambda juego : juego.terminal()
 
     return max((a for a in ordena_jugadas(juego)),
                key=lambda a: min_val(juego, a, dmax, utilidad, ordena_jugadas,
@@ -103,7 +102,7 @@ def min_val(juego, jugada, d, utilidad, ordena_jugadas,
         return primero * ganancia
 
     if d == 0:
-        u = utilidad(juego.x)
+        u = utilidad(juego)
         juego.deshacer_jugada()
         return primero * u
 
@@ -135,11 +134,11 @@ def max_val(juego, jugada, d, utilidad, ordena_jugadas,
         return primero * ganancia
 
     if d == 0:
-        u = utilidad(juego.x)
+        u = utilidad(juego)
         juego.deshacer_jugada()
         return primero * u
 
-    if transp is not None and tuple(juego.x) in transp:
+    if transp is not None and tuple(juego) in transp:
         val_tt, d_tt, tipo_tt = transp[tuple(juego.x)]
         if d_tt >= d and tipo_tt is 'alfa':
             alfa = max(alfa, val_tt)
