@@ -350,7 +350,7 @@ def generar_jugador_definitivo(a,b,c):
     return jugador_definitivo
 
 
-def juega_timbiriche(jugador1, jugador2, n, debug=False):
+def juega_timbiriche(jugador1, jugador2, n):
     partida = Timbiriche(n)
     pinta_tablero_timbiriche(partida)
     numero_jugada = 1
@@ -371,15 +371,6 @@ def juega_timbiriche(jugador1, jugador2, n, debug=False):
             numero_jugada += 1
         else:
             partida.hacer_jugada(-1)
-        
-        if debug:
-            cuadros_cadenas, longitud_cadenas = obtener_cadenas(partida)
-            num_cajas_muertas = calcular_cajas_muertas(partida, cuadros_cadenas, longitud_cadenas)
-
-            print("\n*****DEBUGGING PRINT*****\n")
-            print("Las cadenas en el juego son: {}".format(longitud_cadenas))
-            print("El numero de cajas muertas es: {}".format(num_cajas_muertas))
-            print("\n*****END DEBUGGIN MESSAGE****\n")
     
     puntos_jugador1 = partida.terminal()
     puntos_jugador2 = partida.n*partida.n - puntos_jugador1
@@ -391,47 +382,48 @@ def juega_timbiriche(jugador1, jugador2, n, debug=False):
     else:
         print("\nHa sido un empate.\n")
 
-def juega_timbiriche_simulacion(jugador1, jugador2, n):
-    partida = Timbiriche(n)
-    numero_jugada = 1
-    while partida.terminal() == None:
-        if partida.jugadas_legales() != [-1]:
-            if partida.jugador == 1:
-                partida.hacer_jugada(jugador1(partida))
-            else:
-                partida.hacer_jugada(jugador2(partida))
-            numero_jugada += 1
-        else:
-            partida.hacer_jugada(-1)
-    
-    puntos_jugador1 = partida.terminal()
-    puntos_jugador2 = partida.n*partida.n - puntos_jugador1
 
-    if puntos_jugador1 > puntos_jugador2:
-        return 1
-    elif puntos_jugador1 < puntos_jugador2:
-        return -1
-    return 0
+#def juega_timbiriche_simulacion(jugador1, jugador2, n):
+#    partida = Timbiriche(n)
+#    numero_jugada = 1
+#    while partida.terminal() == None:
+#        if partida.jugadas_legales() != [-1]:
+#            if partida.jugador == 1:
+#                partida.hacer_jugada(jugador1(partida))
+#            else:
+#                partida.hacer_jugada(jugador2(partida))
+#            numero_jugada += 1
+#        else:
+#            partida.hacer_jugada(-1)
+#    
+#    puntos_jugador1 = partida.terminal()
+#    puntos_jugador2 = partida.n*partida.n - puntos_jugador1
+#
+#    if puntos_jugador1 > puntos_jugador2:
+#        return 1
+#    elif puntos_jugador1 < puntos_jugador2:
+#        return -1
+#    return 0
 
-def prueba_jugadores_maquina(jugador1, jugador2, n, num_juegos=100):
-    puntage_jugador1 = 0
-    puntage_jugador2 = 0
-    empates = 0
-    print("progress: [          ] 0%...", end='')
-    for i in range(num_juegos):
-        ganador = juega_timbiriche_simulacion(jugador1, jugador2, n)
-        if ganador > 0:
-            puntage_jugador1 += 1
-        elif ganador < 0:
-            puntage_jugador2 += 1
-        else:
-            empates += 1
+#def prueba_jugadores_maquina(jugador1, jugador2, n, num_juegos=100):
+#    puntage_jugador1 = 0
+#    puntage_jugador2 = 0
+#    empates = 0
+#    print("progress: [          ] 0%...", end='')
+#    for i in range(num_juegos):
+#        ganador = juega_timbiriche_simulacion(jugador1, jugador2, n)
+#        if ganador > 0:
+#            puntage_jugador1 += 1
+#        elif ganador < 0:
+#            puntage_jugador2 += 1
+#        else:
+#            empates += 1
 
-        dunno = int(((i+1)/num_juegos)*10)
-        some_var = '*'*dunno + ' '*(10-dunno)
-        print("\rprogress:[{}] {}%...".format(some_var, 10*dunno), end='')
-    
-    print("\nEl jugador1 gano {} juegos\nEl jugador2 gano {} juegos\nHubo {} empates".format(puntage_jugador1, puntage_jugador2, empates))
+#        dunno = int(((i+1)/num_juegos)*10)
+#        some_var = '*'*dunno + ' '*(10-dunno)
+#        print("\rprogress:[{}] {}%...".format(some_var, 10*dunno), end='')
+#    
+#    print("\nEl jugador1 gano {} juegos\nEl jugador2 gano {} juegos\nHubo {} empates".format(puntage_jugador1, puntage_jugador2, empates))
 
 
 
@@ -463,7 +455,7 @@ def pinta_tablero_timbiriche(partida):
 if __name__ == '__main__':
     jugador_maquina1 = generar_jugador_definitivo(4,1,2)
     jugador_maquina2 = generar_jugador_definitivo(1,1,2)
-    juega_timbiriche(jugador1=jugador_humano, jugador2=jugador_maquina2, n=3, debug=True)
+    juega_timbiriche(jugador1=jugador_humano, jugador2=jugador_maquina2, n=3)
 
     #prueba_jugadores_maquina(jugador_maquina1, jugador_maquina2, 3, 20)
 
