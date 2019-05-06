@@ -178,17 +178,11 @@ def obtener_cadenas(juego):
     longitud_cadenas = []
     cuadros_cadenas = {}
 
-    for i, g, c in enumerate(zip(juego.grados, juego.cuadros)):
-        if g >= 2 and c == 0 and i not in cuadros_cadenas.keys():
-            longitud_cadenas.append(1)
-            cuadros_cadenas[i] = len(longitud_cadenas)
-            sigue_cadena(i, longitud_cadenas, cuadros_cadenas)
-    
     def sigue_cadena(indice, longitud_cadenas, cuadros_cadenas):
         n = juego.n
         mid = int(len(juego.x)/2)
 
-        if indice/n > 0:
+        if indice//n > 0:
             if juego.grados[indice-n] >= 2 and juego.cuadros[indice-n] == 0:
                 if indice-n not in cuadros_cadenas.keys() and juego.x[indice] == 0:
                     cuadros_cadenas[indice-n] = cuadros_cadenas[indice]
@@ -209,17 +203,23 @@ def obtener_cadenas(juego):
                     longitud_cadenas[-1] += 1
                     sigue_cadena(indice+1, longitud_cadenas, cuadros_cadenas)
         
-        if indice/n < n-1:
+        if indice//n < n-1:
             if juego.grados[indice+n] >= 2 and juego.cuadros[indice+n] == 0:
                 if indice+n not in cuadros_cadenas.keys() and juego.x[indice+n] == 0:
                     cuadros_cadenas[indice+n] = cuadros_cadenas[indice]
                     longitud_cadenas[-1] += 1
                     sigue_cadena(indice+n, longitud_cadenas, cuadros_cadenas)
+
+    for i, (g, c) in enumerate(zip(juego.grados, juego.cuadros)):
+        if g >= 2 and c == 0 and i not in cuadros_cadenas.keys():
+            longitud_cadenas.append(1)
+            cuadros_cadenas[i] = len(longitud_cadenas)-1
+            sigue_cadena(i, longitud_cadenas, cuadros_cadenas)
     
     return (cuadros_cadenas, longitud_cadenas)
 
 def calcular_cajas_muertas(juego, cuadros_cadenas, longitud_cadenas):
-    jugador = juego.jugador * (-1 if juego.caja_cerrada else 1)
+    jugador = juego.jugador * (-1 if juego.cuadro_cerrado else 1)
     cadenas_muertas = []
     
     num_cajas_muertas = 0
@@ -230,17 +230,22 @@ def calcular_cajas_muertas(juego, cuadros_cadenas, longitud_cadenas):
     
     return num_cajas_muertas * jugador
 
-def utilidad_cadenas(juego):
-    cuadros_cadenas, longitud_cadenas = obtener_cadenas(juego)
-    cajas_estimadas = 0
 
-    longitud_cadenas.sort()
+def utilidad_cadenas_parametrizadas(a,b,c):
+    def utilidad_cadenas(juego):
+        cuadros_cadenas, longitud_cadenas = obtener_cadenas(juego)
+        cajas_estimadas = 0
 
-    for i in range(len(longitud_cadenas)):
-        if i%2 == len(longitud_cadenas)%2:
-            cajas_estimadas += longitud_cadenas[i]
+        cajas_muertas = calcular_cajas_muertas(juego, cuadros_cadenas, longitud_cadenas)
 
-    return sum((1 for c in juego.cuadros if c == 1)) + cajas_estimadas
+        longitud_cadenas.sort()
+
+        for i in range(len(longitud_cadenas)):
+            if i%2 == len(longitud_cadenas)%2:
+                cajas_estimadas += longitud_cadenas[i]
+
+        return a*sum(juego.cuadros) + b*cajas_estimadas + c*cajas_muertas
+    return utilidad_cadenas
 
 # Jugadores
 
@@ -250,7 +255,7 @@ def jugador_humano(partida):
 
     print("\nIngresa el renglon y la comluna del punto que quieras conectar "+
             "luego con que punto adyacente a este lo quieres conectar "+
-            "\{arr,abj,izq,der\}\n")
+            "{arr,abj,izq,der}\n")
     
     ren = 0
     col = 0
@@ -332,15 +337,17 @@ def jugador_minmax_heuristica_fool_ord_dist_l1(partida):
 def jugador_aleatorio(partida):
     return random.choice(list(partida.jugadas_legales()))
 
-def jugador_definitivo(partida):
-    if len(partida.historial) < partida.n*partida.n/4:
-        return minimax(partida, dmax=1,utilidad=utilidad_ingenua, ordena_jugadas=ordenamiento_aleatorio)
-    elif len(partida.x) - sum(partida.x) <= 12:
-        return minimax(partida, ordena_jugadas=ordenamiento_manhattan)
-    else:
-        #jug_restantes = 2*partida.n*(partida.n+1) - sum(partida.x)
-        return minimax(partida, dmax=3, utilidad=utilidad_cadenas, ordena_jugadas=ordenamiento_manhattan)
-    
+def generar_jugador_definitivo(a,b,c):
+    def jugador_definitivo(partida):
+        if len(partida.historial) < partida.n*partida.n/4:
+            return minimax(partida, dmax=1,utilidad=utilidad_ingenua, ordena_jugadas=ordenamiento_aleatorio)
+        elif len(partida.x) - sum(partida.x) <= 10:
+            return minimax(partida, ordena_jugadas=ordenamiento_manhattan)
+        else:
+            #jug_restantes = 2*partida.n*(partida.n+1) - sum(partida.x)
+            utilidad_cadenas = utilidad_cadenas_parametrizadas(a,b,c)
+            return minimax(partida, dmax=4, utilidad=utilidad_cadenas, ordena_jugadas=ordenamiento_manhattan)
+    return jugador_definitivo
 
 
 def juega_timbiriche(jugador1, jugador2, n, debug=False):
@@ -364,6 +371,15 @@ def juega_timbiriche(jugador1, jugador2, n, debug=False):
             numero_jugada += 1
         else:
             partida.hacer_jugada(-1)
+        
+        if debug:
+            cuadros_cadenas, longitud_cadenas = obtener_cadenas(partida)
+            num_cajas_muertas = calcular_cajas_muertas(partida, cuadros_cadenas, longitud_cadenas)
+
+            print("\n*****DEBUGGING PRINT*****\n")
+            print("Las cadenas en el juego son: {}".format(longitud_cadenas))
+            print("El numero de cajas muertas es: {}".format(num_cajas_muertas))
+            print("\n*****END DEBUGGIN MESSAGE****\n")
     
     puntos_jugador1 = partida.terminal()
     puntos_jugador2 = partida.n*partida.n - puntos_jugador1
@@ -374,6 +390,50 @@ def juega_timbiriche(jugador1, jugador2, n, debug=False):
         print("\nHa ganado el jugador 2.\n")
     else:
         print("\nHa sido un empate.\n")
+
+def juega_timbiriche_simulacion(jugador1, jugador2, n):
+    partida = Timbiriche(n)
+    numero_jugada = 1
+    while partida.terminal() == None:
+        if partida.jugadas_legales() != [-1]:
+            if partida.jugador == 1:
+                partida.hacer_jugada(jugador1(partida))
+            else:
+                partida.hacer_jugada(jugador2(partida))
+            numero_jugada += 1
+        else:
+            partida.hacer_jugada(-1)
+    
+    puntos_jugador1 = partida.terminal()
+    puntos_jugador2 = partida.n*partida.n - puntos_jugador1
+
+    if puntos_jugador1 > puntos_jugador2:
+        return 1
+    elif puntos_jugador1 < puntos_jugador2:
+        return -1
+    return 0
+
+def prueba_jugadores_maquina(jugador1, jugador2, n, num_juegos=100):
+    puntage_jugador1 = 0
+    puntage_jugador2 = 0
+    empates = 0
+    print("progress: [          ] 0%...", end='')
+    for i in range(num_juegos):
+        ganador = juega_timbiriche_simulacion(jugador1, jugador2, n)
+        if ganador > 0:
+            puntage_jugador1 += 1
+        elif ganador < 0:
+            puntage_jugador2 += 1
+        else:
+            empates += 1
+
+        dunno = int(((i+1)/num_juegos)*10)
+        some_var = '*'*dunno + ' '*(10-dunno)
+        print("\rprogress:[{}] {}%...".format(some_var, 10*dunno), end='')
+    
+    print("\nEl jugador1 gano {} juegos\nEl jugador2 gano {} juegos\nHubo {} empates".format(puntage_jugador1, puntage_jugador2, empates))
+
+
 
 def pinta_tablero_timbiriche(partida):
     tablero = ''
@@ -401,7 +461,11 @@ def pinta_tablero_timbiriche(partida):
     print('\n\n'+tablero+'\n')
 
 if __name__ == '__main__':
-    juega_timbiriche(jugador1=jugador_humano, jugador2=jugador_minmax_heuristica_fool_ord_dist_l1, n=3)
+    jugador_maquina1 = generar_jugador_definitivo(4,1,2)
+    jugador_maquina2 = generar_jugador_definitivo(1,1,2)
+    juega_timbiriche(jugador1=jugador_humano, jugador2=jugador_maquina2, n=3, debug=True)
+
+    #prueba_jugadores_maquina(jugador_maquina1, jugador_maquina2, 3, 20)
 
 
         
