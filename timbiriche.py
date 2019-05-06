@@ -156,21 +156,67 @@ def ordenamiento_manhattan(juego):
     
     return sorted(juego.jugadas_legales(), key=criterio)
 
+# Simple funcion para ordenar las jugadas posibles
+# de manera aleatoria
 def ordenamiento_aleatorio(juego):
     cplist = list(juego.jugadas_legales())
     random.shuffle(cplist)
     return cplist
 
 def utilidad_fool(juego):
+    """
+    Esta utilidad regresa el numero de cuadros ganados por
+    el jugador 1 si es que ya ha ganado alguno, si no, devuelve
+    un numero aleatorio entre 0 y 2n donde n es el numero de
+    cuadros
+    """
     if 4 in juego.grados:
         return sum((1 for i in juego.cuadros if i == 1))
     return random.randint(0, juego.n*2)
 
 def utilidad_ingenua(juego):
+    """
+    Esta utilidad devuleve el puntaje del jugador 1 menos el
+    puntaje del jugador 2 que se tenga en el estado acual en la
+    partida, y al resultado le suma el numero de cajas muertas,
+    que es un numero negativo si le pertenecen al oponente y
+    positivo en otro caso.
+
+    se llama ingenua porque calcula el numero de cajas muertas
+    de vagamente, contado solo las cajas que tengan 3 o mas lados
+    puestos, aunque no necesariamente es asi, ya que lo que importa
+    para que una caja se considere muerta es que pertenesca a una
+    cadena que este muerta, por lo que este algoritmo solo funciona
+    para contar cajas muertas que tengan 3 lados. Esta heuristica
+    esta pensada para usarse al inicio del juego, en combinacion
+    de un ordenamiento aleatorio, de tal manera que el jugador
+    escoja una jugada aleatoria pero que si puede cerrar un cuadro
+    y ganar un punto lo haga y que no regale puntos.
+    """
     return sum(juego.cuadros) - (1 - juego.cuadro_cerrado) * sum((1 for i in juego.grados if i == 3))
 
 
 def obtener_cadenas(juego):
+    """
+    Funcion que calcula el numero de cadenas y las longitudes de
+    cada una, así como a que cadena pertenece cada cuadro libre 
+    del juego.
+
+    regresa una tupla (cuadros_cadenas, longitud_cadenas) donde:
+
+        cuadros_cadenas: es un diccionario en el cual las llaves
+                         son los indices de los cuadros en el
+                         tablero (juego.cuadros) y los valores
+                         son los indices de la cadena (en longitud_cadenas) 
+                         a la que pertenece dicho cuadro en caso 
+                         de que pertenesca a una cadena.
+        
+        longitud_cadenas: es una lista que contiene la longitud
+                          de todas las cadenas del juego (la 
+                          longitud de la lista nos proporciona
+                          el numero de cadenas).
+
+    """
     longitud_cadenas = []
     cuadros_cadenas = {}
 
@@ -215,6 +261,12 @@ def obtener_cadenas(juego):
     return (cuadros_cadenas, longitud_cadenas)
 
 def calcular_cajas_muertas(juego, cuadros_cadenas, longitud_cadenas):
+    """
+    Funcion que calcula el nuemro de cajas muertas
+    en el tablero, considerando que una caja muerta
+    es aquella que le pertenece a un jugador aun
+    estando abierta.
+    """
     jugador = juego.jugador * (-1 if juego.cuadro_cerrado else 1)
     cadenas_muertas = []
     
