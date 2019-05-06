@@ -170,10 +170,6 @@ def utilidad_ingenua(juego):
     return sum(juego.cuadros) - (1 - juego.cuadro_cerrado) * sum((1 for i in juego.grados if i == 3))
 
 
-# Seccion del analisis de cadenas
-# Nota: no se ha realizado ninguna prueba con estas heuristicas
-# puede que aparescan bugs al momento de ejecucion.
-
 def obtener_cadenas(juego):
     longitud_cadenas = []
     cuadros_cadenas = {}
@@ -383,47 +379,49 @@ def juega_timbiriche(jugador1, jugador2, n):
         print("\nHa sido un empate.\n")
 
 
-#def juega_timbiriche_simulacion(jugador1, jugador2, n):
-#    partida = Timbiriche(n)
-#    numero_jugada = 1
-#    while partida.terminal() == None:
-#        if partida.jugadas_legales() != [-1]:
-#            if partida.jugador == 1:
-#                partida.hacer_jugada(jugador1(partida))
-#            else:
-#                partida.hacer_jugada(jugador2(partida))
-#            numero_jugada += 1
-#        else:
-#            partida.hacer_jugada(-1)
-#    
-#    puntos_jugador1 = partida.terminal()
-#    puntos_jugador2 = partida.n*partida.n - puntos_jugador1
-#
-#    if puntos_jugador1 > puntos_jugador2:
-#        return 1
-#    elif puntos_jugador1 < puntos_jugador2:
-#        return -1
-#    return 0
+# Funciones de utileria para probar las IAs
 
-#def prueba_jugadores_maquina(jugador1, jugador2, n, num_juegos=100):
-#    puntage_jugador1 = 0
-#    puntage_jugador2 = 0
-#    empates = 0
-#    print("progress: [          ] 0%...", end='')
-#    for i in range(num_juegos):
-#        ganador = juega_timbiriche_simulacion(jugador1, jugador2, n)
-#        if ganador > 0:
-#            puntage_jugador1 += 1
-#        elif ganador < 0:
-#            puntage_jugador2 += 1
-#        else:
-#            empates += 1
+def juega_timbiriche_simulacion(jugador1, jugador2, n):
+    partida = Timbiriche(n)
+    numero_jugada = 1
+    while partida.terminal() == None:
+        if partida.jugadas_legales() != [-1]:
+            if partida.jugador == 1:
+                partida.hacer_jugada(jugador1(partida))
+            else:
+                partida.hacer_jugada(jugador2(partida))
+            numero_jugada += 1
+        else:
+            partida.hacer_jugada(-1)
+    
+    puntos_jugador1 = partida.terminal()
+    puntos_jugador2 = partida.n*partida.n - puntos_jugador1
 
-#        dunno = int(((i+1)/num_juegos)*10)
-#        some_var = '*'*dunno + ' '*(10-dunno)
-#        print("\rprogress:[{}] {}%...".format(some_var, 10*dunno), end='')
-#    
-#    print("\nEl jugador1 gano {} juegos\nEl jugador2 gano {} juegos\nHubo {} empates".format(puntage_jugador1, puntage_jugador2, empates))
+    if puntos_jugador1 > puntos_jugador2:
+        return 1
+    elif puntos_jugador1 < puntos_jugador2:
+        return -1
+    return 0
+
+def prueba_jugadores_maquina(jugador1, jugador2, n, num_juegos=100):
+    puntage_jugador1 = 0
+    puntage_jugador2 = 0
+    empates = 0
+    print("progress: [          ] 0%...", end='')
+    for i in range(num_juegos):
+        ganador = juega_timbiriche_simulacion(jugador1, jugador2, n)
+        if ganador > 0:
+            puntage_jugador1 += 1
+        elif ganador < 0:
+            puntage_jugador2 += 1
+        else:
+            empates += 1
+
+        dunno = int(((i+1)/num_juegos)*10)
+        some_var = '*'*dunno + ' '*(10-dunno)
+        print("\rprogress:[{}] {}%...".format(some_var, 10*dunno), end='')
+    
+        print("\nEl jugador1 gano {} juegos\nEl jugador2 gano {} juegos\nHubo {} empates".format(puntage_jugador1, puntage_jugador2, empates))
 
 
 
