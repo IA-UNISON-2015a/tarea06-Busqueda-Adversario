@@ -16,14 +16,14 @@ __author__ = 'nombre del alumno'
 # -------------------------------------------------------------------------
 from busquedas_adversarios import JuegoSumaCeros2T
 from busquedas_adversarios import minimax
-class Gato(JuegoSumaCeros2T):
+class Timbiriche(JuegoSumaCeros2T):
     """
-    El juego del gato para ilustrar los modelos de juegos
+    El juego del timbiriche para ilustrar los modelos de juegos
 
     """
     def __init__(self, jugador=1, altura=2, ancho=2):
         """
-        Inicializa el juego del gato
+        Inicializa el juego del timbiriche
 
         """
         self.x0 = tuple((altura-1)*(ancho-1) * [0])
@@ -33,7 +33,7 @@ class Gato(JuegoSumaCeros2T):
         self.historial = []
         self.jugador = 1
 
-    def jugadas_legales(self): #PENDIENTE-----------------------------------------------------
+    def jugadas_legales(self):
         return (posicion for posicion in range(len(self.y0)) if self.y[posicion] == 0)
 
     def terminal(self):
@@ -57,6 +57,10 @@ class Gato(JuegoSumaCeros2T):
     def hacer_jugada(self, jugada):
         self.historial.append(jugada)
         self.y[jugada] = self.jugador
+        self.jugador *= -1
+        
+    def actualiza_tablero(self, jugada):    
+        self.jugador *= -1
         c = 0
         aux = 0
         for i in range(altura - 1):
@@ -72,33 +76,33 @@ class Gato(JuegoSumaCeros2T):
         if aux == 0: 
             self.jugador *= -1
 
-    def deshacer_jugada(self): #PENDIENTE-----------------------------------------------------
+    def deshacer_jugada(self):#PENDIENTE---------------------------------------------
         jugada = self.historial.pop()
         self.y[jugada] = 0
         self.jugador *= -1
 
 
-def juega_gato(jugador='X', altura=2, ancho=2):
+def juega_timbiriche(jugador='X', altura=2, ancho=2):
     
     if jugador not in ['X', 'O']:
         raise ValueError("El jugador solo puede tener los valores 'X' o 'O'")
-    juego = Gato(1,altura, ancho)
+    juego = Timbiriche(1,altura, ancho)
     
     if jugador is 'O':
         jugada = minimax(juego)
         juego.hacer_jugada(jugada)
     
     acabado = False
-
+    
     while not acabado:
-        pprint_gato(juego.x, juego.y, altura, ancho)
-        print("\nEscoge una linea: ")
+        pprint_timbiriche(juego.x, juego.y, altura, ancho)
+        print("\nEscoge una linea juegor ", juego.jugador, ": ")
 
         try:
             if (juego.jugador == 1):
                 jugada = int(input("Jugador X: ".format()))
             else:
-                jugada = int(input("Jugador O: ".format()))
+                jugada = minimax(juego)
             print()
         except:
             print("¡No seas macana y pon un número!")
@@ -108,11 +112,12 @@ def juega_gato(jugador='X', altura=2, ancho=2):
             continue
 
         juego.hacer_jugada(jugada)
-        
+        juego.actualiza_tablero(jugada)
         
         if juego.terminal() is not None:
             acabado = True
-    pprint_gato(juego.x, juego.y, altura, ancho)
+            
+    pprint_timbiriche(juego.x, juego.y, altura, ancho)
     ganador = juego.terminal()
     if ganador == 0:
         print("UN ASQUEROSO EMPATE".center(60))
@@ -123,8 +128,8 @@ def juega_gato(jugador='X', altura=2, ancho=2):
     print("\n\nFin del juego")
     
 
-def pprint_gato(x, y, altura, ancho):
-    #y = [('X' if x[i] > 0 else 'O' if x[i] < 0 else str(i)) for i in range(9)]
+def pprint_timbiriche(x, y, altura, ancho):
+
     aux = 0
     for i in range(altura):
         #renglones
@@ -158,7 +163,7 @@ def pprint_gato(x, y, altura, ancho):
                 else:
                     if x[(i+j)+(i*(ancho-2))] == 1:
                         print("{}".format("X").center(4), end="")
-                    else:
+                    elif(x[(i+j)+(i*(ancho-2))] == -1):
                         print("{}".format("O").center(4), end="")
             #ultima columna
             if y[aux+(i+ancho-1)] == 0:
@@ -202,7 +207,7 @@ if __name__ == '__main__':
             ancho = None
             continue
         break
-    juega_gato('X', altura, ancho)
+    juega_timbiriche('X', altura, ancho)
     
     
     
