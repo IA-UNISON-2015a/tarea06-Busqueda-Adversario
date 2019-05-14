@@ -8,7 +8,7 @@ El juego de Timbiriche implementado por ustedes mismos, con jugador inteligente
 
 """
 
-__author__ = 'nombre del alumno'
+__author__ = 'Brayan Durazo'
 
 # -------------------------------------------------------------------------
 #              (60 puntos)

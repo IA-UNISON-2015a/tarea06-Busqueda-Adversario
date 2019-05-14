@@ -94,7 +94,7 @@ class ConectaCuatro(JuegoSumaCeros2T):
                 return None
 
 
-def utilidad_c4(x):
+def utilidad_c4(juego):
     """
     Calcula la utilidad de una posición del juego conecta 4
     para el jugador max (las fichas rojas, o el que empieza)
@@ -103,18 +103,19 @@ def utilidad_c4(x):
     Para probar solo busque el número de conecciones de las
     bolitas de mas arriba con su alrededor
     """
+    
     cum = 0
     for i in range(7):
         for j in (35, 28, 21, 14, 7, 0):
-            if x[i] != 0:
+            if juego.x[i] != 0:
                 if 0 < i < 6:
                     biases = (-6, -7, -8, -1, 1, 6, 8)
                 elif i == 0:
                     biases = (-7, -8, 1, 8)
                 else:
                     biases = (-6, -7, -1, 6)
-                con = sum(x[i] for bias in biases
-                          if i + bias >= 0 and x[i] == x[i + bias])
+                con = sum(juego.x[i] for bias in biases
+                          if i + bias >= 0 and juego.x[i] == juego.x[i + bias])
                 cum += con / len(biases)
                 break
 
