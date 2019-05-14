@@ -1,12 +1,10 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-timbiriche.py
-------------
+Created on Mon Apr 29 20:28:42 2019
 
-El juego de Timbiriche implementado por ustedes mismos, con jugador inteligente
-
+@author: Ariana
 """
+
 def arranca(x, y):
     t = crear_tablero(x, y)
     jugar(t)
@@ -223,7 +221,3 @@ def imprimir_tablero(tab):
 if __name__ == "__main__":
     print("Tablero Dots and Boxes:")
     arranca(5,5)
-
-
-
-

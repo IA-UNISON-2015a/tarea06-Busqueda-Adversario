@@ -109,7 +109,7 @@ def utilidad_c4(x):
 
     Para probar solo busque el número de conecciones de las
     bolitas de mas arriba con su alrededor
-    """
+    
     cum = 0
     for i in range(7):
         for j in (35, 28, 21, 14, 7, 0):
@@ -126,6 +126,28 @@ def utilidad_c4(x):
                 break
 
     return cum / 42
+    """
+    
+    cum = 0
+    for i in range(7):
+        con = sum(x[j] for j in range(0+i,42,7))
+        if con < 0:
+            cum -= 1
+        elif con > 0:
+            cum += 1
+        else:
+            continue
+        
+    for i in (0, 7, 14, 21, 28, 35):
+        s = sum(x[j] for j in range(i,i+7))
+        if con < 0:
+            cum -= 1
+        elif con > 0:
+            cum += 1
+        else:
+            continue
+        
+        return cum
 
 
 def ordena_jugadas(juego):
@@ -138,8 +160,14 @@ def ordena_jugadas(juego):
 
     """
     jugadas = list(juego.jugadas_legales())
-    shuffle(jugadas)
-    return jugadas
+    jugadas_buenas = []
+    for jugada in jugadas:
+        juego.hacer_jugada(jugada)
+        jugadas_buenas.append((utilidad_c4(juego.x), jugada))
+        juego.deshacer_jugada()
+    jugadas_buenas.sort()
+    return [jugadas_final for _, jugadas_final in jugadas_buenas]
+
 
 
 class Conecta4GUI:
