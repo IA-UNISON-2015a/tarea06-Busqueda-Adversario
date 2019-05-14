@@ -3,12 +3,9 @@
 """
 conecta4.py.py
 ------------
-
 El juego de conecta 4
-
 Este juego contiene una parte de la tarea 5, y otra parte
 es la implementación desde 0 del juego de Otello.
-
 """
 from busquedas_adversarios import JuegoSumaCeros2T
 from busquedas_adversarios import minimax_t
@@ -25,7 +22,6 @@ class ConectaCuatro(JuegoSumaCeros2T):
         Inicializa el juego, esto es: el número de columnas y
         renglones y el estado inicial del juego. Cuyas posiciones
         estan dadas como:
-
                         35  36  37  38  39  40  41
                         28  29  30  31  32  33  34
                         21  22  23  24  25  26  27
@@ -102,11 +98,8 @@ def utilidad_c4(x):
     """
     Calcula la utilidad de una posición del juego conecta 4
     para el jugador max (las fichas rojas, o el que empieza)
-
     @param x: Una lista con el estado del tablero
-
     @return: Un número entre -1 y 1 con la ganancia esperada
-
     Para probar solo busque el número de conecciones de las
     bolitas de mas arriba con su alrededor
     """
@@ -132,10 +125,8 @@ def ordena_jugadas(juego):
     """
     Ordena las jugadas de acuerdo al jugador actual, en función
     de las más prometedoras.
-
     Para que funcione le puse simplemente las jugadas aleatorias
     pero es un criterio bastante inaceptable
-
     """
     jugadas = list(juego.jugadas_legales())
     jugadas_ordenadas = []

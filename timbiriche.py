@@ -45,6 +45,7 @@ class Timbiriche(JuegoSumaCeros2T):
                 jugadorX += 1
             if x[box] == -1:
                 jugadorO += 1
+        
         if (jugadorX + jugadorO) < len(x):
             return None
         if jugadorX > jugadorO:
@@ -54,6 +55,7 @@ class Timbiriche(JuegoSumaCeros2T):
         if jugadorX == jugadorO:
             return 0
         
+        return jugadorX + jugadorO
     def hacer_jugada(self, jugada):
         self.historial.append(jugada)
         self.y[jugada] = self.jugador
@@ -76,10 +78,62 @@ class Timbiriche(JuegoSumaCeros2T):
         if aux == 0: 
             self.jugador *= -1
 
-    def deshacer_jugada(self):#PENDIENTE---------------------------------------------
+    def deshacer_jugada(self):
         jugada = self.historial.pop()
         self.y[jugada] = 0
         self.jugador *= -1
+
+def utilidad(juego):
+    aux=0
+    c=0
+    bordesCuadros = list()
+    utilidad = 0
+    for i in range(altura - 1):
+            for j in range(ancho - 1):
+                if(juego.x[c] == 0):
+                    if (juego.y[c + ancho * i] != 0):
+                        aux+=1
+
+                    if (juego.y[c + i * ancho + ancho - 1] != 0):
+                        aux+=1
+
+                    if (juego.y[c + i * ancho + ancho] != 0): 
+                        aux+=1
+
+                    if (juego.y[c + i * ancho + 2 * ancho - 1] != 0):
+                        aux+=1
+                bordesCuadros.append(aux) 
+                c += 1
+                aux = 0
+    for bordes in bordesCuadros:
+        if bordes == 1:
+            utilidad += bordes/2
+        if bordes == 2:
+            utilidad+=bordes
+        if bordes == 3:
+            utilidad-=bordes
+        if bordes == 4:
+            utilidad += 10*bordes
+    utilidad = int(utilidad/len(juego.y))
+    return utilidad
+
+
+def ordena_jugadas(juego):
+    """
+    Ordena las jugadas de acuerdo al jugador actual, en función
+    de las más prometedoras.
+    """
+    jugadas = list(juego.jugadas_legales())
+    jugadas_ordenadas = []
+    for jugada in jugadas:
+        juego.hacer_jugada(jugada)
+        jugadas_ordenadas.append(((jugada), utilidad(juego)))
+        juego.deshacer_jugada()
+    jugadas_ordenadas.sort(key=lambda tupla: tupla[1], reverse=True)
+    jugadas = []
+    for jugada in jugadas_ordenadas:
+        jugadas.append(jugada[0])
+    return jugadas
 
 
 def juega_timbiriche(jugador='X', altura=2, ancho=2):
@@ -89,7 +143,7 @@ def juega_timbiriche(jugador='X', altura=2, ancho=2):
     juego = Timbiriche(1,altura, ancho)
     
     if jugador is 'O':
-        jugada = minimax(juego)
+        jugada = minimax(juego, None, utilidad=utilidad, ordena_jugadas=ordena_jugadas) 
         juego.hacer_jugada(jugada)
     
     acabado = False
@@ -102,8 +156,8 @@ def juega_timbiriche(jugador='X', altura=2, ancho=2):
             if (juego.jugador == 1):
                 jugada = int(input("Jugador X: ".format()))
             else:
-                jugada = minimax(juego)
-            print()
+                jugada = minimax(juego, dmax=6, utilidad=utilidad, ordena_jugadas=ordena_jugadas)                
+                print("Jugador O: ",jugada)
         except:
             print("¡No seas macana y pon un número!")
             continue

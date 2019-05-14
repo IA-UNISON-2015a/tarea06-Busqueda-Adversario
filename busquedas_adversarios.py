@@ -87,6 +87,10 @@ def minimax(juego, dmax=100, utilidad=None, ordena_jugadas=None, transp=None):
             return juego.terminal()
         dmax = int(1e10)
 
+    max((a for a in ordena_jugadas(juego)),
+               key=lambda a: min_val(juego, a, dmax, utilidad, ordena_jugadas,
+                                     -1e10, 1e10, juego.jugador, transp))
+    
     return max((a for a in ordena_jugadas(juego)),
                key=lambda a: min_val(juego, a, dmax, utilidad, ordena_jugadas,
                                      -1e10, 1e10, juego.jugador, transp))
@@ -94,7 +98,6 @@ def minimax(juego, dmax=100, utilidad=None, ordena_jugadas=None, transp=None):
 
 def min_val(juego, jugada, d, utilidad, ordena_jugadas,
             alfa, beta, primero, transp):
-
     juego.hacer_jugada(jugada)
 
     ganancia = juego.terminal()
@@ -103,7 +106,7 @@ def min_val(juego, jugada, d, utilidad, ordena_jugadas,
         return primero * ganancia
 
     if d == 0:
-        u = utilidad(juego.x)
+        u = utilidad(juego)
         juego.deshacer_jugada()
         return primero * u
 
@@ -135,7 +138,7 @@ def max_val(juego, jugada, d, utilidad, ordena_jugadas,
         return primero * ganancia
 
     if d == 0:
-        u = utilidad(juego.x)
+        u = utilidad(juego)
         juego.deshacer_jugada()
         return primero * u
 
