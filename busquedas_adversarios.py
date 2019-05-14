@@ -71,7 +71,7 @@ class JuegoSumaCeros2T:
         raise NotImplementedError("Hay que desarrollar este método, pues")
 
 
-def minimax(juego, dmax=1, utilidad=None, ordena_jugadas=None, transp=None):
+def minimax(juego, dmax=4, utilidad=None, ordena_jugadas=None, transp=None):
     """
     Escoje una jugada legal para el jugador en turno, utilizando el
     método de minimax a una profundidad máxima de dmax, con una función de
