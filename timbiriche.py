@@ -71,9 +71,11 @@ class Timbiriche(JuegoSumaCeros2T):
                 return None
             
 def utilidad(x):
-    
+    utilidad = 0
+    for i in range(3):
+        if x[i] != 0 and (x[i] == x[i+ 3] == x[i + 4] == x[i+7]):
+            utilidad += .25
         
-    
     
     
     
