@@ -71,7 +71,7 @@ class JuegoSumaCeros2T:
         raise NotImplementedError("Hay que desarrollar este método, pues")
 
 
-def minimax(juego, dmax=100, utilidad=None, ordena_jugadas=None, transp=None):
+def minimax(juego, dmax=1, utilidad=None, ordena_jugadas=None, transp=None):
     """
     Escoje una jugada legal para el jugador en turno, utilizando el
     método de minimax a una profundidad máxima de dmax, con una función de
@@ -82,10 +82,11 @@ def minimax(juego, dmax=100, utilidad=None, ordena_jugadas=None, transp=None):
     if ordena_jugadas is None:
         def ordena_jugadas(juego):
             return juego.jugadas_legales()
-    if utilidad is None:
+    if utilidad is None:       
         def utilidad(juego):
-            return juego.terminal()
-        dmax = int(1e10)
+            return juego.terminal() if juego.terminal()!= None else 1
+            #return juego.terminal() 
+        #dmax = int(15)
 
     return max((a for a in ordena_jugadas(juego)),
                key=lambda a: min_val(juego, a, dmax, utilidad, ordena_jugadas,
@@ -103,7 +104,7 @@ def min_val(juego, jugada, d, utilidad, ordena_jugadas,
         return primero * ganancia
 
     if d == 0:
-        u = utilidad(juego.x)
+        u = utilidad(juego)
         juego.deshacer_jugada()
         return primero * u
 
@@ -135,7 +136,7 @@ def max_val(juego, jugada, d, utilidad, ordena_jugadas,
         return primero * ganancia
 
     if d == 0:
-        u = utilidad(juego.x)
+        u = utilidad(juego)
         juego.deshacer_jugada()
         return primero * u
 

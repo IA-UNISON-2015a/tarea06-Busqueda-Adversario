@@ -127,7 +127,6 @@ def utilidad_c4(x):
 
     return cum / 42
 
-
 def ordena_jugadas(juego):
     """
     Ordena las jugadas de acuerdo al jugador actual, en función
@@ -137,9 +136,16 @@ def ordena_jugadas(juego):
     pero es un criterio bastante inaceptable
 
     """
-    jugadas = list(juego.jugadas_legales())
-    shuffle(jugadas)
+    #Tomando como guía las mejores jugadas basicas del conecta 4
+    jugadas_l = list(juego.jugadas_legales())
+    jugadas = []
+    for i in (3,2,4,1,5,0,6):
+        if i in jugadas_l: 
+            jugadas.append(i) 
     return jugadas
+    #jugadas = list(juego.jugadas_legales())
+    #shuffle(jugadas)
+    #return jugadas
 
 
 class Conecta4GUI:
