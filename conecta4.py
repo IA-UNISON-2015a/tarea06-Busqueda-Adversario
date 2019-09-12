@@ -97,7 +97,7 @@ class ConectaCuatro(JuegoSumaCeros2T):
                 self.jugador *= -1
                 return None
 
-
+#Desarrolla tu propias funciones con el fin de lograr mejores búsquedas a mayor profundidad (20 puntos).
 def utilidad_c4(x):
     """
     Calcula la utilidad de una posición del juego conecta 4
@@ -139,7 +139,16 @@ def ordena_jugadas(juego):
     """
     jugadas = list(juego.jugadas_legales())
     shuffle(jugadas)
+     #Tomando como guía las mejores jugadas basicas del conecta 4
+    jugadas_l = list(juego.jugadas_legales())
+    jugadas = []
+    for i in (3,2,4,1,5,0,6):
+        if i in jugadas_l: 
+            jugadas.append(i) 
     return jugadas
+    #jugadas = list(juego.jugadas_legales())
+    #shuffle(jugadas)
+    #return jugadas
 
 
 class Conecta4GUI:
