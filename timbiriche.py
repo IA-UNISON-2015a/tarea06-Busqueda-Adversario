@@ -387,14 +387,16 @@ def jugador_aleatorio(partida):
 
 def generar_jugador_definitivo(a,b,c):
     def jugador_definitivo(partida):
-        if len(partida.historial) < partida.n*partida.n/4:
+        movs = len(partida.x) - sum(partida.x)
+        if movs > 51 or sum(partida.x) < 3:
             return minimax(partida, dmax=1,utilidad=utilidad_ingenua, ordena_jugadas=ordenamiento_aleatorio)
-        elif len(partida.x) - sum(partida.x) <= 10:
+        elif movs <= 10:
             return minimax(partida, ordena_jugadas=ordenamiento_manhattan)
         else:
+            dmax = 90 // movs
             #jug_restantes = 2*partida.n*(partida.n+1) - sum(partida.x)
             utilidad_cadenas = utilidad_cadenas_parametrizadas(a,b,c)
-            return minimax(partida, dmax=4, utilidad=utilidad_cadenas, ordena_jugadas=ordenamiento_manhattan)
+            return minimax(partida, dmax=dmax, utilidad=utilidad_cadenas, ordena_jugadas=ordenamiento_manhattan)
     return jugador_definitivo
 
 
@@ -403,17 +405,17 @@ def juega_timbiriche(jugador1, jugador2, n):
     pinta_tablero_timbiriche(partida)
     numero_jugada = 1
     while partida.terminal() == None:
-        print("\nJugada numero: {}".format(numero_jugada))
         if partida.jugadas_legales() != [-1]:
+            print("\nJugada numero: {}".format(numero_jugada))
             if partida.jugador == 1:
-                print("\nTurno del jugador A:\n")
+                print("\nTurno del jugador A:", end='')
                 partida.hacer_jugada(jugador1(partida))
-                print("\nJugada del jugador A:")
+                print("\rJugada del jugador A:")
                 pinta_tablero_timbiriche(partida)
             else:
-                print("\nTurno del jugador B:\n")
+                print("\nTurno del jugador B:", end='')
                 partida.hacer_jugada(jugador2(partida))
-                print("\nJugada del jugador B:")
+                print("\rJugada del jugador B:")
                 pinta_tablero_timbiriche(partida)
                 
             numero_jugada += 1
@@ -504,8 +506,8 @@ def pinta_tablero_timbiriche(partida):
 
 if __name__ == '__main__':
     jugador_maquina1 = generar_jugador_definitivo(4,1,2)
-    jugador_maquina2 = generar_jugador_definitivo(1,1,2)
-    juega_timbiriche(jugador1=jugador_humano, jugador2=jugador_maquina2, n=3)
+    jugador_maquina2 = generar_jugador_definitivo(2,1,2)
+    juega_timbiriche(jugador1=jugador_maquina1, jugador2=jugador_maquina2, n=5)
 
     #prueba_jugadores_maquina(jugador_maquina1, jugador_maquina2, 3, 20)
 
