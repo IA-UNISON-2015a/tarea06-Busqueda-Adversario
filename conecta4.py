@@ -97,6 +97,59 @@ class ConectaCuatro(JuegoSumaCeros2T):
                 self.jugador *= -1
                 return None
 
+def tres_hor(x):
+    """
+    Busca por columnas si se encuentran tres fichas conectadas
+    y regresa el jugador que tiene las fichas conectadas
+    """
+    prim_col = [7 * i for i in range(6)]
+    segn_col = [7 * i+1 for i in range(6)]
+    terc_col = [7 * i+2 for i in range(6)]
+    cuar_col = [7 * i+3 for i in range(6)]
+
+    for i in range(39):
+        if x[i] != 0 and x[i] == x[i + 1] and x[i] == x[i + 2]:
+            if i in prim_col and x[i + 3] == 0:
+                return x[i]
+            elif (i in segn_col or i in terc_col or i in cuar_col) and (x[i + 3] == 0 or x[i -1] == 0):
+                return x[i]
+    return 0
+
+def tres_ver(x):
+    """
+    Busca por renglones si se encuentran tres fichas conectadas
+    y regresa el jugador que tiene las fichas conectadas
+    """
+    prim_ren = [i for i in range(7)]
+    segn_ren = [i for i in range (7,14)]
+    terc_ren = [i for i in range(14,21)]
+
+    for i in range(21):
+        if x[i] != 0 and x[i] == x[i + 7] and x[i] == x[i + 14]:
+            if i in prim_ren and x[i + 21] == 0:
+                return x[i]
+            elif ((i in segn_ren or i in terc_ren) and
+            x[i + 21] == 0 or x[i - 7] == 0):
+                return x[i]
+    return 0
+
+def tres_diagonal(x):
+    """
+    Busca tres fichas conectadas en diagonal / y regresa el jugador
+    """
+    for i in [0,1,2,3,7,8,9,10,14,15,16,17]:
+        if x[i] != 0 and x[i] == x[i + 8] and x[i] == x[i + 16] and x[i+24]== 0:
+            return x[i]
+    return 0
+
+def tres_diagonal_i(x):
+    """
+    Busca tres fichas conectadas en diagonal \ y regresa el jugador
+    """
+    for i in [3,4,5,6,10,11,12,13,17,18,19,20]:
+        if x[i] != 0 and x[i] == x[i + 6] and x[i] == x[i + 12] and x[i+18]== 0:
+            return x[i]
+    return 0
 
 def utilidad_c4(x):
     """
@@ -110,23 +163,8 @@ def utilidad_c4(x):
     Para probar solo busque el número de conecciones de las
     bolitas de mas arriba con su alrededor
     """
-    cum = 0
-    for i in range(7):
-        for j in (35, 28, 21, 14, 7, 0):
-            if x[i] != 0:
-                if 0 < i < 6:
-                    biases = (-6, -7, -8, -1, 1, 6, 8)
-                elif i == 0:
-                    biases = (-7, -8, 1, 8)
-                else:
-                    biases = (-6, -7, -1, 6)
-                con = sum(x[i] for bias in biases
-                          if i + bias >= 0 and x[i] == x[i + bias])
-                cum += con / len(biases)
-                break
-
-    return cum / 42
-
+    x = juego.x
+    return tres_hor(x) + tres_ver(x) + tres_diagonal(x) + tres_diagonal_i(x)
 
 def ordena_jugadas(juego):
     """
@@ -136,9 +174,14 @@ def ordena_jugadas(juego):
     Para que funcione le puse simplemente las jugadas aleatorias
     pero es un criterio bastante inaceptable
 
+    Entonces lo que hace es buscar las jugadas en el centro y después se
+    va a las extremidades
     """
-    jugadas = list(juego.jugadas_legales())
-    shuffle(jugadas)
+    jugadas_leg = list(juego.jugadas_legales())
+    jugadas = []
+    for i in (3,2,4,1,5,0,6):
+        if i in jugadas_l:
+            jugadas.append(i)
     return jugadas
 
 
